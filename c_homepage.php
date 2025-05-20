@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 
-<!-- ji kejut aku pukul 8 kalau aku tak roger plith
- -->
 <html>
 <head>
   <title>COORDINATOR DASHBOARD</title>
