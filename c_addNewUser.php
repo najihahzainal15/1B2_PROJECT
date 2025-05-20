@@ -334,6 +334,9 @@
 			
 		<label>Password</label><br>
 			<input type="password" class="details3"><br>
+			
+		<label>Password</label><br>
+			<input type="password" class="details3"><br>
 
 		<br>
 		<button type="button" class="cancel-button">Cancel</button>
