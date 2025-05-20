@@ -2,7 +2,7 @@
 <!-- commment -->
 <html>
 <head>
-  <title>ADD NEW USER 321</title>
+  <title>COORDINATOR ADD NEW USER</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
@@ -319,10 +319,10 @@
   <br>
   <form action="c_addUser_action.php" method="POST"> 
 		<label>Name</label><br>
-			<input type="text" class="details1"><br>
+			<input type="text" name="username" class="details1"><br>
 			
 		<label>Role</label><br>
-			<select name = "role" class="select">
+			<select name = "role" name="role" class="select">
 				<option selected = "selected">Select role</option>
 				<option>Student</option>
 				<option>Coordinator</option>
@@ -330,33 +330,17 @@
 			</select><br>
 			
 		<label>Email Address</label><br>
-			<input type="email" class="details2"><br>
+			<input type="email" name="email" class="details2"><br>
 			
 		<label>Password</label><br>
-			<input type="password" class="details3"><br>
+			<input type="password" name="password" class="details3"><br>
 			
-		<label>Password</label><br>
-			<input type="password" class="details3"><br>
-
 		<br>
 		<button type="button" class="cancel-button">Cancel</button>
-		<button type="button" class="save-button" onclick="showSuccessModal()">Save</button>
+		<button type="button" class="save-button">Save</button>
 
 	</form>
-	
-	<div id="overlay"></div>
 
-	<!-- Success popup modal -->
-	<div id="successModal" class="popUp">
-	  <div class="modal-content">
-		<h2>Success!</h2>
-		<p>The new user has been added successfully.</p>
-		<div class="modal-buttons">
-		  <a href="c_manageProfile.php"><button>Back to the List</button></a>
-		  <a href="c_addNewUser.php"><button>Add New User</button></a>
-		</div>
-	  </div>
-	</div>
   </div>
   <script type="text/javascript">
 	$(document).ready(function(){
@@ -365,12 +349,7 @@
 		});
 	});
 	</script>
-	
-	<script>
-	function showSuccessModal() {
-	  document.getElementById("overlay").style.display = "block";
-	  document.getElementById("successModal").style.display = "block";
-	}
+
 </script>
 </body>
 </html>

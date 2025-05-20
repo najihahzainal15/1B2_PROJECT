@@ -3,7 +3,7 @@
 <body>
 	<?php
 		// get data from form
-		$name = $_POST["name"];
+		$username = $_POST["username"];
 		$email = $_POST["email"];
 		$role = $_POST["role"];
 		$password = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -15,7 +15,7 @@
 		mysqli_select_db($link, "web_project") or die(mysqli_error());
 
 		// to create a query to be executed in sql
-		$query = "insert into user values('','$name','$email','$role','$password')" 	
+		$query = "insert into user values('','$username','$email','$role','$password')" 	
 		or die(mysqli_connect_error());
 
 		// to run sql query in database
