@@ -317,11 +317,8 @@
   
   <div class="content">
   <br>
-  <form> 
+  <form action="c_addUser_action.php" method="POST"> 
 		<label>Name</label><br>
-			<input type="text" class="details1"><br>
-
-	  	<label>Name</label><br>
 			<input type="text" class="details1"><br>
 			
 		<label>Role</label><br>
@@ -337,11 +334,7 @@
 			
 		<label>Password</label><br>
 			<input type="password" class="details3"><br>
-			
-		<label>Confirm Password</label><br>
-			<input type="password" class="details3"><br>
-			
-		
+
 		<br>
 		<button type="button" class="cancel-button">Cancel</button>
 		<button type="button" class="save-button" onclick="showSuccessModal()">Save</button>
