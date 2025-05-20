@@ -320,6 +320,9 @@
   <form> 
 		<label>Name</label><br>
 			<input type="text" class="details1"><br>
+
+	  	<label>Name</label><br>
+			<input type="text" class="details1"><br>
 			
 		<label>Role</label><br>
 			<select name = "role" class="select">
