@@ -297,7 +297,7 @@
 				echo "<td>" . htmlspecialchars($row['role']) . "</td>";
 				echo "<td>" . htmlspecialchars($row['email']) . "</td>";
 				echo "<td>
-						<a href='editUser.php?id=" . $row['userID'] . "' class='action-btn'>VIEW</a>
+						<a href='viewUser.php?id=" . $row['userID'] . "' class='action-btn'>VIEW</a>
 						<a href='editUser.php?id=" . $row['userID'] . "' class='action-btn'>EDIT</a>
 						<a href='deleteUser.php?id=" . $row['userID'] . "' class='action-btn' onclick=\"return confirm('Are you sure you want to delete this user?');\">DELETE</a>
 					  </td>";
