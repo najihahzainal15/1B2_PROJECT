@@ -1,3 +1,11 @@
+<?php
+session_start();
+include("db_connection.php");
+
+$sql = "SELECT * FROM user ORDER BY userID ASC";
+$result = mysqli_query($conn, $sql);
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -278,166 +286,30 @@
           <th>NAME</th>
           <th>ROLE</th>
           <th>EMAIL ADDRESS</th>
-		  <th>ACTIONS</th>
+          <th>ACTIONS</th>
         </tr>
       </thead>
-      <tbody class="tbody"> 
-        <tr>
-          <td td align="center">1.</td>
-          <td align="left">NURUL NAJIHA BINTI RAMZI</td>
-          <td align="center">STUDENT</td>
-          <td align="center">CD22081@adab.umpsa.edu.my</td>
-		  <td align="center">
-            <button class="action-btn">VIEW</button>
-            <button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-          </td>
-		</tr>
-		
-		<tr>
-          <td td align="center">2.</td>
-          <td align="left">MUHAMMAD FARIDZUAN BIN AHMAD</td>
-          <td align="center">STUDENT</td>
-          <td align="center">CD22081@adab.umpsa.edu.my</td>
-		  <td align="center">
-            <button class="action-btn">VIEW</button>
-            <button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-          </td>
-		</tr>
-		
-		<tr>
-          <td td align="center">3.</td>
-          <td align="left">MUHAMMAD AMIR HAZIQ BIN MOHD SYAHRUL</td>
-          <td align="center">STUDENT</td>
-          <td align="center">CD22081@adab.umpsa.edu.my</td>
-		  <td align="center">
-            <button class="action-btn">VIEW</button>
-            <button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-          </td>
-		</tr>
-		
-		<tr>
-          <td td align="center">4.</td>
-          <td align="left">SITI MASYITAH BINTI IBRAHIM</td>
-          <td align="center">STUDENT</td>
-          <td align="center">CD22081@adab.umpsa.edu.my</td>
-		  <td align="center">
-            <button class="action-btn">VIEW</button>
-            <button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-          </td>
-		</tr>
-		
-		<tr>
-          <td td align="center">5.</td>
-          <td align="left">NUR HUSNINA BINTI MUHANURUL</td>
-          <td align="center">COORDINATOR</td>
-          <td align="center">CD22081@adab.umpsa.edu.my</td>
-		  <td align="center">
-            <button class="action-btn">VIEW</button>
-            <button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-          </td>
-		</tr>
-		
-		<tr>
-          <td td align="center">6.</td>
-          <td align="left">MUHAMMAD AMIR FIRDAUS BIN AMRAN</td>
-          <td align="center">EVENT ADVISOR</td>
-          <td align="center">CD22081@adab.umpsa.edu.my</td>
-		  <td align="center">
-            <button class="action-btn">VIEW</button>
-            <button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-          </td>
-		</tr>
-		
-		<tr>
-          <td td align="center">7.</td>
-          <td align="left">NUR AISYAH SYAZANA BINTI MOHD FAHIM</td>
-          <td align="center">EVENT ADVISOR</td>
-          <td align="center">CD22081@adab.umpsa.edu.my</td>
-		  <td align="center">
-            <button class="action-btn">VIEW</button>
-            <button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-          </td>
-		</tr>
-		
-		<tr>
-		  <td align="center">8.</td>
-		  <td align="left">NUR IZZATI BINTI ALIAS</td>
-		  <td align="center">STUDENT</td>
-		  <td align="center">CB23001@adab.umpsa.edu.my</td>
-		  <td align="center">
-			<button class="action-btn">VIEW</button>
-			<button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-		  </td>
-		</tr>
-
-		<tr>
-		  <td align="center">9.</td>
-		  <td align="left">MUHAMMAD HAFIZ BIN RAZAK</td>
-		  <td align="center">STUDENT</td>
-		  <td align="center">CD23045@adab.umpsa.edu.my</td>
-		  <td align="center">
-			<button class="action-btn">VIEW</button>
-			<button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-		  </td>
-		</tr>
-
-		<tr>
-		  <td align="center">10.</td>
-		  <td align="left">LIM WEI JIE</td>
-		  <td align="center">STUDENT</td>
-		  <td align="center">CA23112@adab.umpsa.edu.my</td>
-		  <td align="center">
-			<button class="action-btn">VIEW</button>
-			<button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-		  </td>
-		</tr>
-
-		<tr>
-		  <td align="center">11.</td>
-		  <td align="left">SITI AISYAH BINTI KAMAL</td>
-		  <td align="center">STUDENT</td>
-		  <td align="center">CF23078@adab.umpsa.edu.my</td>
-		  <td align="center">
-			<button class="action-btn">VIEW</button>
-			<button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-		  </td>
-		</tr>
-
-		<tr>
-		  <td align="center">12.</td>
-		  <td align="left">AIMAN HAKIM BIN NORAZMI</td>
-		  <td align="center">STUDENT</td>
-		  <td align="center">CD23156@adab.umpsa.edu.my</td>
-		  <td align="center">
-			<button class="action-btn">VIEW</button>
-			<button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-		  </td>
-		</tr>
-
-		<tr>
-		  <td align="center">13.</td>
-		  <td align="left">NUR SYAHIRAH BINTI SAHARUDIN</td>
-		  <td align="center">STUDENT</td>
-		  <td align="center">CB23234@adab.umpsa.edu.my</td>
-		  <td align="center">
-			<button class="action-btn">VIEW</button>
-			<button class="action-btn">EDIT</button>
-			<button class="action-btn">DELETE</button>
-		  </td>
-		</tr>
-	  
+      <tbody class="tbody">
+        <?php 
+        $count = 1;
+        if (mysqli_num_rows($result) > 0) {
+          while ($row = mysqli_fetch_assoc($result)) {
+            echo "<tr>";
+            echo "<td align='center'>" . $count++ . ".</td>";
+            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+            echo "<td align='center'>" . strtoupper(htmlspecialchars($row['role'])) . "</td>";
+            echo "<td align='center'>" . htmlspecialchars($row['email']) . "</td>";
+            echo "<td align='center'>
+                    <a href='#' class='action-btn'>VIEW</a>
+                    <a href='#' class='action-btn'>EDIT</a>
+                    <a href='#' class='action-btn'>DELETE</a>
+                  </td>";
+            echo "</tr>";
+          }
+        } else {
+          echo "<tr><td colspan='5' align='center'>No users found.</td></tr>";
+        }
+        ?>
       </tbody>
     </table>
 

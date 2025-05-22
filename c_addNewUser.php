@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- commment -->
 <html>
 <head>
   <title>COORDINATOR ADD NEW USER</title>
@@ -272,6 +271,19 @@
   </style>
 </head>
 <body>
+
+	<?php
+	if (isset($_GET['status'])) {
+		$status = $_GET['status'];
+		echo "<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				const message = '" . ($status === 'success' ? 'Data inserted successfully!' : 'Insert failed.') . "';
+				alert(message);
+			});
+		</script>";
+	}
+	?>
+
   <div class="header1">
 	<img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo"/>
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo"/>
@@ -319,14 +331,14 @@
   <br>
   <form action="c_addUser_action.php" method="POST"> 
 		<label>Name</label><br>
-			<input type="text" name="username" class="details1"><br>
+			<input type="username" name="username" class="details1"><br>
 			
 		<label>Role</label><br>
 			<select name = "role" name="role" class="select">
-				<option selected = "selected">Select role</option>
-				<option>Student</option>
-				<option>Coordinator</option>
-				<option>Event Advisor</option>
+				<option value="Select Role" selected="selected">Select role</option>
+				<option value="Student">Student</option>
+				<option value="Coordinator">Coordinator</option>
+				<option value="Event Advisor">Event Advisor</option>
 			</select><br>
 			
 		<label>Email Address</label><br>
@@ -337,7 +349,7 @@
 			
 		<br>
 		<button type="button" class="cancel-button">Cancel</button>
-		<button type="button" class="save-button">Save</button>
+		<button type="submit" class="save-button">Save</button>
 
 	</form>
 
@@ -349,7 +361,5 @@
 		});
 	});
 	</script>
-
-</script>
 </body>
 </html>
