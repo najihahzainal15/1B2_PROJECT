@@ -197,7 +197,7 @@
   
   <div class="nav">
 	<div class="menu">
-		<div class="item"><a class="active" href="s_homepage.html">Dashboard</a></div>
+		<div class="item"><a class="active" href="s_homepage.php">Dashboard</a></div>
 		<div class="item">
 			<a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
