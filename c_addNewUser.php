@@ -331,7 +331,7 @@
   <br>
   <form action="c_addUser_action.php" method="POST"> 
 		<label>Name</label><br>
-			<input type="username" name="username" class="details1"><br>
+			<input type="name" name="username" class="details1"><br>
 			
 		<label>Role</label><br>
 			<select name = "role" name="role" class="select">
@@ -348,7 +348,7 @@
 			<input type="password" name="password" class="details3"><br>
 			
 		<br>
-		<button type="button" class="cancel-button">Cancel</button>
+		<button type="button" class="cancel-button" onclick="window.location.href='c_manageProfile.php'">Cancel</button>
 		<button type="submit" class="save-button">Save</button>
 
 	</form>

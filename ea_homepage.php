@@ -1,5 +1,15 @@
-<!DOCTYPE html>
+<?php
+// Initialize the session
+session_start();
+ 
+// Check if the user is logged in, if not then redirect him to login page
+if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
+    header("location: login_page.php");
+    exit;
+}
+?>
 
+<!DOCTYPE html>
 <html>
 <head>
   <title>EVENT ADVISOR DASHBOARD</title>
@@ -261,7 +271,7 @@
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_edit_profile.html">
+			<a href="s_edit_profile.php">
 				<img src="images/profile.png" alt="Profile" class="logo2">
 			</a>
 		</div>  

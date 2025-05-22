@@ -2,7 +2,7 @@
 // Initialize the session
 session_start();
 
-// Include config file (make sure $link is your DB connection)
+// Include config file
 require_once "config.php";
 
 // Define variables
@@ -10,54 +10,45 @@ $email = $password = $selected_role = "";
 $email_err = $password_err = $selected_role_err = $login_err = "";
 
 // When form is submitted
-if($_SERVER["REQUEST_METHOD"] == "POST"){
-	
-	$email = trim($_POST["email"]);
-	$password = trim($_POST["password"]);
-	$selected_role = trim($_POST["role"]);
-	
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = trim($_POST["email"]);
+    $password = trim($_POST["password"]);
+    $selected_role = trim($_POST["role"]);
+
     // Email validation
-    if(empty($email)){
+    if (empty($email)) {
         $email_err = "Please enter your email.";
     }
 
     // Password validation
-    if(empty($password)){
+    if (empty($password)) {
         $password_err = "Please enter your password.";
     }
 
     // Role validation
-    if(empty($selected_role)){
+    if (empty($selected_role)) {
         $selected_role_err = "Please select a role.";
     }
-		
+
     // If no errors, proceed
-    if(empty($email_err) && empty($password_err) && empty($selected_role_err)){
-		// Prepare a select statement
+    if (empty($email_err) && empty($password_err) && empty($selected_role_err)) {
         $sql = "SELECT email, password, role FROM user WHERE email = ?";
-        $param_email = $email;
-        if($stmt = mysqli_prepare($link, $sql)){
-			// Bind variables to the prepared statement as parameters
-            mysqli_stmt_bind_param($stmt, "s", $param_email);	
-			// Attempt to execute the prepared statement
-            if(mysqli_stmt_execute($stmt)){
-				// Store result
+        if ($stmt = mysqli_prepare($link, $sql)) {
+            mysqli_stmt_bind_param($stmt, "s", $email);
+            if (mysqli_stmt_execute($stmt)) {
                 mysqli_stmt_store_result($stmt);
 
-                // Check if email exists, if yes then verify password
-                if(mysqli_stmt_num_rows($stmt) == 1){   
-					// Bind result variables
+                if (mysqli_stmt_num_rows($stmt) == 1) {
                     mysqli_stmt_bind_result($stmt, $db_email, $hashed_password, $db_role);
-                    if(mysqli_stmt_fetch($stmt)){
-                            if($password === $hashed_password){  
-								if(strcasecmp($selected_role, $db_role) == 0) {
+                    if (mysqli_stmt_fetch($stmt)) {
+                        if (password_verify($password, $hashed_password) || $password === $hashed_password) {
+                            if (strcasecmp($selected_role, $db_role) == 0) {
                                 $_SESSION["loggedin"] = true;
                                 $_SESSION["email"] = $db_email;
                                 $_SESSION["role"] = $db_role;
-								header("location: welcome.php");
-								exit;
-                                }
-							} else {
+                                header("location: welcome.php");
+                                exit;
+                            } else {
                                 $login_err = "Selected role does not match your account.";
                             }
                         } else {
@@ -72,8 +63,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             }
             mysqli_stmt_close($stmt);
         }
-
-    mysqli_close($link);
+        mysqli_close($link);
+    }
 }
 ?>
 
@@ -84,9 +75,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
-  
   <style>
-		*{
+*{
 			padding: 0;
 			margin: 0;
 			box-sizing: border-box;
@@ -302,7 +292,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			font-size: 12px;
 		  }
 		
-	</style>
+
+  </style>
 </head>
 <body>
   <div class="container">
@@ -310,75 +301,67 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
       <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo" />
       <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo" />
     </div>
-	
+
     <div class="login-container">
+      <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+        <h2>Welcome to MyPetakom!</h2> 
 
-	  <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-	  <h2>Welcome to MyPetakom!</h2> 
-	  
-	  <?php if($login_err): ?>
-		<div class="error-message"><?= $login_err; ?></div>
-	  <?php endif; ?>
+        <?php 
+        if (!empty($login_err)) {
+            echo '<div class="error-message">' . $login_err . '</div>';
+        }
+        ?>
 
-		<div class="input-div one">
-			<div class="icon">
-				<i class="fas fa-user-alt"></i>
-			</div>
-			<div>
-				<h5>Email</h5>
-				<input class="input" type="text" name="email">
-				<?php if ($email_err): ?>
-				  <div align="left" class="error-message1"><?= $email_err; ?></div>
-				<?php endif; ?>
-			</div>
-		</div>
-		
-		
-		<div class="input-div two">
-			<div class="icon">
-				<i class="fas fa-lock"></i>
-			</div>
-			<div>
-				<h5>Password</h5>
-				<input class="input" type="password" name="password">
-				<?php if ($password_err): ?>
-				  <div align="left" class="error-message1"><?= $password_err; ?></div>
-				<?php endif; ?>
-			</div>
-		</div>
-		
+        <div class="input-div one">
+          <div class="icon">
+            <i class="fas fa-user-alt"></i>
+          </div>
+          <div>
+            <h5>Email</h5>
+            <input class="input" type="text" name="email" value="<?php echo htmlspecialchars($email); ?>" required>
+          </div>
+        </div>
 
-          <a href="#" class="forgot">Forgot password?</a>
-		  
-		 <select name = "role" class="select">
-			<option value="">Select role</option>
-				 <option value="Student">Student</option>
-				<option value="Coordinator">Coordinator</option>
-				<option value="Event Advisor">Event Advisor</option>	
-		 </select>
-		 <?php if ($selected_role_err): ?>
-		  <div align="left" class="error-message2"><?= $selected_role_err; ?></div>
-		<?php endif; ?>
-				  <input type="submit" class="login-button" value="Login">
-		  <p>Not registered yet? <a href="register_page.php"> Sign up.</a></p>
+        <div class="input-div two">
+          <div class="icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <div>
+            <h5>Password</h5>
+            <input class="input" type="password" name="password" value="<?php echo htmlspecialchars($password); ?>" required>
+          </div>
+        </div>
+
+        <a href="#" class="forgot">Forgot password?</a>
+
+        <select name="role" class="select" required>
+          <option value="">Select role</option>
+          <option value="Student" <?php if($selected_role === "Student") echo "selected"; ?>>Student</option>
+          <option value="Coordinator" <?php if($selected_role === "Coordinator") echo "selected"; ?>>Coordinator</option>
+          <option value="Event Advisor" <?php if($selected_role === "Event Advisor") echo "selected"; ?>>Event Advisor</option>
+        </select>
+
+        <input type="submit" class="login-button" value="Login">
+
+        <p>Not registered yet? <a href="register_page.php"> Sign up.</a></p>
       </form>
-	  </div>
+    </div>
   </div>
 
   <script>
-	  const inputs = document.querySelectorAll('.input');
+    const inputs = document.querySelectorAll('.input');
 
-	  inputs.forEach(input => {
-		input.addEventListener('focus', () => {
-		  input.parentNode.parentNode.classList.add('focus');
-		});
+    inputs.forEach(input => {
+      input.addEventListener('focus', () => {
+        input.parentNode.parentNode.classList.add('focus');
+      });
 
-		input.addEventListener('blur', () => {
-		  if (input.value.trim() === "") {
-			input.parentNode.parentNode.classList.remove('focus');
-		  }
-		});
-	  });
-	</script>
+      input.addEventListener('blur', () => {
+        if (input.value.trim() === "") {
+          input.parentNode.parentNode.classList.remove('focus');
+        }
+      });
+    });
+  </script>
 </body>
 </html>

@@ -1,5 +1,15 @@
-<!DOCTYPE html>
+<?php
+// Initialize the session
+session_start();
+ 
+// Check if the user is logged in, if not then redirect him to login page
+if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
+    header("location: login_page.php");
+    exit;
+}
+?>
 
+<!DOCTYPE html>
 <html>
 <head>
   <title>COORDINATOR DASHBOARD</title>
@@ -268,7 +278,7 @@
 		<div class="item">
 			<a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
-				<a href="c_membership.html" class="sub-item">Membership Approval</a>
+				<a href="c_membership.php" class="sub-item">Membership Approval</a>
 			</div>
 		</div>
 
@@ -276,7 +286,7 @@
 			<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
 				<a href="#events" class="sub-item">View Event</a>
-				<a href="#events" class="sub-item">Merit Application</a>
+				<a href="c_meritApp.php" class="sub-item">Merit Application</a>
 			</div>
 		</div>
 	</div>

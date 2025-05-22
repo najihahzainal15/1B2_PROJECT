@@ -177,7 +177,7 @@
 	}
 
     .member-table {
-	  margin-left: 30px;
+	  margin-left: 40px;
       width: 95%;
       border-collapse: collapse;
       background: #d0e6ff;
@@ -283,22 +283,23 @@
       </thead>
       <tbody class="tbody">
          <?php
-		include("db_connection.php"); // connect to your DB
+		include("config.php"); // connect to your DB
 
 		$sql = "SELECT * FROM user"; 
-		$result = mysqli_query($conn, $sql);
+		$result = mysqli_query($link, $sql);
 
 		if (mysqli_num_rows($result) > 0) {
 			$no = 1;
 			while($row = mysqli_fetch_assoc($result)) {
 				echo "<tr>";
 				echo "<td>" . $no++ . "</td>";
-				echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+				echo "<td>" . htmlspecialchars($row['username']) . "</td>";
 				echo "<td>" . htmlspecialchars($row['role']) . "</td>";
 				echo "<td>" . htmlspecialchars($row['email']) . "</td>";
 				echo "<td>
-						<a href='editUser.php?id=" . $row['id'] . "' class='action-btn'>Edit</a>
-						<a href='deleteUser.php?id=" . $row['id'] . "' class='action-btn' onclick=\"return confirm('Are you sure you want to delete this user?');\">Delete</a>
+						<a href='editUser.php?id=" . $row['userID'] . "' class='action-btn'>VIEW</a>
+						<a href='editUser.php?id=" . $row['userID'] . "' class='action-btn'>EDIT</a>
+						<a href='deleteUser.php?id=" . $row['userID'] . "' class='action-btn' onclick=\"return confirm('Are you sure you want to delete this user?');\">DELETE</a>
 					  </td>";
 				echo "</tr>";
 			}
@@ -306,7 +307,7 @@
 			echo "<tr><td colspan='5'>No users found.</td></tr>";
 		}
 
-		mysqli_close($conn);
+		mysqli_close($link);
 	  ?>
       </tbody>
     </table>
