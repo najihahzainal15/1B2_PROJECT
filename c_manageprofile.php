@@ -1,11 +1,3 @@
-<?php
-session_start();
-include("db_connection.php");
-
-$sql = "SELECT * FROM user ORDER BY userID ASC";
-$result = mysqli_query($conn, $sql);
-?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -290,26 +282,32 @@ $result = mysqli_query($conn, $sql);
         </tr>
       </thead>
       <tbody class="tbody">
-        <?php 
-        $count = 1;
-        if (mysqli_num_rows($result) > 0) {
-          while ($row = mysqli_fetch_assoc($result)) {
-            echo "<tr>";
-            echo "<td align='center'>" . $count++ . ".</td>";
-            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-            echo "<td align='center'>" . strtoupper(htmlspecialchars($row['role'])) . "</td>";
-            echo "<td align='center'>" . htmlspecialchars($row['email']) . "</td>";
-            echo "<td align='center'>
-                    <a href='#' class='action-btn'>VIEW</a>
-                    <a href='#' class='action-btn'>EDIT</a>
-                    <a href='#' class='action-btn'>DELETE</a>
-                  </td>";
-            echo "</tr>";
-          }
-        } else {
-          echo "<tr><td colspan='5' align='center'>No users found.</td></tr>";
-        }
-        ?>
+         <?php
+		include("db_connection.php"); // connect to your DB
+
+		$sql = "SELECT * FROM user"; 
+		$result = mysqli_query($conn, $sql);
+
+		if (mysqli_num_rows($result) > 0) {
+			$no = 1;
+			while($row = mysqli_fetch_assoc($result)) {
+				echo "<tr>";
+				echo "<td>" . $no++ . "</td>";
+				echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+				echo "<td>" . htmlspecialchars($row['role']) . "</td>";
+				echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+				echo "<td>
+						<a href='editUser.php?id=" . $row['id'] . "' class='action-btn'>Edit</a>
+						<a href='deleteUser.php?id=" . $row['id'] . "' class='action-btn' onclick=\"return confirm('Are you sure you want to delete this user?');\">Delete</a>
+					  </td>";
+				echo "</tr>";
+			}
+		} else {
+			echo "<tr><td colspan='5'>No users found.</td></tr>";
+		}
+
+		mysqli_close($conn);
+	  ?>
       </tbody>
     </table>
 
