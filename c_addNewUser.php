@@ -1,3 +1,14 @@
+<?php
+// Initialize the session
+session_start();
+ 
+// Check if the user is logged in, if not then redirect him to login page
+if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
+    header("location: login_page.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -215,58 +226,6 @@
 	form{
 		margin-left: 40px;
 	}
-	
-	#overlay {
-	  position: fixed;
-	  top: 0;
-	  left: 0;
-	  width: 100%;
-	  height: 100%;
-	  backdrop-filter: blur(5px);
-	  background: rgba(0, 0, 0, 0.2);
-	  z-index: 998;
-	  display: none;
-	}
-
-	.popUp {
-	  display: none;
-	  position: fixed;
-	  z-index: 999;
-	  left: 50%;
-	  top: 50%;
-	  transform: translate(-50%, -50%);
-	  background: white;
-	  padding: 30px;
-	  border-radius: 10px;
-	  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-	  text-align: center;
-	  width: 300px;
-	}
-
-	.modal h2 {
-	  margin-top: 0;
-	  color: green;
-	}
-
-	.modal-buttons {
-	  margin-top: 20px;
-	}
-
-	.modal-buttons button {
-	  margin: 5px;
-	  padding: 8px 15px;
-	  font-family: 'Poppins', sans-serif;
-	  background-color: #0074e4;
-	  border: none;
-	  border-radius: 5px;
-	  color: white;
-	  cursor: pointer;
-	}
-
-	.modal-buttons button:hover {
-	  background-color: #005bb5;
-	}
-
 
   </style>
 </head>
@@ -334,7 +293,7 @@
 			<input type="name" name="username" class="details1"><br>
 			
 		<label>Role</label><br>
-			<select name = "role" name="role" class="select">
+			<select name="role" class="select">
 				<option value="Select Role" selected="selected">Select role</option>
 				<option value="Student">Student</option>
 				<option value="Coordinator">Coordinator</option>
@@ -348,7 +307,7 @@
 			<input type="password" name="password" class="details3"><br>
 			
 		<br>
-		<button type="button" class="cancel-button" onclick="window.location.href='c_manageProfile.php'">Cancel</button>
+		<button type="button" class="cancel-button" onclick="window.location.href='c_manageprofile.php'">Cancel</button>
 		<button type="submit" class="save-button">Save</button>
 
 	</form>

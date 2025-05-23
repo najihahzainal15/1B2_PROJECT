@@ -32,20 +32,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // If no errors, proceed
     if (empty($email_err) && empty($password_err) && empty($selected_role_err)) {
-        $sql = "SELECT email, password, role FROM user WHERE email = ?";
+        $sql = "SELECT userID, email, password, role FROM user WHERE email = ?";
         if ($stmt = mysqli_prepare($link, $sql)) {
             mysqli_stmt_bind_param($stmt, "s", $email);
             if (mysqli_stmt_execute($stmt)) {
                 mysqli_stmt_store_result($stmt);
 
                 if (mysqli_stmt_num_rows($stmt) == 1) {
-                    mysqli_stmt_bind_result($stmt, $db_email, $hashed_password, $db_role);
+                    mysqli_stmt_bind_result($stmt, $userID, $db_email, $hashed_password, $db_role);
                     if (mysqli_stmt_fetch($stmt)) {
                         if (password_verify($password, $hashed_password) || $password === $hashed_password) {
                             if (strcasecmp($selected_role, $db_role) == 0) {
                                 $_SESSION["loggedin"] = true;
                                 $_SESSION["email"] = $db_email;
                                 $_SESSION["role"] = $db_role;
+								$_SESSION["userID"] = $userID;
                                 header("location: welcome.php");
                                 exit;
                             } else {

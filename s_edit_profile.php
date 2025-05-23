@@ -1,3 +1,34 @@
+<?php
+	session_start();
+
+	if (!isset($_SESSION['userID'])) {
+		// Redirect to login page if not logged in
+		header("Location: login_page.php");
+		exit();
+	}
+
+	// Connect to the database
+	$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
+
+	// Get the logged-in user's ID securely from the session
+	$userID = $_SESSION['userID'];
+
+	// Prepare the SQL query
+	$query = "SELECT * FROM user WHERE userID = ?";
+
+	$stmt = mysqli_prepare($link, $query);
+	mysqli_stmt_bind_param($stmt, "i", $userID);
+	mysqli_stmt_execute($stmt);
+	$result = mysqli_stmt_get_result($stmt);
+
+	$row = mysqli_fetch_assoc($result);
+
+	// Assign to variables
+	$uName = $row["username"];
+	$uEmail = $row["email"];
+?>
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -235,7 +266,7 @@
 		margin-left: 40px;
 	}
 	
-	.select{
+	.select1{
 		font-family: 'Poppins', sans-serif;
 		margin: 5px 0px 25px 0px;
 		padding: 3px 100px;
@@ -245,7 +276,20 @@
 		border: 1px solid #DCDCDC;
 		border-radius: 4px;
 		border-bottom-width: 2px;
-		}
+	}
+	
+	.select2{
+		font-family: 'Poppins', sans-serif;
+		margin: 5px 0px 25px 0px;
+		padding: 3px 100px;
+		color: black;
+		width: 35%;
+		background-color: white;
+		border: 1px solid #DCDCDC;
+		border-radius: 4px;
+		border-bottom-width: 2px;
+		text-align: left;
+	}
 
   </style>
 </head>
@@ -267,18 +311,18 @@
   
   <div class="nav">
 	<div class="menu">
-		<div class="item"><a href="s_homepage.html">Dashboard</a></div>
+		<div class="item"><a href="s_homepage.php">Dashboard</a></div>
 		<div class="item">
 			<a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
-				<a href="s_membership" class="sub-item">Membership Application</a>
+				<a href="s_membership.php" class="sub-item">Membership Application</a>
 			</div>
 		</div>
 		
 		<div class="item">
 			<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
-				<a href="s_homepage.html" class="sub-item">View Event</a>
+				<a href="s_homepage.php" class="sub-item">View Event</a>
 			</div>
 		</div>
 		
@@ -293,26 +337,35 @@
   
   <div class="content">
 	<br>
-  <form class="form"> 
+  <form action="s_editProfile2.php" method="POST" class="form"> 
 		
 		<label>Full Name</label><br>
-			<input type="text" placeholder="Enter your name" class="details1"><br>
+			<input type="text" name="username" placeholder="Enter your name" class="details1"  value="<?php echo $uName; ?>"><br>
 			
 		<label>Email Address</label><br>
-			<input type="email" placeholder="Enter your email address" class="details1"><br>
+			<input type="email" name="email"  placeholder="Enter your email address" class="details1"  value="<?php echo $uEmail; ?>"><br>
 			
 		<label>Phone Number</label><br>
-			<input type="tel" placeholder="Enter your phone number" class="details2"><br>
+			<input type="tel" name="phoneNo" placeholder="Enter your phone number" class="details2"><br>
 		
 		<label>Programme</label><br>
-			<select name = "programme" class="select">
+			<select name = "programme" class="select1">
 				<option selected = "selected">Select programme</option>
 				<option>Bachelor of Computer Science (Software Engineering) with Honours</option>
 				<option>Bachelor of Computer Science (Computer Systems & Networking) with Honours</option>
 				<option>Bachelor of Computer Science (Multimedia Software) with Honours</option>
 				<option>Bachelor of Computer Science (Cyber Security) with Honours</option>
 				<option>Diploma in Computer Science</option>
-			</select><br>
+		</select><br>
+		
+		<label>Year of Study</label><br>
+			<select name = "year" class="select2">
+				<option selected = "selected">Select year of study</option>
+				<option>1</option>
+				<option>2</option>
+				<option>3</option>
+				<option>4</option>
+		</select><br>
 			
 		<label>Current Password</label><br>
 			<input type="password" name="currpass" placeholder="Enter your current password" class="details3"><br>
@@ -324,7 +377,8 @@
 			<input type="password" name="conpass" placeholder="Confirm new password" class="details3"><br>
 
 		<br>
-		<input type="submit" class="cancel-button" value="Cancel">
+		<input type ="hidden" name="id2" value="<?php echo $userID; ?>">
+		<a href="s_homepage.php" class="cancel-button">Cancel</a>
 		<input type="submit" class="save-button" value="Save">
 
 	</form>

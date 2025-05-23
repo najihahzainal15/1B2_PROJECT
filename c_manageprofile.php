@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>COORDINATOR MEMBERSHIP APPLICATION</title>
+  <title>COORDINATOR MANAGE PROFILE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
@@ -184,15 +184,30 @@
     }
 
     .member-table th, .member-table td {
-      border: 2px solid #666;
+	  border: 1px solid #666;
+	  border-collapse: collapse;
       padding: 10px;
     }
+	
+	.member-table td:last-child {
+	  text-align: center;
+	  white-space: nowrap;
+	}
+	
+	.member-table td:last-child a {
+	  margin: 0 5px;
+	}
+	
+	.member-table td:first-child
+	{
+	text-align: center;
+	}
 
     .action-btn {
-      margin: 0 5px;
-      padding: 5px 10px;
-      font-weight: bold;
+      text-align: center;
+	  min-width: 50px;
       cursor: pointer;
+	  text-decoration: none;
     }
 	   
 	.tbody {
@@ -282,24 +297,33 @@
         </tr>
       </thead>
       <tbody class="tbody">
-         <?php
-		include("config.php"); // connect to your DB
+		<?php
+		//Connect to the database server.
+		$link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
 
-		$sql = "SELECT * FROM user"; 
-		$result = mysqli_query($link, $sql);
+		//Select the database.
+		mysqli_select_db($link, "web_project") or die(mysqli_error($link));
+
+		//SQL query
+		$query = "SELECT * FROM user"
+			or die(mysqli_connect_error());
+			
+		//Execute the query (the recordset $rs contains the result)
+		$result = mysqli_query($link, $query);
 
 		if (mysqli_num_rows($result) > 0) {
 			$no = 1;
 			while($row = mysqli_fetch_assoc($result)) {
+				$ID = $row["userID"];
 				echo "<tr>";
 				echo "<td>" . $no++ . "</td>";
 				echo "<td>" . htmlspecialchars($row['username']) . "</td>";
 				echo "<td>" . htmlspecialchars($row['role']) . "</td>";
 				echo "<td>" . htmlspecialchars($row['email']) . "</td>";
 				echo "<td>
-						<a href='viewUser.php?id=" . $row['userID'] . "' class='action-btn'>VIEW</a>
-						<a href='editUser.php?id=" . $row['userID'] . "' class='action-btn'>EDIT</a>
-						<a href='deleteUser.php?id=" . $row['userID'] . "' class='action-btn' onclick=\"return confirm('Are you sure you want to delete this user?');\">DELETE</a>
+						<a href='c_viewUser.php?id=" . $row['userID'] . "' class='action-btn'>VIEW</a> 
+						<a href='c_editUser.php?id=" . $row['userID'] . "' class='action-btn'>EDIT</a> 
+						<a href='c_deleteUser.php?id=" . $row['userID'] . "' class='action-btn' onclick=\"return confirm('Are you sure you want to delete this user?');\">DELETE</a>
 					  </td>";
 				echo "</tr>";
 			}
