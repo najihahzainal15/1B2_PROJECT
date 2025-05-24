@@ -254,7 +254,8 @@
           
           
       <div class="button-container">
-    <button type="button" class="button">REGISTER COMMITTEE MEMBER +</button>
+   <a href="ea_registerEvent1.php" class="button">REGISTER NEW COMMITTEE MEMBER</a>
+
       </div>
 
           
@@ -263,7 +264,19 @@
 
       <table>
 	  
-	  
+	  <?php
+// Connect to the database server.
+$link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
+
+// Select the database.
+mysqli_select_db($link, "web_project") or die(mysqli_error($link));
+
+$query = "SELECT * FROM committee";
+
+$result = mysqli_query($link, $query);
+
+?>
+
 <table>
   <thead>
     <tr>
@@ -275,10 +288,31 @@
     </tr>
   </thead>
   <tbody class="tbody">
-    <tr><td>3</td><td>EVT002</td><td>finance leader</td><td>CB34055</td><td>
-        <a href='ea_eventCommitteeUpdate.php?id=3'>EDIT</a> || 
-        <a href='ea_eventCommitteeDelete.php?id=3' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-      </td>  </tbody>
+    <?php
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $commID = htmlspecialchars($row["committeeID"]);
+            $eventID = htmlspecialchars($row["eventID"]);
+            $role = htmlspecialchars($row["committeeRole"]);
+            $studentID = htmlspecialchars($row["studentID"]);
+            echo "<tr>";
+            echo "<td>$commID</td>";
+            echo "<td>$eventID</td>";
+            echo "<td>$role</td>";
+            echo "<td>$studentID</td>";
+           echo "<td>
+        <a href='ea_eventCommitteeUpdate.php?id=$commID'>EDIT</a> || 
+        <a href='ea_eventCommitteeDelete.php?id=$commID' onclick=\"return confirm('Are you sure to delete this record?');\">DELETE</a>
+      </td>";
+
+        }
+    } else {
+        echo "<tr><td colspan='5'>No committee records found.</td></tr>";
+    }
+
+    mysqli_close($link);
+    ?>
+  </tbody>
 </table>
 
 
@@ -291,4 +325,3 @@
   </script>
 </body>
 </html>
-
