@@ -1,15 +1,9 @@
-<?php
-// Initialize the session
-session_start();
- 
-// Check if the user is logged in, if not then redirect him to login page
-if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-    header("location: login_page.php");
-    exit;
-}
-?>
-
 <!DOCTYPE html>
+
+
+
+
+
 <html>
 <head>
   <title>EVENT ADVISOR DASHBOARD</title>
@@ -258,6 +252,20 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 	.recent-activities li:last-child {
 	  border-bottom: none;
 	}
+	
+	.dashboard-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 30px 15px; /* horizontal gap between cells */
+    margin-top: 20px;
+  }
+  .dashboard-table td {
+    padding: 15px 40px;
+    background-color: white;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 8px;
+  }
 
   </style>
 </head>
@@ -271,7 +279,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_edit_profile.php">
+			<a href="s_edit_profile.html">
 				<img src="images/profile.png" alt="Profile" class="logo2">
 			</a>
 		</div>  
@@ -333,12 +341,15 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 	</div>
 	
 	<div class="dashboard-content">
-	  <div class="overview-cards">
-		<div class="card">Total Events Created: 10</div>
-		<div class="card">Active Events: 7</div>
-		<div class="card">Cancelled Events: 2</div>
-		<div class="card">Postponed Events: 1</div>
-	  </div>
+  <table class="dashboard-table">
+    <tr>
+      <td>Total Events Created: 3</td>
+      <td>Active Events: 1</td>
+      <td>Cancelled Events: 1</td>
+      <td>Postponed Events: 0</td>
+    </tr>
+  </table>
+</div>
 
   <div class="analytics">
 		<div class="event-status">
