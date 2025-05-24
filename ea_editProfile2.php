@@ -11,10 +11,9 @@
 	$userID = $_SESSION['userID'];
 
 	// Sanitize input
-	$sID = trim($_POST['studentID']);
+	$advisorID = trim($_POST['eventAdvisorID']);
 	$phone = trim($_POST['phone_No']);
-	$programme = trim($_POST['programme']);
-	$year = trim($_POST['year_of_study']);
+	$expertise = trim($_POST['expertiseArea']);
 	$currpass = $_POST['currpass'] ?? '';
 	$newpass = $_POST['npass'] ?? '';
 	$conpass = $_POST['conpass'] ?? '';
@@ -26,10 +25,10 @@
 	mysqli_stmt_execute($stmtUser);
 
 	// Update programme and year_of_study in student table
-	$updateStudentQuery = "UPDATE student SET studentID = ?, programme = ?, year_of_study = ? WHERE userID = ?";
-	$stmtStudent = mysqli_prepare($link, $updateStudentQuery);
-	mysqli_stmt_bind_param($stmtStudent, "ssii", $sID, $programme, $year, $userID);
-	mysqli_stmt_execute($stmtStudent);
+	$updateAdvisorQuery = "UPDATE eventadvisor SET eventAdvisorID = ?, expertiseArea = ? WHERE userID = ?";
+	$stmtAdvisor = mysqli_prepare($link, $updateAdvisorQuery);
+	mysqli_stmt_bind_param($stmtAdvisor, "ssi", $advisorID, $expertise, $userID);
+	mysqli_stmt_execute($stmtAdvisor);
 
 	// Handle password change
 	if (!empty($currpass) && !empty($newpass) && !empty($conpass)) {
@@ -56,6 +55,6 @@
 		}
 	}
 
-	echo "<script>alert('Profile updated successfully.'); window.location.href = 's_displayProfile.php';</script>";
+	echo "<script>alert('Profile updated successfully.'); window.location.href = 'ea_displayProfile.php';</script>";
 	exit();
 ?>

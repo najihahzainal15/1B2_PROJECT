@@ -1,33 +1,41 @@
-<?php
+<?php 
 	session_start();
 
 	if (!isset($_SESSION['userID'])) {
-		// Redirect to login page if not logged in
 		header("Location: login_page.php");
 		exit();
 	}
 
-	// Connect to the database
 	$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
-
-	// Get the logged-in user's ID securely from the session
 	$userID = $_SESSION['userID'];
 
-	// Prepare the SQL query
-	$query = "SELECT * FROM user WHERE userID = ?";
+	// Get data from user table
+	$queryUser = "SELECT username, email, phone_No, password FROM user WHERE userID = ?";
+	$stmtUser = mysqli_prepare($link, $queryUser);
+	mysqli_stmt_bind_param($stmtUser, "i", $userID);
+	mysqli_stmt_execute($stmtUser);
+	$resultUser = mysqli_stmt_get_result($stmtUser);
+	$userData = mysqli_fetch_assoc($resultUser);
 
-	$stmt = mysqli_prepare($link, $query);
-	mysqli_stmt_bind_param($stmt, "i", $userID);
-	mysqli_stmt_execute($stmt);
-	$result = mysqli_stmt_get_result($stmt);
-
-	$row = mysqli_fetch_assoc($result);
+	// Get data from student table
+	$queryStudent = "SELECT studentID, programme, year_of_study FROM student WHERE userID = ?";
+	$stmtStudent = mysqli_prepare($link, $queryStudent);
+	mysqli_stmt_bind_param($stmtStudent, "i", $userID);
+	mysqli_stmt_execute($stmtStudent);
+	$resultStudent = mysqli_stmt_get_result($stmtStudent);
+	$studentData = mysqli_fetch_assoc($resultStudent);
 
 	// Assign to variables
-	$uName = $row["username"];
-	$uEmail = $row["email"];
+	$uName = $userData["username"] ?? '';
+	$uEmail = $userData["email"] ?? '';
+	$sID = $studentData["studentID"] ?? '';
+	$uPhone = $userData["phone_No"] ?? '';
+	$sProgramme = $studentData["programme"] ?? '';
+	$sYear = $studentData["year_of_study"] ?? '';
+	$currpass = $_POST['currpass'] ?? '';
+	$newpass = $_POST['npass'] ?? '';
+	$conpass = $_POST['conpass'] ?? '';
 ?>
-
 
 <!DOCTYPE html>
 <html>
@@ -344,28 +352,31 @@
 			
 		<label>Email Address</label><br>
 			<input type="email" name="email"  placeholder="Enter your email address" class="details1"  value="<?php echo $uEmail; ?>"><br>
+		
+		<label>Student ID</label><br>
+			<input type="text" name="studentID" placeholder="Enter your student ID" class="details2" value="<?php echo $sID; ?>"><br>
 			
 		<label>Phone Number</label><br>
-			<input type="tel" name="phoneNo" placeholder="Enter your phone number" class="details2"><br>
+			<input type="text" name="phone_No" placeholder="Enter your phone number" class="details2" value="<?php echo $uPhone; ?>"><br>
 		
 		<label>Programme</label><br>
-			<select name = "programme" class="select1">
-				<option selected = "selected">Select programme</option>
-				<option>Bachelor of Computer Science (Software Engineering) with Honours</option>
-				<option>Bachelor of Computer Science (Computer Systems & Networking) with Honours</option>
-				<option>Bachelor of Computer Science (Multimedia Software) with Honours</option>
-				<option>Bachelor of Computer Science (Cyber Security) with Honours</option>
-				<option>Diploma in Computer Science</option>
+			<select name="programme" class="select1">
+			<option value="Select programme" <?php if ($sProgramme == "Select Programme") echo "selected"; ?>>Select programme</option>
+			<option value="Bachelor of Computer Science (Software Engineering) with Honours" <?php if ($sProgramme == "BCS") echo "selected"; ?>>Bachelor of Computer Science (Software Engineering) with Honours</option>
+			<option value="Bachelor of Computer Science (Computer Systems & Networking) with Honours" <?php if ($sProgramme == "BCN") echo "selected"; ?>>Bachelor of Computer Science (Computer Systems & Networking) with Honours</option>
+			<option value="Bachelor of Computer Science (Multimedia Software) with Honours" <?php if ($sProgramme == "BCG") echo "selected"; ?>>Bachelor of Computer Science (Multimedia Software) with Honours</option>
+			<option value="Bachelor of Computer Science (Cyber Security) with Honours" <?php if ($sProgramme == "BCY") echo "selected"; ?>>Bachelor of Computer Science (Cyber Security) with Honours</option>
+			<option value="Diploma in Computer Science" <?php if ($sProgramme == "DRC") echo "selected"; ?>>Diploma in Computer Science</option>
 		</select><br>
 		
 		<label>Year of Study</label><br>
-			<select name = "year" class="select2">
-				<option selected = "selected">Select year of study</option>
-				<option>1</option>
-				<option>2</option>
-				<option>3</option>
-				<option>4</option>
-		</select><br>
+			<select name = "year_of_study" class="select2">
+				<option value="Select year of study" <?php if ($sYear == "Select Year of Study") echo "selected"; ?>>Select year of study</option>
+				<option value="1" <?php if ($sProgramme == "1") echo "selected"; ?>>1</option>
+				<option value="2" <?php if ($sProgramme == "2") echo "selected"; ?>>2</option>
+				<option value="3" <?php if ($sProgramme == "3") echo "selected"; ?>>3</option>
+				<option value="4" <?php if ($sProgramme == "4") echo "selected"; ?>>4</option>
+			</select><br>
 			
 		<label>Current Password</label><br>
 			<input type="password" name="currpass" placeholder="Enter your current password" class="details3"><br>
@@ -378,7 +389,7 @@
 
 		<br>
 		<input type ="hidden" name="id2" value="<?php echo $userID; ?>">
-		<a href="s_homepage.php" class="cancel-button">Cancel</a>
+		<a href="s_displayProfile.php" class="cancel-button">Cancel</a>
 		<input type="submit" class="save-button" value="Save">
 
 	</form>

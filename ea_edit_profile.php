@@ -1,3 +1,42 @@
+<?php 
+	session_start();
+
+	if (!isset($_SESSION['userID'])) {
+		header("Location: login_page.php");
+		exit();
+	}
+
+	$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
+	$userID = $_SESSION['userID'];
+
+	// Get data from user table
+	$queryUser = "SELECT userID, username, email, phone_No, password FROM user WHERE userID = ?";
+	$stmtUser = mysqli_prepare($link, $queryUser);
+	mysqli_stmt_bind_param($stmtUser, "i", $userID);
+	mysqli_stmt_execute($stmtUser);
+	$resultUser = mysqli_stmt_get_result($stmtUser);
+	$userData = mysqli_fetch_assoc($resultUser);
+
+	// Get data from event advisor table
+	$queryAdvisor = "SELECT eventAdvisorID, expertiseArea FROM eventadvisor WHERE userID = ?";
+	$stmtAdvisor = mysqli_prepare($link, $queryAdvisor);
+	mysqli_stmt_bind_param($stmtAdvisor, "i", $userID);
+	mysqli_stmt_execute($stmtAdvisor);
+	$resultAdvisor = mysqli_stmt_get_result($stmtAdvisor);
+	$advisorData = mysqli_fetch_assoc($resultAdvisor);
+
+	// Assign to variables
+	$ID = $userData["userID"];
+	$uName = $userData["username"] ?? '';
+	$uEmail = $userData["email"] ?? '';
+	$uPhone = $userData["phone_No"] ?? '';
+	$expertise = $advisorData["expertiseArea"] ?? '';
+	$advisorID = $advisorData["eventAdvisorID"] ?? '';
+	$currpass = $_POST['currpass'] ?? '';
+	$newpass = $_POST['npass'] ?? '';
+	$conpass = $_POST['conpass'] ?? '';
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -149,7 +188,7 @@
 	.content{ 
 	  background-color: #e6f0ff; 
 	  margin-left: 160px;
-	  height: 100vh;
+	  height: auto;
 	}
 	
 	
@@ -234,6 +273,18 @@
 	form{
 		margin-left: 40px;
 	}
+	
+	.select1{
+		font-family: 'Poppins', sans-serif;
+		margin: 5px 0px 25px 0px;
+		padding: 3px 100px;
+		color: black;
+		width: 60%;
+		background-color: white;
+		border: 1px solid #DCDCDC;
+		border-radius: 4px;
+		border-bottom-width: 2px;
+	}
 
   </style>
 </head>
@@ -285,16 +336,29 @@
   
   <div class="content">
 	<br>
-  <form class="form"> 
+  <form action="ea_editProfile2.php" method="POST" class="form"> 
 		
 		<label>Full Name</label><br>
-			<input type="text" placeholder="Enter your name" class="details1"><br>
+			<input type="text" name="username" placeholder="Enter your name" class="details1"  value="<?php echo $uName; ?>"><br>
 			
 		<label>Email Address</label><br>
-			<input type="email" placeholder="Enter your email address" class="details1"><br>
+			<input type="email" name="email"  placeholder="Enter your email address" class="details1"  value="<?php echo $uEmail; ?>"><br>
+		
+		<label>Event Advisor ID</label><br>
+			<input type="text" name="eventAdvisorID"  placeholder="Enter your event advisor ID" class="details1"  value="<?php echo $advisorID; ?>"><br>
 			
 		<label>Phone Number</label><br>
-			<input type="tel" placeholder="Enter your phone number" class="details2"><br>
+			<input type="text" name="phone_No" placeholder="Enter your phone number" class="details2" value="<?php echo $uPhone; ?>"><br>
+		
+		<label>Expertise Area</label><br>
+			<select name="expertiseArea" class="select1">
+			<option value="Select expertise area" <?php if ($expertise == "Select Expertise Area") echo "selected"; ?>>Select expertise area</option>
+			<option value="Academic Event Planning" <?php if ($expertise == "academic") echo "selected"; ?>>Academic Event Planning</option>
+			<option value="Student Leadership & Mentorship" <?php if ($expertise == "leadership") echo "selected"; ?>>Student Leadership & Mentorship</option>
+			<option value="Corporate & Industry Collaboration" <?php if ($expertise == "corporate") echo "selected"; ?>>Corporate & Industry Collaboration</option>
+			<option value="Project Management & Logistics" <?php if ($expertise == "management") echo "selected"; ?>>Project Management & Logistics</option>
+			<option value="Sponsorship & Fundraising" <?php if ($expertise == "sponsorship") echo "selected"; ?>>Sponsorship & Fundraising</option>
+		</select><br>
 			
 		<label>Current Password</label><br>
 			<input type="password" name="currpass" placeholder="Enter your current password" class="details3"><br>
@@ -306,7 +370,8 @@
 			<input type="password" name="conpass" placeholder="Confirm new password" class="details3"><br>
 
 		<br>
-		<input type="submit" class="cancel-button" value="Cancel">
+		<input type ="hidden" name="id2" value="<?php echo $userID; ?>">
+		<a href="ea_displayProfile.php" class="cancel-button">Cancel</a>
 		<input type="submit" class="save-button" value="Save">
 
 	</form>

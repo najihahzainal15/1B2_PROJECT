@@ -7,6 +7,9 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login_page.php");
     exit;
 }
+
+// Get role
+$role = $_SESSION["role"];
 ?>
 
 <!DOCTYPE html>
@@ -271,7 +274,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_edit_profile.php">
+			<a href="ea_displayProfile.php">
 				<img src="images/profile.png" alt="Profile" class="logo2">
 			</a>
 		</div>  

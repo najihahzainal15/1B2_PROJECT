@@ -1,18 +1,41 @@
-<?php
-// Initialize the session
-session_start();
- 
-// Check if the user is logged in, if not then redirect him to login page
-if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-    header("location: login_page.php");
-    exit;
-}
+<?php 
+	session_start();
+
+	if (!isset($_SESSION['userID'])) {
+		header("Location: login_page.php");
+		exit();
+	}
+
+	$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
+	$userID = $_SESSION['userID'];
+
+	// Get data from user table
+	$queryUser = "SELECT userID, username, email FROM user WHERE userID = ?";
+	$stmtUser = mysqli_prepare($link, $queryUser);
+	mysqli_stmt_bind_param($stmtUser, "i", $userID);
+	mysqli_stmt_execute($stmtUser);
+	$resultUser = mysqli_stmt_get_result($stmtUser);
+	$userData = mysqli_fetch_assoc($resultUser);
+
+	// Get data from student table
+	$queryStudent = "SELECT studentID FROM student WHERE userID = ?";
+	$stmtStudent = mysqli_prepare($link, $queryStudent);
+	mysqli_stmt_bind_param($stmtStudent, "i", $userID);
+	mysqli_stmt_execute($stmtStudent);
+	$resultStudent = mysqli_stmt_get_result($stmtStudent);
+	$studentData = mysqli_fetch_assoc($resultStudent);
+
+	// Assign to variables
+	$ID = $userData["userID"];
+	$uName = $userData["username"] ?? '';
+	$uEmail = $userData["email"] ?? '';
+	$sID = $studentData["studentID"] ?? '';
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-  <title>STUDENT MEMBERSHIP</title>
+  <title>STUDENT MEMBERSHIP APPLICATION</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyPetakom Student Membership Application</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -268,15 +291,15 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
   <br>
   <form class="form"> 
 		
-		<label>Name</label><br>
-			<input type="text" placeholder="Enter your name" class="details1"><br>
-			
+		<label>Full Name</label><br>
+			<input type="text" name="username" class="details1"  value="<?php echo $uName; ?>" readonly><br>
+		
 		<label>Student ID</label><br>
-			<input type="text" placeholder="Enter your student ID" class="details2"><br>
+			<input type="text" name="studID" class="details2"  value="<?php echo $sID; ?>" readonly><br>
 			
 		<label>Email Address</label><br>
-			<input type="email" placeholder="Enter your email address" class="details3"><br>
-			
+			<input type="email" name="email" class="details1"  value="<?php echo $uEmail; ?>" readonly><br>
+	
 		<label>Student Card</label><br>
 			<input type="file" name="myfile" class="details"><br>
 			

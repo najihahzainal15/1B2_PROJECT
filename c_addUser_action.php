@@ -30,6 +30,17 @@
 
 		// Redirect based on result
 		if ($result) {
+			$userID = mysqli_insert_id($link); // Get last inserted userID
+
+			// Insert into the correct table based on role
+			if ($role === "Student") {
+				mysqli_query($link, "INSERT INTO student (userID) VALUES ('$userID')") or die(mysqli_error($link));
+			} elseif ($role === "Coordinator") {
+				mysqli_query($link, "INSERT INTO petakomcoordinator (userID) VALUES ('$userID')") or die(mysqli_error($link));
+			} elseif ($role === "Event Advisor") {
+				mysqli_query($link, "INSERT INTO eventadvisor (userID) VALUES ('$userID')") or die(mysqli_error($link));
+			}
+
 			header("Location: c_addNewUser.php?status=success");
 			exit;
 		} else {

@@ -1,3 +1,14 @@
+<?php
+// Initialize the session
+session_start();
+ 
+// Check if the user is logged in, if not then redirect him to login page
+if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
+    header("location: login_page.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -285,7 +296,7 @@
   <div class="table-header">
     <a href="c_addNewUser.php" class="add-btn">Add New User</a>
   </div>
-
+  <form method="post" action="c_deleteUser.php">
   <table class="member-table">
       <thead>
         <tr>
@@ -322,7 +333,7 @@
 				echo "<td>" . htmlspecialchars($row['email']) . "</td>";
 				echo "<td>
 						<a href='c_viewUser.php?id=" . $row['userID'] . "' class='action-btn'>VIEW</a> 
-						<a href='c_editUser.php?id=" . $row['userID'] . "' class='action-btn'>EDIT</a> 
+						<a href='c_editUser.php?id=" . $row['userID'] . "' class='action-btn'>EDIT</a>
 						<a href='c_deleteUser.php?id=" . $row['userID'] . "' class='action-btn' onclick=\"return confirm('Are you sure you want to delete this user?');\">DELETE</a>
 					  </td>";
 				echo "</tr>";
@@ -335,6 +346,7 @@
 	  ?>
       </tbody>
     </table>
+	</form>
 
     <button class="back-button">Back</button>
 </div>
