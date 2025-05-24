@@ -300,13 +300,15 @@
   </style>
 </head>
 <body>
+  <body>
   <div class="header1">
-	<img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
-    <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
-		<div class="header-center">
-			<h2>Dashboard</h2>
-			<p>Event Advisor: Prof. Hakeem</p>
-		</div>
+	<img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo"/>
+    <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo"/>
+		 <div class="header-center">
+			<h2>Membership Approval</h2>
+			<p>Petakom Coordinator: Dr. Haneef</p>
+		  </div>
+		 
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
 			<a href="ea_displayProfile.php">
@@ -317,24 +319,29 @@
   
   <div class="nav">
 	<div class="menu">
-		<div class="item"><a href="ea_homepage.php">Dashboard</a></div>
+		<div class="item"><a  href="c_homepage.html">Dashboard</a></div>
+		<div class="item">
+			<a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
+			<div class="sub-menu">
+				<a class="active" href="c_membership.html" class="sub-item">Membership Approval</a>
+			</div>
+		</div>
 		
 		<div class="item">
 			<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
-				<a href="ea_viewEvent.php" class="sub-item">View Event</a>
-				<a href="ea_registerEvent1.php" class="sub-item">Register New Event</a>
-				<a href="ea_eventCommittee.php">Event Committee</a>
-				<a href="ea_committeeReg.php" class="sub-item">Register Committee Event</a>
+				<a href="#events" class="sub-item">View Event</a>
+				<a href="c_meritApp.php" class="sub-item">Merit Application</a>
 			</div>
 		</div>
 		
 		<div class="item">
 			<a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
-				<a  href="ea_attendanceSlot.php" class="sub-item">Attendance Slot</a>
+				<a href="c_attendance.php" class="sub-item">Verify Attendance</a>
 			</div>
 		</div>
+
 	</div>
   </div>
   

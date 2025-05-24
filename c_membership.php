@@ -1,15 +1,16 @@
 <?php
-// Initialize the session
-session_start();
- 
-// Check if the user is logged in, if not then redirect him to login page
-if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-    header("location: login_page.php");
-    exit;
-}
+	// Initialize the session
+	session_start();
+	require_once "config.php"; // your DB config
+	 
+	// Check if the user is logged in, if not then redirect him to login page
+	if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
+		header("location: login_page.php");
+		exit;
+	}
 
-// Get role
-$role = $_SESSION["role"];
+	// Get role
+	$role = $_SESSION["role"];
 ?>
 
 <!DOCTYPE html>
@@ -243,7 +244,7 @@ $role = $_SESSION["role"];
 		 
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="ea_displayProfile.php">
+			<a href="c_displayProfile.php">
 				<img src="images/profile.png" alt="Profile" class="logo2">
 			</a>
 		</div>  
@@ -251,11 +252,11 @@ $role = $_SESSION["role"];
   
   <div class="nav">
 	<div class="menu">
-		<div class="item"><a  href="c_homepage.html">Dashboard</a></div>
+		<div class="item"><a  href="c_homepage.php">Dashboard</a></div>
 		<div class="item">
 			<a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
-				<a class="active" href="c_membership.html" class="sub-item">Membership Approval</a>
+				<a class="active" href="c_membership.php" class="sub-item">Membership Approval</a>
 			</div>
 		</div>
 		
@@ -263,14 +264,14 @@ $role = $_SESSION["role"];
 			<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
 				<a href="#events" class="sub-item">View Event</a>
-				<a href="c_merit.html" class="sub-item">Merit Application</a>
+				<a href="c_meritApp.php" class="sub-item">Merit Application</a>
 			</div>
 		</div>
 		
 		<div class="item">
 			<a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
-				<a href="c_attendance.html" class="sub-item">Verify Attendance</a>
+				<a href="c_attendance.php" class="sub-item">Verify Attendance</a>
 			</div>
 		</div>
 
@@ -290,10 +291,48 @@ $role = $_SESSION["role"];
 		  <th>ACTIONS</th>
         </tr>
       </thead>
-      <tbody class="tbody"> 
-        <tr>
-		  
-      </tbody>
+      <tbody class="tbody">
+	  <?php
+		$sql = "SELECT m.membership_ID, m.studentID, s.username, m.verification_status, m.student_card
+				FROM membership m
+				JOIN student s ON m.studentID = s.studentID";
+
+		$result = $conn->query($sql);
+		$no = 1;
+
+	if($result->num_rows > 0){
+		while($row = $result->fetch_assoc()){
+			echo "<tr>";
+			echo "<td>" . $no++ . "</td>";
+			echo "<td>" . htmlspecialchars($row['username']) . "</td>";
+			echo "<td>" . htmlspecialchars($row['studentID']) . "</td>";
+
+        // Student Card column
+        if($row['student_card_upload']){
+            echo "<td><a href='" . $row['student_card_upload'] . "' target='_blank'>View</a></td>";
+        } else {
+            echo "<td>No file</td>";
+        }
+
+        // Status with class
+        $status = $row['verification_status'];
+        $status_class = strtolower($status) == 'approved' ? 'status-approve' : (strtolower($status) == 'rejected' ? 'status-reject' : 'status-pending');
+        echo "<td class='$status_class'>" . $status . "</td>";
+
+        // Actions (approve/reject buttons)
+        echo "<td>
+                <form action='approve_reject.php' method='POST' style='display:inline'>
+                    <input type='hidden' name='membership_ID' value='" . $row['membership_ID'] . "'>
+                    <button class='action-btn' name='action' value='approve'>Approve</button>
+                    <button class='action-btn' name='action' value='reject'>Reject</button>
+                </form>
+              </td>";
+
+        echo "</tr>";
+		}
+	}
+	?>
+	</tbody>
     </table>
 
     <button class="back-button">Back</button>

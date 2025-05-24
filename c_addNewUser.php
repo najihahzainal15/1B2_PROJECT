@@ -7,6 +7,9 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login_page.php");
     exit;
 }
+
+// Get role
+$role = $_SESSION["role"];
 ?>
 
 <!DOCTYPE html>

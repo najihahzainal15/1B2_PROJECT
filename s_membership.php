@@ -8,6 +8,20 @@
 
 	$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
 	$userID = $_SESSION['userID'];
+	
+	// Get verification status from membership table
+	$verificationStatus = "Pending"; // Default status
+	if (!empty($sID)) {
+		$queryMembership = "SELECT verification_status FROM membership WHERE studentID = ?";
+		$stmtMembership = mysqli_prepare($link, $queryMembership);
+		mysqli_stmt_bind_param($stmtMembership, "i", $sID);
+		mysqli_stmt_execute($stmtMembership);
+		$resultMembership = mysqli_stmt_get_result($stmtMembership);
+		
+		if ($membershipData = mysqli_fetch_assoc($resultMembership)) {
+			$verificationStatus = $membershipData["verification_status"];
+		}
+	}
 
 	// Get data from user table
 	$queryUser = "SELECT userID, username, email FROM user WHERE userID = ?";
@@ -18,7 +32,7 @@
 	$userData = mysqli_fetch_assoc($resultUser);
 
 	// Get data from student table
-	$queryStudent = "SELECT studentID FROM student WHERE userID = ?";
+	$queryStudent = "SELECT studentID, student_card_upload FROM student WHERE userID = ?";
 	$stmtStudent = mysqli_prepare($link, $queryStudent);
 	mysqli_stmt_bind_param($stmtStudent, "i", $userID);
 	mysqli_stmt_execute($stmtStudent);
@@ -30,6 +44,7 @@
 	$uName = $userData["username"] ?? '';
 	$uEmail = $userData["email"] ?? '';
 	$sID = $studentData["studentID"] ?? '';
+	$sCard = $studentData["student_card_upload"] ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -37,7 +52,6 @@
 <head>
   <title>STUDENT MEMBERSHIP APPLICATION</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyPetakom Student Membership Application</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
@@ -245,6 +259,7 @@
   </style>
 </head>
 <body>
+	
   <div class="header1">
 	<img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo"/>
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo"/>
@@ -289,7 +304,14 @@
   <div class="content">
   <br>
   <br>
-  <form class="form"> 
+  <?php
+	$color = 'gray';
+	if ($verificationStatus === 'Accepted') $color = 'green';
+	elseif ($verificationStatus === 'Rejected') $color = 'red';
+  ?>
+  <p style="color: <?php echo $color; ?>;">Status: <?php echo $verificationStatus; ?></p>
+
+  <form action="s_membership_action.php" method="POST" enctype="multipart/form-data"> 
 		
 		<label>Full Name</label><br>
 			<input type="text" name="username" class="details1"  value="<?php echo $uName; ?>" readonly><br>
@@ -300,18 +322,19 @@
 		<label>Email Address</label><br>
 			<input type="email" name="email" class="details1"  value="<?php echo $uEmail; ?>" readonly><br>
 	
+		<?php if ($verificationStatus !== 'Accepted') { ?>
 		<label>Student Card</label><br>
-			<input type="file" name="myfile" class="details"><br>
-			
-			
+		<input type="file" name="student_card_upload" class="details" ><br>
 		<p>Please upload your student card in JPG or PNG format. Maximum file size: 5MB.</p>
-		<input type="checkbox" name="s_card" value="Student Card">I confirm that the uploaded information is true.
+		<?php } else { ?>
+			<p style="color: green;">Your student card has been verified and approved.</p>
+		<?php } ?>
+
 		<br>
 		<input type="submit" class="submit-button" value="Submit">
-		<button type="button" class="cancel-button" onclick="s_homepage.php">Cancel</button>
+		<button type="button" class="cancel-button" onclick="window.location.href='s_homepage.php'">Cancel</button>
 
-	</form>
-	
+  </form>	
   </div>
   <script type="text/javascript">
 	$(document).ready(function(){

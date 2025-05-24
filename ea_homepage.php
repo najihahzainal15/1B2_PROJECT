@@ -288,11 +288,7 @@ $role = $_SESSION["role"];
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
-<<<<<<< HEAD
 			<a href="ea_displayProfile.php">
-=======
-			<a href="s_edit_profile.html">
->>>>>>> 1e9338aa2be03371e6e27b66a46ae9e87ff00b5d
 				<img src="images/profile.png" alt="Profile" class="logo2">
 			</a>
 		</div>  
