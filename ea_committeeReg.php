@@ -374,9 +374,21 @@ select {
     </div>
   </div>
   
-  <div class="content">
-	
-    </div>
+  <?php
+$servername = "localhost";
+$username = "root";        // Your MySQL username
+$password = "";            // Your MySQL password (often empty for localhost)
+$dbname = "web_project";  // Your database name
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?>
+  
+
+  
  
     <div class="content">
     <div class="table-container">
@@ -395,10 +407,9 @@ select {
         <td><label for="event">Choose an event:</label></td>
         <td>
             <select id="event" name="event" required>
-                <option value="">Select an event</option>
-                <option value="EVT001">EVT001 - HACKATHON</option>
-                <option value="EVT002">EVT002 - FUN RUN</option>
-            </select>
+    <option value="">Loading events...</option>
+</select>
+
         </td>
     </tr>
 </table>
@@ -433,5 +444,35 @@ select {
 		});
 	});
 	</script>
+	
+	<script>
+$(document).ready(function(){
+    // Toggle submenus
+    $('.sub-button').click(function(){
+        $(this).next('.sub-menu').slideToggle();
+    });
+
+    // Load events dynamically
+    $.ajax({
+       url: 'ea_committeeReg2.php',
+        method: 'GET',
+        dataType: 'json',
+        success: function(events) {
+            let $dropdown = $('#event');
+            $dropdown.empty(); // Clear existing options
+            $dropdown.append('<option value="">Select an event</option>');
+
+            events.forEach(function(event) {
+                let optionText =  event.event_name;
+                $dropdown.append(`<option value="${event.event_id}">${optionText}</option>`);
+            });
+        },
+        error: function() {
+            alert('Failed to load events. Please try again.');
+        }
+    });
+});
+</script>
+
 </body>
 </html>
