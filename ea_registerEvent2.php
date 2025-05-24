@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
   <style>
 	
@@ -279,6 +280,16 @@
 	 .submit-button:hover {
 	   background-color: #005bb5;
 	 }
+	 
+	 .qr-container {
+    display: flex;
+    justify-content: center;  /* Center horizontally */
+    /* Remove space-between */
+    /* You can keep align-items: center; if vertical centering needed */
+    align-items: center;
+}
+
+	 
 	
 	
   </style>
@@ -331,21 +342,53 @@
         <h2>EVENT DETAILS QR CODE GENERATOR</h2>
         
         <div class="qr-container">
-            <div class="qr-code">
-                <h3>QR CODE</h3>
-                <!-- Insert your QR code image here -->
-                <img src="images/QR.webp" alt="QR Code">
-            </div>
+            <body>
+  
+  <div id="qrcode"></div>
 
-            <div class="event-details">
-                <p><strong>Event Name:</strong> HACKATON FUN RUN</p>
-                <p><strong>Date:</strong> 25 MAY 2025</p>
-                <p><strong>Geolocation:</strong> 2.9285, 101.7715 (Faculty of Computing)</p>
-                
-                    <button class="submit-button">Save</button>
-                    <button class="submit-button">Download</button>
-                
-            </div>
+   <script>
+  // Dynamically get the eventID from the URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventID = urlParams.get('id'); // Get the event ID from URL query parameter
+
+  // Check if the eventID exists in the URL
+  if (eventID) {
+    fetch(`generate_QR.php?id=${eventID}`)
+      .then(response => response.json()) // Parse the JSON response
+      .then(data => {
+        // Handle error if no event data found
+        if (data.error) {
+          document.getElementById('qrcode').innerText = data.error;
+          return;
+        }
+
+        // Create the QR code text from the fetched event data
+        const qrText = `
+Event: ${data.eventName}
+Date: ${data.eventDate}
+Time: ${data.eventTime}
+Venue: ${data.eventLocation}
+Location: ${data.eventGeolocation}
+        `;
+
+        // Generate the QR code using the event data
+        new QRCode(document.getElementById("qrcode"), {
+          text: qrText.trim(),
+          width: 200,
+          height: 200,
+        });
+      })
+      .catch(error => {
+        document.getElementById('qrcode').innerText = "Error loading event data.";
+        console.error('Error fetching event data:', error);
+      });
+  } else {
+    document.getElementById('qrcode').innerText = "No event ID provided in URL.";
+  }
+</script>
+</body>
+
+            
         </div>
     </div>
 	</div>
