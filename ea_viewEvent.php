@@ -174,6 +174,11 @@
     transition: 0.3s;
     margin: 10px 0;
     width: fit-content;
+	
+	
+  text-decoration: none; /* Remove underline */
+
+
 }
 
 
@@ -333,10 +338,23 @@
   <div class="content">
   
 	<div class="register-btn-container">
-    <button class="register-btn">REGISTER NEW EVENT +</button>
+    <a href="ea_registerEvent1.php" class="register-btn">REGISTER NEW EVENT </a>
+
 </div>
 	
-	
+	<?php
+// Connect to the database server.
+$link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
+
+// Select the database.
+mysqli_select_db($link, "web_project") or die(mysqli_error($link));
+
+$query = "SELECT * FROM event";
+
+$result = mysqli_query($link, $query);
+
+?>
+
     <table class="event-table">
       <thead class="thead">
         <tr>
@@ -348,19 +366,36 @@
       </thead>
 	  
 	  <tbody class="tbody">
-    <tr><td>AMAL  FUN RUN ZOMBIE</td><td>17 JUNE 2021</td><td>ACTIVE</td><td>
-    <a href='ea_viewEventUpdate.php?id=3'>EDIT</a> || 
-    <a href='ea_viewEventDelete.php?id=3' onclick="return confirm('Are you sure to delete this record?');">DELETE</a> ||
-    <a href='ea_registerEvent2.php?id=3'>QR</a> 
-</td><tr><td>FLUUTER PRO</td><td>30 JUNE 2025</td><td>CANCELED</td><td>
-    <a href='ea_viewEventUpdate.php?id=8'>EDIT</a> || 
-    <a href='ea_viewEventDelete.php?id=8' onclick="return confirm('Are you sure to delete this record?');">DELETE</a> ||
-    <a href='ea_registerEvent2.php?id=8'>QR</a> 
-</td><tr><td>FIGMA PRO TECH</td><td>17 JUNE 2025</td><td></td><td>
-    <a href='ea_viewEventUpdate.php?id=9'>EDIT</a> || 
-    <a href='ea_viewEventDelete.php?id=9' onclick="return confirm('Are you sure to delete this record?');">DELETE</a> ||
-    <a href='ea_registerEvent2.php?id=9'>QR</a> 
-</td>  </tbody>
+    <?php
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+			$eventID = htmlspecialchars($row["eventID"]);
+            $eventName = htmlspecialchars($row["eventName"]);
+			
+            $date = htmlspecialchars($row["eventDate"]);
+            $status = htmlspecialchars($row["status"]);
+           
+            echo "<tr>";
+            echo "<td>$eventName</td>";
+            echo "<td>$date</td>";
+            echo "<td>$status</td>";
+           
+          echo "<td>
+    <a href='ea_viewEventUpdate.php?id=" . $eventID . "'>EDIT</a> || 
+    <a href='ea_viewEventDelete.php?id=" . $eventID . "' onclick=\"return confirm('Are you sure to delete this record?');\">DELETE</a> ||
+    <a href='ea_registerEvent2.php?id=" . $eventID . "'>QR</a> 
+</td>";
+
+
+
+        }
+    } else {
+        echo "<tr><td colspan='5'>No committee records found.</td></tr>";
+    }
+
+    mysqli_close($link);
+    ?>
+  </tbody>
   </table>
 	 
     <button class="submit-button">Back</button>
@@ -374,3 +409,4 @@
 	});
 	</script>
 </body>
+</html>
