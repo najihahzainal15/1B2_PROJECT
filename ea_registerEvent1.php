@@ -223,30 +223,26 @@
       display: flex;
       justify-content: flex-end;
       gap: 15px;
-      padding: 0 20px 30px;
+      padding: 20px ;
     }
 
 
-	.submit-button{
-	   background-color: #0074e4; 
-	   font-family: 'Poppins', sans-serif;
-	   border: none;
-	   border-radius: 10px;
-	   color: white;
-	   padding: 8px 14px;
-	   text-align: center;
-	   text-decoration: none;
-	   display: inline-block;
-	   font-size: 14px;
-	   margin: 20px 15px;
-	   cursor: pointer;
-	   transition: 0.3s;
-	   margin-right: auto;
-	 }
- 
-	 .submit-button:hover {
-	   background-color: #005bb5;
-	 }
+	.submit-button {
+    background-color: #0074e4;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-align: center;
+}
+
+.submit-button:hover {
+    background-color: #005bb5;
+}
+
 	
 	.reset-button{
 	   background-color: #0074e4; 
@@ -327,92 +323,104 @@
 	  height: auto;
 	}
 
+ <br />
+<b>Warning</b>:  session_start(): Session cannot be started after headers have already been sent in <b>C:\xampp\htdocs\UPDATED_WEB\ea_registerEvent1.php</b> on line <b>327</b><br />
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register New Event</title>
+  <style>
+    /* Your existing styles here */
   </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
   <div class="header1">
-	<img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
+    <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo">
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
-		<div class="header-center">
-			<h2>Register New Event</h2>
-			<p>Event Advisor: Prof. Hakeem</p>
-		</div>
-		<div class="header-right">
-			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_edit_profile.html">
-				<img src="images/profile.png" alt="Profile" class="logo2">
-			</a>
-		</div>  
+    <div class="header-center">
+      <h2>Register New Event</h2>
+      <p>Event Advisor: Prof. Hakeem</p>
+    </div>
+    <div class="header-right">
+      <a href="logout_button.php" class="logout">Logout</a>
+      <a href="s_edit_profile.html">
+        <img src="images/profile.png" alt="Profile" class="logo2">
+      </a>
+    </div>  
   </div>
- 
- <div class="nav">
-    <div class="menu">
-      
-      <div class="item"><a href="ea_homepage.php">Dashboard</a></div>
 
+  <div class="nav">
+    <div class="menu">
+      <div class="item"><a href="ea_homepage.php">Dashboard</a></div>
       <div class="item">
         <a href="#events" class="sub-button">Events <i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
           <a href="ea_viewEvent.php">View Event</a>
-          <a class="active" href="ea_registerEvent.html">Register New Event</a>
+          <a class="active" href="ea_registerEvent.php">Register New Event</a>
           <a href="ea_eventCommittee.php">Event Committee</a>
-		  <a href="ea_committeeReg.php">Register Committee Member</a>
+          <a href="ea_committeeReg.php">Register Committee Member</a>
         </div>
       </div>
-
       <div class="item">
         <a href="#attendance" class="sub-button">Attendance <i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
           <a href="ea_attendanceSlot.php">Attendance Slot</a>
         </div>
       </div>
-
-      
     </div>
   </div>
-  
+
   <div class="content">
-  <div class="table-container">
-    <h2 class="section-title">REGISTER NEW EVENT</h2>
+    <div class="table-container">
+      <h2 class="section-title">REGISTER NEW EVENT</h2>
 
-    <form action="ea_processRegisterEvent.php" method="POST" enctype="multipart/form-data">
-      <div class="form-grid">
-        <label for="name">EVENT NAME</label>
-        <input type="text" id="name" name="name" placeholder="CYBERSECURITY FUN RUN 2025" required>
+      <form action="ea_registerEvent1Action.php" method="POST" enctype="multipart/form-data">
+        <div class="form-grid">
+          <label for="name">EVENT NAME</label>
+          <input type="text" id="name" name="name" placeholder="CYBERSECURITY FUN RUN 2025" required>
 
-        <label for="date">DATE</label>
-        <input type="text" id="date" name="date" placeholder="15 MAY 2025" required>
+          <label for="date">DATE</label>
+          <input type="text" id="date" name="date" placeholder="15 MAY 2025" required>
 
-        <label for="time">TIME</label>
-        <input type="text" id="time" name="time" placeholder="9AM – 12PM" required>
+          <label for="time">TIME</label>
+          <input type="text" id="time" name="time" placeholder="9AM – 12PM" required>
 
-        <label for="geolocation">GEOLOCATION</label>
-        <input type="text" id="geolocation" name="geolocation" placeholder="2.9285,101.7715 (Faculty of Computing)" required>
+          <label for="geolocation">GEOLOCATION</label>
+          <input type="text" id="geolocation" name="geolocation" placeholder="2.9285,101.7715 (Faculty of Computing)" required>
 
-        <label for="venue">VENUE</label>
-        <input type="text" id="venue" name="venue" placeholder="Astaka Hall" required>
+          <label for="venue">VENUE</label>
+          <input type="text" id="venue" name="venue" placeholder="Astaka Hall" required>
 
-        <label for="description">DESCRIPTION</label>
-        <textarea id="description" name="description" placeholder="Brief description about the event..." required></textarea>
+			<label for="venue">MERIT SCORE</label>
+          <input type="text" id="meritScore" name="meritScore" placeholder="3" required>
+		  
+          <label for="description">DESCRIPTION</label>
+          <textarea id="description" name="description" placeholder="Brief description about the event..." required></textarea>
 
-        <label for="approvalLetter">UPLOAD APPROVAL LETTER</label>
-        <input type="file" id="approvalLetter" name="approvalLetter" accept=".pdf,.jpg,.png,.jpeg" required>
-      </div>
+          <label for="approvalLetter">UPLOAD APPROVAL LETTER</label>
+          <input type="file" id="approvalLetter" name="approvalLetter" accept=".pdf,.jpg,.png,.jpeg" required>
 
-      <div class="actions">
-        <button type="submit" class="submit-button">Submit</button>
-        <button type="reset" class="reset-button">Reset</button>
-      </div>
-    </form>
-  </div>
+          <!-- Example: attendanceID hardcoded for now, replace as needed -->
+          <input type="hidden" name="attendanceID" value="1">
+        </div>
+
+        <div class="actions">
+    <button type="submit" class="submit-button">Submit</button>
 </div>
 
-	<script type="text/javascript">
-	$(document).ready(function(){
-		$('.sub-button').click(function(){
-			$(this).next('.sub-menu').slideToggle();
-		});
-	});
-	</script>
+      </form>
+
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $('.sub-button').click(function(){
+        $(this).next('.sub-menu').slideToggle();
+      });
+    });
+  </script>
 </body>
 </html>

@@ -17,8 +17,8 @@
 	.header1 {
 	  overflow: hidden;
 	  background-color: #0074e4;
-	  padding: 0px 10px;
-	  margin-left: 160px;
+	  padding: 0px 40px;
+	  margin-left: 180px;
 	}
 	
 	.header-right {
@@ -103,7 +103,7 @@
 	}
 	
 	.content {
-	  margin-left: 150px;
+	  margin-left: 170px;
 	  padding: 20px;
 	  background-color: #e6f0ff;
 	  display: flex;
@@ -172,9 +172,14 @@ table th {
 
   
    .registration-container {
-    margin: 20px;
-    padding: 20px;
+	  
+	 
+    margin: 40px;
+    padding: 30px;
     background-color: #F2F2F2;
+	border: 2px solid #000; 
+	border-radius: 10px;
+	
 }
 
 .registration-container h2 {
@@ -225,8 +230,8 @@ button:hover {
   align-items: center;
   justify-content: space-between;
   background-color: #0074e4;
-  padding: 10px 20px;
-  margin-left: 160px;
+  padding: 10px 50px;
+  margin-left: 120px;
   color: white;
 	}
 	
@@ -260,6 +265,7 @@ button:hover {
 
 
 	.logo {
+		margin-left: 15px;
   height: 40px;
 }
 
@@ -296,6 +302,30 @@ button:hover {
 	  text-align:center;
  }
 	
+	.event-table {
+    width: 100%;
+    max-width: 600px;
+    border-collapse: collapse;
+    margin: 20px auto;
+    background-color: #f9f9f9;
+}
+
+.event-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    font-size: 18px;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+
   </style>
 </head>
 
@@ -344,25 +374,45 @@ button:hover {
     </div>
   </div>
   
-  <div class="content">
-	
-    </div>
+  <?php
+$servername = "localhost";
+$username = "root";        // Your MySQL username
+$password = "";            // Your MySQL password (often empty for localhost)
+$dbname = "web_project";  // Your database name
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?>
+  
+
+  
  
     <div class="content">
     <div class="table-container">
     
 	
-	<div class="eventname">HACKATON</div>
 	
 	
 
     <div class="registration-container">
         <h2>COMMITTEE MEMBER REGISTRATION</h2>
+		
+		<form action="ea_committeeRegAction.php" method="POST">
+		
+<table class="event-table">
+    <tr>
+        <td><label for="event">Choose an event:</label></td>
+        <td>
+            <select id="event" name="event" required>
+    <option value="">Loading events...</option>
+</select>
 
-        <div class="form-group">
-            <label for="event">EVENT</label>
-            <input type="text" id="event" name="event" placeholder="HACKATON FUN RUN" >
-        </div>
+        </td>
+    </tr>
+</table>
 
         <div class="form-group">
             <label for="name">NAME</label>
@@ -376,13 +426,14 @@ button:hover {
 
         <div class="form-group">
             <label for="student-id">STUDENT ID</label>
-            <input type="text" id="student-id" name="student-id" placeholder="CB23077">
+            <input type="text" id="student-id" name="student_id" placeholder="CB23077">
         </div>
 
         <div class="form-actions">
             <button class="submit-button">Back</button>
             <button class="submit-button">Register</button>
         </div>
+		</form>
 		</div>
     </div>
   </div>
@@ -393,5 +444,35 @@ button:hover {
 		});
 	});
 	</script>
+	
+	<script>
+$(document).ready(function(){
+    // Toggle submenus
+    $('.sub-button').click(function(){
+        $(this).next('.sub-menu').slideToggle();
+    });
+
+    // Load events dynamically
+    $.ajax({
+       url: 'ea_committeeReg2.php',
+        method: 'GET',
+        dataType: 'json',
+        success: function(events) {
+            let $dropdown = $('#event');
+            $dropdown.empty(); // Clear existing options
+            $dropdown.append('<option value="">Select an event</option>');
+
+            events.forEach(function(event) {
+                let optionText =  event.event_name;
+                $dropdown.append(`<option value="${event.event_id}">${optionText}</option>`);
+            });
+        },
+        error: function() {
+            alert('Failed to load events. Please try again.');
+        }
+    });
+});
+</script>
+
 </body>
 </html>

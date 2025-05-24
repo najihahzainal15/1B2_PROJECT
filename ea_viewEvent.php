@@ -146,7 +146,7 @@
 	  margin: 10px;
 	}
 	
-    .register-btn, .back-btn {
+    .back-btn {
       background: #e6e6e6;
       padding: 10px 20px;
       border: 2px solid #999;
@@ -154,6 +154,33 @@
       cursor: pointer;
       margin-bottom: 20px;
     }
+	
+	.register-btn-container {
+    text-align: left;
+    margin-left: 30px; /* Slight left alignment */
+}
+	
+	.register-btn {
+    background-color: #0074e4; /* Consistent blue */
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    text-align: left;
+    display: block;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin: 10px 0;
+    width: fit-content;
+	
+	
+  text-decoration: none; /* Remove underline */
+
+
+}
+
 
     .back-btn {
       margin-top: 30px;
@@ -248,8 +275,19 @@
  }
  
  .register-btn:hover {
-   background-color: #D3D3D3;
- }
+    background-color: #005bb5;
+}
+
+.thead{
+	color:white;
+	background-color:#0096D6;
+}
+
+.tbody{
+	background-color:white;
+	
+}
+
 	
   </style>
 </head>
@@ -298,61 +336,68 @@
   </div>
   
   <div class="content">
-	<button class="register-btn">REGISTER NEW EVENT</button>
+  
+	<div class="register-btn-container">
+    <a href="ea_registerEvent1.php" class="register-btn">REGISTER NEW EVENT </a>
+
+</div>
+	
+	<?php
+// Connect to the database server.
+$link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
+
+// Select the database.
+mysqli_select_db($link, "web_project") or die(mysqli_error($link));
+
+$query = "SELECT * FROM event";
+
+$result = mysqli_query($link, $query);
+
+?>
 
     <table class="event-table">
-      <thead>
+      <thead class="thead">
         <tr>
           <th>EVENT NAME</th>
           <th>DATE</th>
           <th>STATUS</th>
-          <th>EDIT / DELETE / POSPONE</th>
+          <th>EDIT / DELETE / QR </th>
         </tr>
       </thead>
-      <tbody class="tbody"> 
-        <tr>
-          <td>HACKATON FUN RUN</td>
-          <td>26/4/25</td>
-          <td class="status active">ACTIVE</td>
-          <td>
-            <button class="action-btn">EDIT</button>
-            <button class="action-btn">DELETE</button>
-            <button class="action-btn">POSTPONE</button>
-          </td>
-        </tr>
-        <tr>
-          <td>CYBERSECURITY AWARENESS</td>
-          <td>20/5/25</td>
-          <td class="status cancelled">CANCELLED</td>
-          <td>
-            <button class="action-btn">EDIT</button>
-            <button class="action-btn">DELETE</button>
-            <button class="action-btn">POSTPONE</button>
-          </td>
-        </tr>
-        <tr>
-          <td>GRAPHICxNETWORKING</td>
-          <td>25/5/25</td>
-          <td class="status postpone">POSPONE</td>
-          <td>
-            <button class="action-btn">EDIT</button>
-            <button class="action-btn">DELETE</button>
-            <button class="action-btn">POSTPONE</button>
-          </td>
-        </tr>
-        <tr>
-          <td>FLUTTER PRO</td>
-          <td>27/6/25</td>
-          <td class="status active">ACTIVE</td>
-          <td>
-            <button class="action-btn">EDIT</button>
-            <button class="action-btn">DELETE</button>
-            <button class="action-btn">POSTPONE</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+	  
+	  <tbody class="tbody">
+    <?php
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+			$eventID = htmlspecialchars($row["eventID"]);
+            $eventName = htmlspecialchars($row["eventName"]);
+			
+            $date = htmlspecialchars($row["eventDate"]);
+            $status = htmlspecialchars($row["status"]);
+           
+            echo "<tr>";
+            echo "<td>$eventName</td>";
+            echo "<td>$date</td>";
+            echo "<td>$status</td>";
+           
+          echo "<td>
+    <a href='ea_viewEventUpdate.php?id=" . $eventID . "'>EDIT</a> || 
+    <a href='ea_viewEventDelete.php?id=" . $eventID . "' onclick=\"return confirm('Are you sure to delete this record?');\">DELETE</a> ||
+    <a href='ea_registerEvent2.php?id=" . $eventID . "'>QR</a> 
+</td>";
 
+
+
+        }
+    } else {
+        echo "<tr><td colspan='5'>No committee records found.</td></tr>";
+    }
+
+    mysqli_close($link);
+    ?>
+  </tbody>
+  </table>
+	 
     <button class="submit-button">Back</button>
   </main>
 	</div>
