@@ -254,7 +254,7 @@
           
           
       <div class="button-container">
-   <a href="ea_registerEvent1.php" class="button">REGISTER NEW COMMITTEE MEMBER</a>
+   <a href="ea_committeeReg.php" class="button">REGISTER NEW COMMITTEE MEMBER</a>
 
       </div>
 
