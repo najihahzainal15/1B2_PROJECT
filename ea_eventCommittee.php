@@ -139,20 +139,24 @@
     }
 
     .button {
-      background-color: #e6e6e6;
-      border: 2px solid #999;
-      color: black;
-      padding: 15px 32px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      margin: 4px 2px;
-      cursor: pointer;
+      background-color: #0074e4;
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    text-align: left; /* Aligns text to the left */
+    text-decoration: none;
+    display: block; /* Ensures it takes up full width */
+    font-size: 16px;
+    margin: 10px 0; /* Reduce vertical spacing */
+    cursor: pointer;
+    border-radius: 5px;
+    width: fit-content; /* Adjust width dynamically */
+
     }
 	
 	.button:hover {
-	background-color:#C5C7C4;
+	background-color: #005bb5;
+
 	}
 	
 	.edit-btn:hover {
@@ -189,6 +193,15 @@
  }
  
  .h2{ color:black;}
+ 
+ .tbody{
+	  background-color: white;
+ }
+ 
+ .button-container {
+    text-align: left;
+    margin-left: 1px; /* Push it slightly from the left */
+}
  
   </style>
 </head>
@@ -237,65 +250,37 @@
   <div class="content">
     <div class="table-container">
       <table>
-        <tr>
-          <td>
-            SELECT EVENT
-            <form action="/action_page.php">
-              <select name="event_" class="event_">
-                <option value="larian_amal">LARIAN AMAL</option>
-                <option value="combat">COMBAT</option>
-                <option value="hackaton">HACKATON</option>
-              </select>
-            </form>
-          </td>
-          <td>
-            <button type="button" class="button">REGISTER COMMITTEE MEMBER +</button>
-          </td>
-        </tr>
+       
+          
+          
+      <div class="button-container">
+    <button type="button" class="button">REGISTER COMMITTEE MEMBER +</button>
+      </div>
+
+          
+        
       </table>
 
       <table>
-        <thead>
-          <tr>
-            <th>COMMITTEE MEMBER NAME</th>
-            <th>POSITION</th>
-            <th>STUDENT ID</th>
-            <th>ACTION</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="data">
-            <td>HIDAYAH</td>
-            <td>CHAIRMAN</td>
-            <td>CB23020</td>
-            <td><button class="edit-btn">EDIT</button><button class="delete-btn">DELETE</button></td>
-          </tr>
-          <tr class="data">
-            <td>NAJIHAH</td>
-            <td>EDITOR</td>
-            <td>CB23027</td>
-            <td><button class="edit-btn">EDIT</button><button class="delete-btn">DELETE</button></td>
-          </tr>
-          <tr class="data">
-            <td>WAHIDAH</td>
-            <td>FINANCE</td>
-            <td>CB23024</td>
-            <td><button class="edit-btn">EDIT</button><button class="delete-btn">DELETE</button></td>
-          </tr>
-          <tr class="data">
-            <td>QISTINA</td>
-            <td>DATA ANALYST</td>
-            <td>CB23099</td>
-            <td><button class="edit-btn">EDIT</button><button class="delete-btn">DELETE</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+	  
+	  
+<table>
+  <thead>
+    <tr>
+      <th>COMMITTEE ID</th>
+      <th>EVENT ID</th>
+      <th>ROLE</th>
+      <th>STUDENT ID</th>
+      <th>EDIT/DELETE</th>
+    </tr>
+  </thead>
+  <tbody class="tbody">
+    <tr><td>3</td><td>EVT002</td><td>finance leader</td><td>CB34055</td><td>
+        <a href='ea_eventCommitteeUpdate.php?id=3'>EDIT</a> || 
+        <a href='ea_eventCommitteeDelete.php?id=3' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+      </td>  </tbody>
+</table>
 
-    <div class="back">
-      <button class="submit-button" onclick="history.back()">Back</button>
-    </div>
-  </div>
 
   <script>
     $(document).ready(function(){
@@ -306,3 +291,4 @@
   </script>
 </body>
 </html>
+
