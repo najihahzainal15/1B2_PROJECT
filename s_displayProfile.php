@@ -310,7 +310,7 @@
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_edit_profile.php">
+			<a href="s_displayProfile.php">
 				<img src="images/profile.png" alt="Profile" class="logo2">
 			</a>
 		</div>   

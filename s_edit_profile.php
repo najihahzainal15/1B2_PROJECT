@@ -372,10 +372,10 @@
 		<label>Year of Study</label><br>
 			<select name = "year_of_study" class="select2">
 				<option value="Select year of study" <?php if ($sYear == "Select Year of Study") echo "selected"; ?>>Select year of study</option>
-				<option value="1" <?php if ($sProgramme == "1") echo "selected"; ?>>1</option>
-				<option value="2" <?php if ($sProgramme == "2") echo "selected"; ?>>2</option>
-				<option value="3" <?php if ($sProgramme == "3") echo "selected"; ?>>3</option>
-				<option value="4" <?php if ($sProgramme == "4") echo "selected"; ?>>4</option>
+				<option value="1" <?php if ($sYear == "1") echo "selected"; ?>>1</option>
+				<option value="2" <?php if ($sYear == "2") echo "selected"; ?>>2</option>
+				<option value="3" <?php if ($sYear == "3") echo "selected"; ?>>3</option>
+				<option value="4" <?php if ($sYear == "4") echo "selected"; ?>>4</option>
 			</select><br>
 			
 		<label>Current Password</label><br>

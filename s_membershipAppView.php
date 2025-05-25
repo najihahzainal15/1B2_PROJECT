@@ -1,3 +1,23 @@
+
+<?php
+
+include 'db_connection.php';
+
+$sql = "SELECT 
+    committee.committeeRole, 
+    event.eventName, 
+    event.eventDate, 
+    event.eventLocation, 
+    event.status
+FROM event
+JOIN committee ON event.eventID = committee.eventID
+JOIN student ON student.studentID = committee.studentID";
+
+       
+
+$result = $conn->query($sql);
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -343,6 +363,8 @@
    background-color: #005bb5;
  }
 	
+.tbody{
+background-color:white;}
 	
 	
 		
@@ -360,10 +382,10 @@
   </div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_edit_profile.html">
+			<a href="s_displayProfile.php">
 				<img src="images/profile.png" alt="Profile" class="logo2">
 			</a>
-		</div>  
+		</div> 
   </div>
   
  <div class="nav">
@@ -402,16 +424,33 @@
 <table>
   <thead>
     <tr>
-      <th>Student ID</th>
       <th>Committee Role</th>
       <th>Event Name</th>
       <th>Event Date</th>
       <th>Event Location</th>
-	  <th>Event Status</th>
+      <th>Event Status</th>
     </tr>
   </thead>
-  <tbody class="tbody">
-    <tr><td colspan='7'>No committee records found.</td></tr>
+  <tbody class='tbody'>
+    <?php if ($result && $result->num_rows > 0): ?>
+        <?php while($row = $result->fetch_assoc()): ?>
+            <tr>
+                <td><?php echo htmlspecialchars($row['committeeRole']); ?></td>
+                <td><?php echo htmlspecialchars($row['eventName']); ?></td>
+                <td><?php echo htmlspecialchars($row['eventDate']); ?></td>
+                <td><?php echo htmlspecialchars($row['eventLocation']); ?></td>
+                <td><?php echo htmlspecialchars($row['status']); ?></td>
+            </tr>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <tr><td colspan="5">No records found.</td></tr>
+    <?php endif; ?>
+  </tbody>
+</table>
+
+  
+  
+  
 
     </div>
   </div>
