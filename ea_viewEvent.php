@@ -3,7 +3,7 @@
 <head>
   <title>EVENT ADVISOR VIEW EVENT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyPetakom Event Advisor Homepage</title>
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">

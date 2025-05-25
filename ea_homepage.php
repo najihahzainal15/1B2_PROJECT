@@ -1,18 +1,43 @@
+<!DOCTYPE html>
+
+
 <?php
-// Initialize the session
-session_start();
- 
-// Check if the user is logged in, if not then redirect him to login page
-if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-    header("location: login_page.php");
-    exit;
+// Database connection (adjust credentials accordingly)
+$servername = "localhost";
+$username = "root";
+$password = "";  // your password
+$dbname = "web_project";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-// Get role
-$role = $_SESSION["role"];
+// Query total events
+$sql_total = "SELECT COUNT(*) AS total FROM event";
+$result_total = $conn->query($sql_total);
+$totalEvents = ($result_total && $result_total->num_rows > 0) ? $result_total->fetch_assoc()['total'] : 0;
+
+// Query active events
+$sql_active = "SELECT COUNT(*) AS active FROM event WHERE status = 'Active'";
+$result_active = $conn->query($sql_active);
+$activeEvents = ($result_active && $result_active->num_rows > 0) ? $result_active->fetch_assoc()['active'] : 0;
+
+// Query cancelled events
+$sql_cancelled = "SELECT COUNT(*) AS cancelled FROM event WHERE status = 'Canceled'";
+$result_cancelled = $conn->query($sql_cancelled);
+$cancelledEvents = ($result_cancelled && $result_cancelled->num_rows > 0) ? $result_cancelled->fetch_assoc()['cancelled'] : 0;
+
+// Query postponed events
+$sql_postponed = "SELECT COUNT(*) AS postponed FROM event WHERE status = 'Postpone'";
+$result_postponed = $conn->query($sql_postponed);
+$postponedEvents = ($result_postponed && $result_postponed->num_rows > 0) ? $result_postponed->fetch_assoc()['postponed'] : 0;
+
+$conn->close();
 ?>
 
-<!DOCTYPE html>
+
+
 <html>
 <head>
   <title>EVENT ADVISOR DASHBOARD</title>
@@ -288,7 +313,7 @@ $role = $_SESSION["role"];
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="ea_displayProfile.php">
+			<a href="s_edit_profile.html">
 				<img src="images/profile.png" alt="Profile" class="logo2">
 			</a>
 		</div>  
@@ -352,10 +377,10 @@ $role = $_SESSION["role"];
 	<div class="dashboard-content">
   <table class="dashboard-table">
     <tr>
-      <td>Total Events Created: 3</td>
-      <td>Active Events: 1</td>
-      <td>Cancelled Events: 1</td>
-      <td>Postponed Events: 0</td>
+      <td>Total Events Created: <?php echo $totalEvents; ?></td>
+      <td>Active Events: <?php echo $activeEvents; ?></td>
+      <td>Cancelled Events: <?php echo $cancelledEvents; ?></td>
+      <td>Postponed Events: <?php echo $postponedEvents; ?></td>
     </tr>
   </table>
 </div>

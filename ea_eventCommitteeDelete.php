@@ -9,13 +9,13 @@ if (isset($_GET['id'])) {
 	 echo "Deleting ID: $id"; 
 
     // Create the DELETE query
-    $query = "DELETE FROM event WHERE eventID = '$id'";
+    $query = "DELETE FROM committee WHERE committeeID = '$id'";
 
     // Execute the query
     $result = mysqli_query($link, $query);
 
     if ($result) {
-        echo "<script>alert('Record deleted successfully'); window.location='ea_viewEvent.php';</script>";
+        echo "<script>alert('Record deleted successfully'); window.location='ea_eventCommittee.php';</script>";
     } else {
         echo "Delete failed: " . mysqli_error($link);
     }
