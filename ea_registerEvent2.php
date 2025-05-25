@@ -1,78 +1,105 @@
+<?php
+// Connect to DB and get event details
+$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
+
+if (isset($_GET['id'])) {
+    $id = (int)$_GET['id']; // Cast to int for safety
+    $query = "SELECT * FROM event WHERE eventID = $id";
+    $result = mysqli_query($link, $query);
+    $row = mysqli_fetch_assoc($result);
+
+    if ($row) {
+        $eventName = $row['eventName'];
+        $eventDate = $row['eventDate'];
+		$eventTime = $row['eventTime'];
+        $eventLocation = $row['eventLocation'];
+    } else {
+        die("Event not found.");
+    }
+} else {
+    die("No ID provided.");
+}
+?>
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>EVENT ADVISOR REGISTER NEW EVENT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  
+  <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet" />
+  
   <style>
-	
-	body{
-		  margin: 0;
-		  font-family: 'Poppins', sans-serif;
-	}
-	
-	.header1 {
-	  display: flex;
-	  align-items: center;
-	  justify-content: space-between;
-	  background-color: #0074e4;
-	  padding: 10px 20px;
-	  margin-left: 160px;
-	  color: white;
-	}
-	
-	.header-right {
-	  display: flex;
-	  align-items: center;
-	}
-	
-	.header-right .logout {
-	  color: white;
-	  font-size: 14px;      
-	  margin-right: 15px;   /* space between Logout and profile icon */
-	  text-decoration: none;
-	  transition: color 0.3s;
-	}
+    /* Reset and base */
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f8ff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-	.header-right .logout:hover {
-	  color: #ddd;         
-	}
-	
-	.header-center {
-	  text-align: center;
-	  flex-grow: 1;
-	}
-	
-	.header-center h2 {
-	  margin: 0;
-	  font-size: 22px;
-	}
-	
-	.header-center p {
-	  margin: 0;
-	  font-size: 14px;
-	}
-	
-	h2{
-	margin: 0px 40px;
-	font-size: 25px;
-	}
-	
-	p{
-	margin: 0px 40px;
-	font-size: 16px;
-	}
-	
-	.p1{
-		margin: 5px;
-		font-size: 14px;
-	}
-	
-	
-	.nav {
+    /* Header */
+    .header1 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #0074e4;
+      padding: 10px 20px;
+      margin-left: 170px; /* equal to nav width */
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      z-index: 1000;
+    }
+
+    .header-center {
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    .header-center h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .header-center p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .logo, .logo2 {
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .header-right .logout {
+      color: white;
+      font-size: 14px;
+      margin-right: 15px;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .header-right .logout:hover {
+      color: #ddd;
+    }
+
+    .nav {
 	  height: 100%;
 	  width: 170px;
 	  position: fixed;
@@ -116,204 +143,100 @@
 	}
 
 
-	.button{
-	  background-color: #D2D2D2; 
-	  border: 2px solid #D0D0D0;
-	  color: black;
-	  padding: 16px 30px;
-	  text-align: center;
-	  text-decoration: none;
-	  display: inline-block;
-	  font-size: 16px;
-	  margin: 4px 25px;
-	  cursor: pointer;
-	}
-	
-	.content{ 
-	  background-color: #e6f0ff; 
-	  overflow-y: auto;
-	  margin-left: 165px;
-	  padding: 10px;
-	  
-	}
-
-	.logo {
-	  height: 40px;
-	  margin: 10px;
-	}
-	
-	.logo2{
-	  height: 35px;
-	  margin: 10px;
-	}
-	
-	.section-title {
-      background: #f0f0f0;
-      padding: 12px;
-      margin: 0;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-      border-top: 2px solid #000;
-      border-bottom: 2px solid #000;
-    }
-
-    /* Form Grid */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 10px;
-      padding: 20px;
-    }
-
-    .form-grid label {
-      background: #d9d9d9;
-      font-weight: bold;
-      padding: 10px;
-      text-align: center;
-    }
-
-    input[type="text"], textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #666;
-      background: white;
-      font-size: 14px;
-    }
-
-    textarea {
-      resize: none;
-      height: 60px;
-    }
-
     
 
-    .actions {
+    /* Main content area */
+    .content {
+      margin-left: 170px;
+      padding: 80px 20px 20px; /* top padding to clear fixed header */
+      background-color: #f4f8ff;
+      min-height: calc(100vh - 60px);
       display: flex;
-      justify-content: space-between; 
-      gap: 15px;
-      padding: 0 20px 30px;
+      justify-content: center;
+      align-items: flex-start;
     }
 
-	.qr-code-generator {
-		margin: 20px;
-		padding: 20px;
-		background-color: #F2F2F2;
-	}
+    /* QR Container */
+    .qr-container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
 
-	.qr-code-generator h2 {
-		text-align: center;
-		margin-bottom: 20px;
-	}
+    .qr-container h2 {
+      color: #0074e4;
+      margin-bottom: 20px;
+    }
 
-	.qr-container {
-		display: flex;
-		justify-content: space-between;
-	}
+    .event-detail {
+      margin: 10px 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
 
-	.qr-code {
-		width: 40%;
-		padding: 10px;
-		background-color: #fff;
-		border: 1px solid #ddd;
-		border-radius: 8px;
-		text-align: center;
-	}
+    canvas {
+      margin-top: 20px;
+      max-width: 100%;
+      height: auto;
+    }
 
-	.qr-code img {
-		width: 100%;
-		height: auto;
-		max-width: 250px;
-	}
+    .back-button {
+      margin-top: 30px;
+      background-color: #0074e4;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
 
-	.event-details {
-		width: 55%;
-		padding: 10px;
-		background-color: #fff;
-		border: 1px solid #ddd;
-		border-radius: 8px;
-	}
+    .back-button:hover {
+      background-color: #005bb5;
+    }
 
+    /* Buttons */
+    button.save-btn, button.download-btn, .submit-button {
+      padding: 10px 20px;
+      background-color: #0096D6;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
 
-
-	.event-details p {
-		margin: 10px 0;
-		font-size: 16px;
-	}
-
-	.event-details .buttons {
-		display: flex;
-		justify-content: space-between;
-		margin-top: 20px;
-	}
-
-	button.save-btn, button.download-btn {
-		padding: 10px 20px;
-		background-color: #0096D6;
-		color: white;
-		border: none;
-		cursor: pointer;
-		font-size: 16px;
-	}
-
-	button.save-btn:hover, button.download-btn:hover {
-		background-color: #0264c2;
-	}
-
-	.submit-button{
-	   background-color: #0074e4; 
-	   font-family: 'Poppins', sans-serif;
-	   border: none;
-	   border-radius: 10px;
-	   color: white;
-	   padding: 8px 10px;
-	   margin-bottom:20px;
-	   text-decoration: none;
-	   display: inline-block;
-	   font-size: 14px;
-	  
-	   cursor: pointer;
-	   transition: 0.3s;
-	   
-	 }
-	 
-	 .submit-button:hover {
-	   background-color: #005bb5;
-	 }
-	 
-	 .qr-container {
-    display: flex;
-    justify-content: center;  /* Center horizontally */
-    /* Remove space-between */
-    /* You can keep align-items: center; if vertical centering needed */
-    align-items: center;
-}
-
-	 
-	
-	
+    button.save-btn:hover, button.download-btn:hover, .submit-button:hover {
+      background-color: #0264c2;
+    }
   </style>
 </head>
 
 <body>
   <div class="header1">
-	<img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
-    <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
-		<div class="header-center">
-			<h2>Register New Event</h2>
-			<p>Event Advisor: Prof. Hakeem</p>
-		</div>
-		<div class="header-right">
-			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_edit_profile.html">
-				<img src="images/profile.png" alt="Profile" class="logo2">
-			</a>
-		</div>  
+    <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo" />
+    <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo" />
+    <div class="header-center">
+      <h2>Register New Event</h2>
+      <p>Event Advisor: Prof. Hakeem</p>
+    </div>
+    <div class="header-right">
+      <a href="logout_button.php" class="logout">Logout</a>
+      <a href="s_edit_profile.html">
+        <img src="images/profile.png" alt="Profile" class="logo2" />
+      </a>
+    </div>
   </div>
-  
- <div class="nav">
+
+  <div class="nav">
     <div class="menu">
-      
       <div class="item"><a href="ea_homepage.php">Dashboard</a></div>
 
       <div class="item">
@@ -322,7 +245,7 @@
           <a href="ea_viewEvent.html">View Event</a>
           <a class="active" href="ea_registerEvent1.php">Register New Event</a>
           <a href="ea_eventCommittee.php">Event Committee</a>
-		  <a href="ea_committeeReg.php">Register Committee Member</a>
+          <a href="ea_committeeReg.php">Register Committee Member</a>
         </div>
       </div>
 
@@ -332,72 +255,42 @@
           <a href="ea_attendanceSlot.php">Attendance Slot</a>
         </div>
       </div>
-
-      
     </div>
   </div>
-  
+
   <div class="content">
-	 <div class="qr-code-generator">
-        <h2>EVENT DETAILS QR CODE GENERATOR</h2>
-        
-        <div class="qr-container">
-            <body>
-  
-  <div id="qrcode"></div>
+    <div class="qr-container">
+      <h2>Event QR Code</h2>
 
-   <script>
-  // Dynamically get the eventID from the URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const eventID = urlParams.get('id'); // Get the event ID from URL query parameter
+      <div class="event-detail"><strong></strong> <?= htmlspecialchars($eventName) ?></div>
+      <div class="event-detail"><strong>Date:</strong> <?= htmlspecialchars($eventDate) ?></div>
+	  <div class="event-detail"><strong>Time:</strong> <?= htmlspecialchars($eventTime) ?></div>
+      <div class="event-detail"><strong>Location:</strong> <?= htmlspecialchars($eventLocation) ?></div>
 
-  // Check if the eventID exists in the URL
-  if (eventID) {
-    fetch(`generate_QR.php?id=${eventID}`)
-      .then(response => response.json()) // Parse the JSON response
-      .then(data => {
-        // Handle error if no event data found
-        if (data.error) {
-          document.getElementById('qrcode').innerText = data.error;
-          return;
-        }
+      <canvas id="qrcode"></canvas>
 
-        // Create the QR code text from the fetched event data
-        const qrText = `
-Event: ${data.eventName}
-Date: ${data.eventDate}
-Time: ${data.eventTime}
-Venue: ${data.eventLocation}
-Location: ${data.eventGeolocation}
-        `;
-
-        // Generate the QR code using the event data
-        new QRCode(document.getElementById("qrcode"), {
-          text: qrText.trim(),
-          width: 200,
-          height: 200,
-        });
-      })
-      .catch(error => {
-        document.getElementById('qrcode').innerText = "Error loading event data.";
-        console.error('Error fetching event data:', error);
-      });
-  } else {
-    document.getElementById('qrcode').innerText = "No event ID provided in URL.";
-  }
-</script>
-</body>
-
-            
-        </div>
+     
     </div>
-	</div>
-	<script type="text/javascript">
-	$(document).ready(function(){
-		$('.sub-button').click(function(){
-			$(this).next('.sub-menu').slideToggle();
-		});
-	});
-	</script>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("qrcode");
+    const qrData = `Event Name: <?= addslashes($eventName) ?>\nDate: <?= $eventDate ?>\nTime: <?= $eventTime ?>\nLocation: <?= $eventLocation ?>`;
+
+    QRCode.toCanvas(canvas, qrData, function (error) {
+      if (error) {
+        console.error("QR Error:", error);
+        canvas.outerHTML = "<p style='color:red;'>Failed to generate QR code.</p>";
+      }
+    });
+
+    // Optional: Toggle submenu on clicking Events/Attendance
+    $(document).ready(function() {
+      $('.sub-button').click(function(e) {
+        e.preventDefault();
+        $(this).next('.sub-menu').slideToggle();
+      });
+    });
+  </script>
 </body>
 </html>
