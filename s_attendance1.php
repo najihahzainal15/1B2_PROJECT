@@ -1,8 +1,24 @@
+<?php
+require_once "config.php";
+
+// Fetch events from database
+$events = [];
+$sql = "SELECT eventID, eventName, eventDate, status FROM event";
+$result = mysqli_query($link, $sql);
+
+if($result) {
+    $events = mysqli_fetch_all($result, MYSQLI_ASSOC);
+} else {
+    die("Database error: " . mysqli_error($link));
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
-  <title>STUDENT ATTENDANCE VERIFICATION 1</title>
+  <title>VERIFY ATTENDANCE 1</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
@@ -11,57 +27,51 @@
 	body{
 		  margin: 0;
 		  font-family: 'Poppins', sans-serif;
-		  overflow: hidden;
 	}
 	
 	.header1 {
-	  display: flex;
-	  align-items: center;
-	  justify-content: space-between;
-	  background-color: #0074e4;
-	  padding: 10px 20px;
-	  margin-left: 160px;
-	  color: white;
+	   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #0074e4;
+  padding: 10px 20px;
+  margin-left: 160px;
+  color: white;
 	}
 	
 	.header-right {
-	  display: flex;
-	  align-items: center;
+	  float: right;
+	   display: flex;
+      align-items: center;
 	}
-	
-	.header-right .logout {
-	  color: white;
-	  font-size: 14px;      
-	  margin-right: 15px;   /* space between Logout and profile icon */
-	  text-decoration: none;
-	  transition: color 0.3s;
-	}
-
-	.header-right .logout:hover {
-	  color: #ddd;         
-	}
-	
 	.header-center {
-	  text-align: center;
-	  flex-grow: 1;
-	}
-	
-	.header-center h2 {
-	  margin: 0;
-	  font-size: 22px;
-	}
-	
-	.header-center p {
-	  margin: 0;
-	  font-size: 14px;
-	}
+  text-align: center;
+  flex-grow: 1;
+}
 
+.header-center h2 {
+  margin: 0;
+  font-size: 22px;
+}
 
-	.logo-left {
-	  max-height: 40px;
-	  max-width: 60px;
-	  object-fit: contain;
-	}
+.header-center p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+}
+
+.logo-left {
+  max-height: 40px;
+  max-width: 60px;
+  object-fit: contain;
+}
+
 
 	p{
 		margin: 0px 40px;
@@ -159,20 +169,20 @@
 	  cursor: pointer;
 	}
 	
-	.content{ 
+		.content{ 
 	  background-color: #e6f0ff; 
 	  margin-left: 160px;
-	  height: auto;
+	  height: 100vh;
 	}
 
 	.logo{
-	   height: 40px;
-	  margin: 10px;
+	  height: 40px;
+	
 	}
 	
 	.logo2{
 	  height: 35px;
-	  margin: 10px;
+	  border-radius: 50%;
 	}
 	
 	
@@ -186,17 +196,26 @@
     }
 
     .back-btn {
-      margin-top: 30px;
-      background: #fff;
-      border: 2px solid #000;
+      background-color: #0074e4; 
+	  font-family: 'Poppins', sans-serif;
+	  border: none;
+	  border-radius: 10px;
+	  color: white;
+	  padding: 6px 14px;
+	  text-align: center;
+	  text-decoration: none;
+	  display: inline-block;
+	  font-size: 14px;
+	  margin: 20px 0 20px 30px;
+	  cursor: pointer;
+	  transition: 0.3s;
     }
 
     .event-table {
-      width: 95%;
+      width: 90%;
       border-collapse: collapse;
       background: #d0e6ff;
 	  margin-left: 30px;
-	  margin-right: 30px;
     }
 
     .event-table th, .event-table td {
@@ -227,77 +246,69 @@
       cursor: pointer;
     }
 
-	hr.new4 {
-	 border: 1px solid black;
-	}
 	   
 	.tbody {
-	background-color: white;}
-    .submit-button{
-   background-color: #0074e4; 
-   font-family: 'Poppins', sans-serif;
-   border: none;
-   border-radius: 10px;
-   color: white;
-   padding: 8px 14px;
-   text-align: center;
-   text-decoration: none;
-   display: inline-block;
-   font-size: 14px;
-   margin: 4px 25px;
-   cursor: pointer;
-   transition: 0.3s;
-   float: left;
- }
+		background-color: white;}
+		.submit-button{
+	   background-color: #0074e4; 
+	   font-family: 'Poppins', sans-serif;
+	   border: none;
+	   border-radius: 10px;
+	   color: white;
+	   padding: 8px 14px;
+	   text-align: center;
+	   text-decoration: none;
+	   display: inline-block;
+	   font-size: 14px;
+	   margin: 4px 25px;
+	   cursor: pointer;
+	   transition: 0.3s;
+	   float: left;
+	 }
  
- .submit-button:hover {
-   background-color: #005bb5;
- }
-
+	 .submit-button:hover {
+	   background-color: #005bb5;
+	 }
 	
 
- /* td .QRButton{
-    border-style: none;
-    background-color: #6666f0ff; 
-
- } */
+    td .QRButton{
+		border-style: none;
+		background-color: #6666f0ff; 
+	}
 	
   </style>
 </head>
 
 <body>
 
-   <div class="header1">
-	<img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo"/>
-    <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo"/>
-		<div class="header-center">
-			<h2>Attendance Slot</h2>
-			<p>Student: Alif</p>
-		</div>
-		<div class="header-right">
-			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="c_edit_profile.php">
-				<img src="images/profile.png" alt="Profile" class="logo2">
-			</a>
-		</div>   
+  <div class="header1">
+  <div class="header-left">
+  <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo logo">
+  <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo logo">
+</div>
+
+  
+  <div class="header-center">
+    <h2>Attendance Slot</h2>
+    <p>Event Advisor: Prof. Hakeem</p>
   </div>
+
+  <div class="header-right">
+    <img src="images/profile.png" alt="Profile" class="logo2"/>
+  </div>  
+</div>
 
   
  <div class="nav">
 	<div class="menu">
-		<div class="item"><a href="s_homepage.html">Dashboard</a></div>
-		<div class="item">
-			<a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
-			<div class="sub-menu">
-				<a href="c_membership.php" class="sub-item">Membership Approval</a>
-			</div>
-		</div>
+		<div class="item"><a href="ea_homepage.php">Dashboard</a></div>
+		
 		<div class="item">
 			<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 			<div class="sub-menu">
-				<a href="#events" class="sub-item">View Event</a>
-				<a href="#events" class="sub-item">Register New Event</a>
-				<a href="#events" class="sub-item">Register Committee Event</a>
+				<a href="ea_viewEvent.php" class="sub-item">View Event</a>
+				<a href="ea_registerEvent1.php" class="sub-item">Register New Event</a>
+				<a href="ea_committeeReg.php" class="sub-item">Register Committee Event</a>
 			</div>
 		</div>
 		
@@ -307,59 +318,43 @@
 				<a class="active" href="s_attendance1.php" class="sub-item">Attendance Slot</a>
 			</div>
 		</div>
-		
 	</div>
   </div>
   
-  
-  <div class="content">
-  <br>
-
+ <div class="content">
     <table class="event-table">
       <thead>
         <tr>
           <th>EVENT NAME</th>
           <th>DATE</th>
-          <th>STATUS</th>
-          <th>ATTENDANCE VERIFICATION</th>
-
+		  <th>STATUS</th>
+          <th>ATTENDANCE QR GENERATOR</th>
         </tr>
       </thead>
-      <tbody class="tbody"> 
-        <tr>
-          <td>HACKATON FUN RUN</td>
-          <td>26/4/25</td>
-          <td class="status active">ACTIVE</td>
-          <td class="QRButton">
-              <button class="action-btn">VERIFY ATTENDANCE</button>
-          </td>
-        </tr>
-        <tr>
-          <td>CYBERSECURITY AWARENESS</td>
-          <td>20/5/25</td>
-          <td class="status cancelled">CANCELLED</td>
-          <td class="attendance">
-          <button class="action-btn">VERIFY ATTENDANCE</button>
-          </td><!-- buat button tak boleh tekan -->
-        </tr>
-        <tr>
-          <td>GRAPHICxNETWORKING</td>
-          <td>25/5/25</td>
-          <td class="status postpone">POSTPONED</td>
-          <td class="QRButton">
-              <button class="action-btn">VERIFY ATTENDANCE</button>
-          </td>        
-        </tr>
-        <tr>
-          <td>FLUTTER PRO</td>
-          <td>27/6/25</td>
-          <td class="status active">ACTIVE</td>
-          <td class="QRButton">
-              <button class="action-btn">VERIFY ATTENDANCE</button>
-          </td>
-        </tr>
-      </tbody>
+      <tbody class="tbody">
+  <?php foreach($events as $event): ?>
+    <tr>
+      <td><?php echo htmlspecialchars($event['eventName']); ?></td>
+      <td><?php echo htmlspecialchars($event['eventDate']); ?></td>
+	  <td class="status <?php echo strtolower($event['status']); ?>">
+  <?php echo htmlspecialchars($event['status']); ?>
+</td>
+
+      <td class="QRButton">
+        <?php if (strtoupper($event['status']) === 'ACTIVE'): ?>
+          <a href="s_attendance2.php?event_id=<?php echo $event['eventID']; ?>">
+    	    	<button class="action-btn">VERIFY ATTENDANCE</button>
+		  </a>
+        <?php else: ?>
+          <span style="color: grey; font-weight: bold;">Unavailable</span>
+        <?php endif; ?>
+      </td>
+    </tr>
+  <?php endforeach; ?>
+</tbody>
+
     </table>
+  </div>
     <br>
     <br>
 
