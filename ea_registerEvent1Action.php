@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $time = mysqli_real_escape_string($link, $_POST['time']);
     $geolocation = mysqli_real_escape_string($link, $_POST['geolocation']);
     $venue = mysqli_real_escape_string($link, $_POST['venue']);
-	$meritScore = mysqli_real_escape_string($link, $_POST['meritScore']);
+    $meritScore = mysqli_real_escape_string($link, $_POST['meritScore']);
 
     // Handle file upload
     $approvalLetterPath = null;
@@ -53,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result) {
         echo "Data inserted successfully!";
-        echo "<br><a href='ea_registerEvent.php'>Register another event</a>";
+        echo "<br><a href='ea_registerEvent1.php'>Register another event</a>";
     } else {
         die("Insert failed: " . mysqli_error($link));
     }
@@ -62,4 +62,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 } else {
     echo "Invalid request method.";
 }
-?>
