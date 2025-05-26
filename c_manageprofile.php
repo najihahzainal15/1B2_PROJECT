@@ -7,6 +7,20 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
 	header("location: login_page.php");
 	exit;
 }
+
+$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
+
+// Get user's name from the database
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($link, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
+
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 ?>
 
 <!DOCTYPE html>
@@ -254,11 +268,11 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
 		<img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo" />
 		<div class="header-center">
 			<h2>User Profile Management</h2>
-			<p>Petakom Coordinator: Dr. Haneef</p>
+			<p>Petakom Coordinator: <?php echo  htmlspecialchars($loggedInUser); ?></p>
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_edit_profile.php">
+			<a href="c_displayProfile.php">
 				<img src="images/profile.png" alt="Profile" class="logo2">
 			</a>
 		</div>

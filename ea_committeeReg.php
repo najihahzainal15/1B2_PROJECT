@@ -1,30 +1,3 @@
-<?php
-// Initialize the session
-session_start();
-
-// Check if the user is logged in, if not then redirect him to login page
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-  header("location: login_page.php");
-  exit;
-}
-
-$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
-$userID = $_SESSION["userID"];
-$role = $_SESSION["role"];
-
-// Fetch username from database
-$queryUser = "SELECT username FROM user WHERE userID = ?";
-$stmtUser = mysqli_prepare($link, $queryUser);
-mysqli_stmt_bind_param($stmtUser, "i", $userID);
-mysqli_stmt_execute($stmtUser);
-$resultUser = mysqli_stmt_get_result($stmtUser);
-$userData = mysqli_fetch_assoc($resultUser);
-
-// Assign username after database query
-$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
-
-
-?>
 <!DOCTYPE html>
 <html>
 
@@ -41,51 +14,16 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
 
     .header1 {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      overflow: hidden;
       background-color: #0074e4;
-      padding: 10px 20px;
-      margin-left: 160px;
-      color: white;
+      padding: 0px 40px;
+      margin-left: 180px;
     }
 
     .header-right {
+      float: right;
       display: flex;
       align-items: center;
-    }
-
-    .header-right .logout {
-      color: white;
-      font-size: 14px;
-      margin-right: 15px;
-      /* space between Logout and profile icon */
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    .header-right .logout:hover {
-      color: #ddd;
-    }
-
-    .header-center {
-      text-align: center;
-      flex-grow: 1;
-    }
-
-    .header-center h2 {
-      margin: 0;
-      font-size: 22px;
-    }
-
-    .header-center p {
-      margin: 0;
-      font-size: 14px;
-    }
-
-    h2 {
-      margin: 0px 40px;
-      font-size: 25px;
     }
 
     p {
@@ -97,6 +35,14 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       margin: 5px;
       font-size: 14px;
     }
+
+
+    h2 {
+      margin: 0px 40px;
+      font-size: 25px;
+      color: black;
+    }
+
 
     .nav {
       height: 100%;
@@ -156,10 +102,18 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
 
     .content {
+      margin-left: 170px;
+      padding: 20px;
       background-color: #e6f0ff;
-      margin-left: 160px;
-      height: auto;
+      display: flex;
+      justify-content: center;
+      width: calc(100% - 170px);
+      /* Use available space */
+      flex-direction: column;
+      /* Stack items vertically */
     }
+
+
 
     @media (max-width: 800px) {
       .table-container {
@@ -176,6 +130,16 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
         font-size: 14px;
         /* Smaller text for smaller screens */
       }
+    }
+
+    .logo {
+      height: 40px;
+      margin: 10px;
+    }
+
+    .logo2 {
+      height: 35px;
+      margin: 10px;
     }
 
     .section-title {
@@ -266,15 +230,54 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       background-color: #0264c2;
     }
 
+    .header1 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #0074e4;
+      padding: 10px 50px;
+      margin-left: 120px;
+      color: white;
+    }
+
+    .header-right {
+      float: right;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-center {
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    .header-center h2 {
+      margin: 0;
+      font-size: 22px;
+      color: white;
+    }
+
+    .header-center p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 120px;
+    }
+
 
     .logo {
+      margin-left: 15px;
       height: 40px;
-      margin: 10px;
     }
 
     .logo2 {
       height: 35px;
-      margin: 10px;
+      border-radius: 50%;
     }
 
     .submit-button {
@@ -332,18 +335,20 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
 <body>
   <div class="header1">
-    <img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
-    <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
+
+    <div class="header-left">
+      <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo logo-left">
+      <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo logo-left">
+    </div>
+
     <div class="header-center">
       <h2>Register Committee Member</h2>
-      <p>Event Advisor: <?php echo  htmlspecialchars($loggedInUser); ?></p>
-
+      <p>Event Advisor: Prof. Hakeem</p>
     </div>
-    <div class=" header-right">
-      <a href="logout_button.php" class="logout">Logout</a>
-      <a href="ea_displayProfile.php">
-        <img src="images/profile.png" alt="Profile" class="logo2">
-      </a>
+
+
+    <div class="header-right">
+      <img src="images/profile.png" alt="Profile" class="logo2" />
     </div>
   </div>
 
@@ -376,8 +381,8 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
   <?php
   $servername = "localhost";
   $username = "root";        // Your MySQL username
-  $password = "";
-  $dbname = "web_project";
+  $password = "";            // Your MySQL password (often empty for localhost)
+  $dbname = "web_project";  // Your database name
 
   $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -386,10 +391,8 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
   }
   ?>
 
-
   <div class="content">
     <div class="table-container">
-
       <div class="registration-container">
         <h2>COMMITTEE MEMBER REGISTRATION</h2>
 
@@ -430,7 +433,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       </div>
     </div>
   </div>
-
   <script type="text/javascript">
     $(document).ready(function() {
       $('.sub-button').click(function() {
@@ -439,6 +441,38 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     });
   </script>
 
+  <script>
+    $(document).ready(function() {
+          // Toggle submenus
+          $('.sub-button').click(function() {
+            $(this).next('.sub-menu').slideToggle();
+          });
+
+          // Load events dynamically
+          $.ajax({
+              url: 'ea_committeeReg2.php',
+              method: 'GET',
+              dataType: 'json',
+              success: function(events) {
+                let $dropdown = $('#event');
+                $dropdown.empty(); // Clear existing options
+                $dropdown.append(`<option value="${event.event_id}">${optionText}</option>`);
+
+
+
+                events.forEach(function(event) {
+                      let optionText = event.event_name;
+                      $dropdown.append( < option value = "${event.event_id}" > $ {
+                          optionText
+                        } < /option>);
+                      });
+                  },
+                  error: function() {
+                    alert('Failed to load events. Please try again.');
+                  }
+              });
+          });
+  </script>
 
 </body>
 

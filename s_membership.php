@@ -46,7 +46,10 @@ $userData = mysqli_fetch_assoc($resultUser);
 $ID = $userData["userID"];
 $uName = $userData["username"] ?? '';
 $uEmail = $userData["email"] ?? '';
+
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 ?>
+
 <!DOCTYPE html>
 <html>
 
@@ -318,7 +321,7 @@ $uEmail = $userData["email"] ?? '';
 		<img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo" />
 		<div class="header-center">
 			<h2>Membership Application</h2>
-			<p>Student: Alif</p>
+			<p>Student: <?php echo  htmlspecialchars($loggedInUser); ?></p>
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
