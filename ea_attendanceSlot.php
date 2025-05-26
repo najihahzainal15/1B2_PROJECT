@@ -1,3 +1,24 @@
+<?php
+require_once "config.php";
+
+// // Check if user is logged in as event advisor
+// if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'event_advisor') {
+//     header("Location: login.php");
+//     exit();
+// }
+
+// Fetch events from database
+$events = [];
+$sql = "SELECT eventID, eventName, eventDate, status FROM event";
+$result = mysqli_query($link, $sql);
+
+if($result) {
+    $events = mysqli_fetch_all($result, MYSQLI_ASSOC);
+} else {
+    die("Database error: " . mysqli_error($link));
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -306,56 +327,40 @@
 	</div>
   </div>
   
-  
-  <div class="content">
-  <br>
-
+ <div class="content">
     <table class="event-table">
       <thead>
         <tr>
           <th>EVENT NAME</th>
           <th>DATE</th>
-          <th>STATUS</th>
+		  <th>STATUS</th>
           <th>ATTENDANCE QR GENERATOR</th>
         </tr>
       </thead>
-      <tbody class="tbody"> 
-        <tr>
-          <td>HACKATON FUN RUN</td>
-          <td>26/4/25</td>
-          <td class="status active">ACTIVE</td>
-          <td class="QRButton">
-              <button class="action-btn">GENERATE ATTENDANCE QR</button>
-          </td>
-        </tr>
-        <tr>
-          <td>CYBERSECURITY AWARENESS</td>
-          <td>20/5/25</td>
-          <td class="status cancelled">CANCELLED</td>
-          <td>
-          <a href:"file:///C:/Users/wahid/Documents/UMP/S4_WEBENG/AdvisorGenerateAttendanceQR.html">
-          <button class="action-btn">GENERATE ATTENDANCE QR</button>
+      <tbody class="tbody">
+  <?php foreach($events as $event): ?>
+    <tr>
+      <td><?php echo htmlspecialchars($event['eventName']); ?></td>
+      <td><?php echo htmlspecialchars($event['eventDate']); ?></td>
+	  <td class="status <?php echo strtolower($event['status']); ?>">
+  <?php echo htmlspecialchars($event['status']); ?>
+</td>
+
+      <td class="QRButton">
+        <?php if (strtoupper($event['status']) === 'ACTIVE'): ?>
+          <a href="ea_attendanceQR.php?event=<?php echo urlencode($event['eventName']); ?>&date=<?php echo urlencode($event['eventDate']); ?>&event_id=<?php echo $event['eventID']; ?>">
+            <button class="action-btn">GENERATE ATTENDANCE QR</button>
           </a>
-          </td><!-- buat button tak boleh tekan -->
-        </tr>
-        <tr>
-          <td>GRAPHICxNETWORKING</td>
-          <td>25/5/25</td>
-          <td class="status postpone">POSPONED</td>
-          <td class="QRButton">
-              <button class="action-btn">GENERATE ATTENDANCE QR</button>
-          </td>        
-        </tr>
-        <tr>
-          <td>FLUTTER PRO</td>
-          <td>27/6/25</td>
-          <td class="status active">ACTIVE</td>
-          <td class="QRButton">
-              <button class="action-btn">GENERATE ATTENDANCE QR</button>
-          </td>
-        </tr>
-      </tbody>
+        <?php else: ?>
+          <span style="color: grey; font-weight: bold;">Unavailable</span>
+        <?php endif; ?>
+      </td>
+    </tr>
+  <?php endforeach; ?>
+</tbody>
+
     </table>
+  </div>
     <br>
     <br>
 
