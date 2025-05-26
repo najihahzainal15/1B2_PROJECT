@@ -363,11 +363,12 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 	<div class="content">
 		<div class="status-container">
 			<h3>Application Status:
-				<span class="status-text <?php echo strtolower($verificationStatus); ?>">
+				<span id="verificationStatus" class="status-text <?php echo strtolower($verificationStatus); ?>">
 					<?php echo htmlspecialchars($verificationStatus); ?>
 				</span>
 			</h3>
 		</div>
+
 
 		<br>
 		<form action="s_membership_action.php" method="POST" enctype="multipart/form-data">
@@ -413,6 +414,32 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 			document.getElementById("fileName").textContent = fileName;
 		});
 	</script>
+
+	<script>
+		function fetchVerificationStatus() {
+			$.ajax({
+				url: "get_membership_status.php",
+				type: "GET",
+				dataType: "json",
+				success: function(response) {
+					if (response.status) {
+						let statusText = response.status;
+						let statusElement = document.getElementById("verificationStatus");
+
+						statusElement.textContent = statusText;
+						statusElement.className = "status-text " + statusText.toLowerCase();
+					}
+				},
+				error: function() {
+					console.log("Error fetching verification status");
+				}
+			});
+		}
+
+		// Fetch status every 5 seconds
+		setInterval(fetchVerificationStatus, 5000);
+	</script>
+
 
 
 </body>
