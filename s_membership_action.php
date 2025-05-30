@@ -9,6 +9,7 @@ if (!isset($_SESSION['userID'])) {
 $link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
 $userID = $_SESSION['userID'];
 
+
 // Get studentID from student table
 $queryStudent = "SELECT studentID FROM student WHERE userID = ?";
 $stmtStudent = mysqli_prepare($link, $queryStudent);

@@ -1,13 +1,5 @@
 <?php
-// Initialize the session
-session_start();
 require_once "config.php"; // Database configuration
-
-// Check if the user is logged in
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-	header("location: login_page.php");
-	exit;
-}
 
 $link = mysqli_connect("localhost", "root", "", "web_project");
 

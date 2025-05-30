@@ -1,3 +1,17 @@
+<?php
+// Connect to the database server.
+$link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
+
+// Select the database.
+mysqli_select_db($link, "web_project") or die(mysqli_error($link));
+
+$query = "SELECT * FROM event";
+
+$result = mysqli_query($link, $query);
+
+?>
+
+
 <!DOCTYPE html>
 <html>
 
@@ -380,51 +394,56 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>AMAL FUN RUN ZOMBIE</td>
-            <td>17 JUNE 2021</td>
-            <td>9AM-10AM</td>
-            <td>2.555 </td>
-            <td>FACULTY COMPUTING</td>
-            <td>LALALALA</td>
-            <td><a href='uploads/1747700157_STUDENT-4 (6).png' target='_blank'>View</a></td>
-            <td>3</td>
-            <td></td>
-            <td>
-              <a href='c_meritAppUpdate.php?id=3'>EDIT</a>
+          <?php
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+			$eventID = htmlspecialchars($row["eventID"]);
+            $eventName = htmlspecialchars($row["eventName"]);
+            $date = htmlspecialchars($row["eventDate"]);
+            $time = htmlspecialchars($row["eventTime"]);
+			$geolocation = htmlspecialchars($row["eventGeolocation"]);
+            $venue = htmlspecialchars($row["eventLocation"]);
+            $desc = htmlspecialchars($row["eventDesc"]);
+            $app = htmlspecialchars($row["approvalLetterPath"]);
+			$meritStatus = htmlspecialchars($row["meritStatus"]);
+			$meritScore = htmlspecialchars($row["meritScore"]);
+           
+            echo "<tr>";
+            echo "<td>$eventName</td>";
+            echo "<td>$date</td>";
+            echo "<td>$time</td>";
+			echo "<td>$geolocation</td>";
+            echo "<td>$venue</td>";
+            echo "<td>$desc</td>";
+			echo "<td>
+  <a href='$app' target='_blank'>
 
-            </td>
-          </tr>
-          <tr>
-            <td>FLUUTER PRO</td>
-            <td>30 JUNE 2025</td>
-            <td>8AM - 3PM</td>
-            <td>2.99887</td>
-            <td>BZ0R99 (FACULTY COMPUTING)</td>
-            <td>EXCELLENCE THE FLUTTER SKILL STUDENTS</td>
-            <td><a href='uploads/1747749530_STUDENT-4 (3).png' target='_blank'>View</a></td>
-            <td>3</td>
-            <td></td>
-            <td>
-              <a href='c_meritAppUpdate.php?id=8'>EDIT</a>
+    <button style='padding: 5px 10px; background-color: #0074e4; color: white; border: none; border-radius: 5px;'>View</button>
+  </a>
+</td>";
 
-            </td>
-          </tr>
-          <tr>
-            <td>FIGMA PRO TECH</td>
-            <td>17 JUNE 2025</td>
-            <td>10AM - 3PM</td>
-            <td>2.378498</td>
-            <td>DEWAN PEKAN</td>
-            <td>INCREASE FIGMA PRO SKILLS</td>
-            <td><a href='uploads/1747924668_PETAKOM COORDINATOR (2).png' target='_blank'>View</a></td>
-            <td>3</td>
-            <td>Approved</td>
-            <td>
-              <a href='c_meritAppUpdate.php?id=9'>EDIT</a>
+			
 
-            </td>
-          </tr>
+
+			echo "<td>$meritScore</td>";
+			echo "<td>$meritStatus</td>";
+            
+           
+          echo "<td>
+    <a href='c_meritAppUpdate3.php?eventID=$eventID'>EDIT</a>
+
+    
+</td>";
+
+
+
+        }
+    } else {
+        echo "<tr><td colspan='10'>No committee records found.</td></tr>";
+    }
+
+    mysqli_close($link);
+    ?>
         </tbody>
       </table>
 

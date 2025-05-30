@@ -6,7 +6,10 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
 	exit();
 }
 
+
 $link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
 
 // Get user ID from URL after coordinator clicks "View"
 $userID = $_GET["id"] ?? null; // Ensure ID is passed correctly
@@ -52,7 +55,7 @@ if ($role === "Student") {
 	$userIDType = "Event Advisor ID: " . ($advisorData["eventAdvisorID"] ?? '');
 	$extraField = "Expertise Area: " . ($advisorData["expertiseArea"] ?? '');
 } elseif ($role === "Coordinator") {
-	$queryCoordinator = "SELECT coordinatorID FROM petakomcoordinator WHERE userID = ?";
+	$queryCoordinator = "SELECT coordinatorID, year_of_service FROM petakomcoordinator WHERE userID = ?";
 	$stmtCoordinator = mysqli_prepare($link, $queryCoordinator);
 	mysqli_stmt_bind_param($stmtCoordinator, "i", $userID);
 	mysqli_stmt_execute($stmtCoordinator);
@@ -61,6 +64,7 @@ if ($role === "Student") {
 
 	$userIDType = "Coordinator ID: " . ($coordinatorData["coordinatorID"] ?? '');
 }
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 ?>
 
 <!DOCTYPE html>
@@ -172,27 +176,6 @@ if ($role === "Student") {
 		.sub-menu a {
 			padding-left: 30px;
 			font-size: 12px;
-		}
-
-		.save-button {
-			background-color: #0074e4;
-			font-family: 'Poppins', sans-serif;
-			border: none;
-			border-radius: 10px;
-			color: white;
-			padding: 6px 14px;
-			text-align: center;
-			text-decoration: none;
-			display: inline-block;
-			font-size: 14px;
-			margin: 4px 25px;
-			cursor: pointer;
-			transition: 0.3s;
-			float: right;
-		}
-
-		.save-button:hover {
-			background-color: #005bb5;
 		}
 
 
@@ -324,7 +307,7 @@ if ($role === "Student") {
 		<img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo" />
 		<div class="header-center">
 			<h2>User Profile Management</h2>
-			<p>Petakom Coordinator: Dr. Haneef</p>
+			<p>Petakom Coordinator: <?php echo  htmlspecialchars($loggedInUser); ?></p>
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
@@ -364,8 +347,6 @@ if ($role === "Student") {
 	</div>
 
 	<div class="content">
-		<br>
-
 		<form method="POST" class="form">
 			<label>Full Name</label><br>
 			<input type="text" class="details1" value="<?php echo htmlspecialchars($userName); ?>" readonly><br>
@@ -373,20 +354,36 @@ if ($role === "Student") {
 			<label>Email Address</label><br>
 			<input type="email" class="details1" value="<?php echo htmlspecialchars($userEmail); ?>" readonly><br>
 
-			<label><?php echo htmlspecialchars($userIDType); ?></label><br>
+			<?php if ($role === "Student") { ?>
+				<label>Student ID</label><br>
+				<input type="text" class="details1" value="<?php echo htmlspecialchars($studentData["studentID"] ?? ''); ?>" readonly><br>
 
-			<label>Phone Number</label><br>
-			<input type="text" class="details2" value="<?php echo htmlspecialchars($userPhone); ?>" readonly><br>
+				<label>Programme</label><br>
+				<input type="text" class="details2" value="<?php echo htmlspecialchars($studentData["programme"] ?? ''); ?>" readonly><br>
 
-			<?php if (!empty($extraField)) { ?>
-				<label>Additional Info</label><br>
-				<input type="text" class="details2" value="<?php echo htmlspecialchars($extraField); ?>" readonly><br>
+				<label>Year of Study</label><br>
+				<input type="text" class="details2" value="<?php echo htmlspecialchars($studentData["year_of_study"] ?? ''); ?>" readonly><br>
+
+			<?php } elseif ($role === "Event Advisor") { ?>
+				<label>Event Advisor ID</label><br>
+				<input type="text" class="details1" value="<?php echo htmlspecialchars($advisorData["eventAdvisorID"] ?? ''); ?>" readonly><br>
+
+				<label>Expertise Area</label><br>
+				<input type="text" class="details2" value="<?php echo htmlspecialchars($advisorData["expertiseArea"] ?? ''); ?>" readonly><br>
+
+			<?php } elseif ($role === "Coordinator") { ?>
+				<label>Coordinator ID</label><br>
+				<input type="text" class="details1" value="<?php echo htmlspecialchars($coordinatorData["coordinatorID"] ?? ''); ?>" readonly><br>
+
+				<label>Year of Service</label><br>
+				<input type="text" class="details2" value="<?php echo htmlspecialchars($coordinatorData["year_of_service"] ?? ''); ?>" readonly><br>
 			<?php } ?>
 
 			<br>
 			<a class="cancel-button" href="c_manageProfile.php">Back</a>
 		</form>
 	</div>
+
 
 
 

@@ -46,7 +46,10 @@ $userData = mysqli_fetch_assoc($resultUser);
 $ID = $userData["userID"];
 $uName = $userData["username"] ?? '';
 $uEmail = $userData["email"] ?? '';
+
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 ?>
+
 <!DOCTYPE html>
 <html>
 
@@ -318,7 +321,7 @@ $uEmail = $userData["email"] ?? '';
 		<img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo" />
 		<div class="header-center">
 			<h2>Membership Application</h2>
-			<p>Student: Alif</p>
+			<p>Student: <?php echo  htmlspecialchars($loggedInUser); ?></p>
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
@@ -360,11 +363,12 @@ $uEmail = $userData["email"] ?? '';
 	<div class="content">
 		<div class="status-container">
 			<h3>Application Status:
-				<span class="status-text <?php echo strtolower($verificationStatus); ?>">
+				<span id="verificationStatus" class="status-text <?php echo strtolower($verificationStatus); ?>">
 					<?php echo htmlspecialchars($verificationStatus); ?>
 				</span>
 			</h3>
 		</div>
+
 
 		<br>
 		<form action="s_membership_action.php" method="POST" enctype="multipart/form-data">
@@ -410,6 +414,32 @@ $uEmail = $userData["email"] ?? '';
 			document.getElementById("fileName").textContent = fileName;
 		});
 	</script>
+
+	<script>
+		function fetchVerificationStatus() {
+			$.ajax({
+				url: "get_membership_status.php",
+				type: "GET",
+				dataType: "json",
+				success: function(response) {
+					if (response.status) {
+						let statusText = response.status;
+						let statusElement = document.getElementById("verificationStatus");
+
+						statusElement.textContent = statusText;
+						statusElement.className = "status-text " + statusText.toLowerCase();
+					}
+				},
+				error: function() {
+					console.log("Error fetching verification status");
+				}
+			});
+		}
+
+		// Fetch status every 5 seconds
+		setInterval(fetchVerificationStatus, 5000);
+	</script>
+
 
 
 </body>

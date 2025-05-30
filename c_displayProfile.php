@@ -1,13 +1,23 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['userID'])) {
-	header("Location: login_page.php");
-	exit();
+// Check if the user is logged in, if not then redirect him to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+	header("location: login_page.php");
+	exit;
 }
 
 $link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
-$userID = $_SESSION['userID'];
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
+
+// Get user's name from the database
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($link, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
 
 // Get data from user table
 $queryUser = "SELECT userID, username, email, phone_No, password FROM user WHERE userID = ?";
@@ -17,8 +27,8 @@ mysqli_stmt_execute($stmtUser);
 $resultUser = mysqli_stmt_get_result($stmtUser);
 $userData = mysqli_fetch_assoc($resultUser);
 
-// Get data from event advisor table
-$queryCoordinator = "SELECT coordinatorID FROM petakomcoordinator WHERE userID = ?";
+// Get data from coordinator table
+$queryCoordinator = "SELECT coordinatorID, year_of_service FROM petakomcoordinator WHERE userID = ?";
 $stmtCoordinator = mysqli_prepare($link, $queryCoordinator);
 mysqli_stmt_bind_param($stmtCoordinator, "i", $userID);
 mysqli_stmt_execute($stmtCoordinator);
@@ -31,7 +41,9 @@ $uName = $userData["username"] ?? '';
 $uEmail = $userData["email"] ?? '';
 $uPhone = $userData["phone_No"] ?? '';
 $coordinatorID = $coordinatorData["coordinatorID"] ?? '';
+$cYearService = $coordinatorData["year_of_service"] ?? '';
 $currpass = $userData["password"] ?? '';
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 ?>
 
 <!DOCTYPE html>
@@ -307,7 +319,7 @@ $currpass = $userData["password"] ?? '';
 			<img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo" />
 			<div class="header-center">
 				<h2>Profile Settings</h2>
-				<p>Petakom Coordinator: Prof. Hakeem</p>
+				<p>Petakom Coordinator: <?php echo  htmlspecialchars($loggedInUser); ?></p>
 			</div>
 
 			<div class="header-right">
@@ -364,6 +376,9 @@ $currpass = $userData["password"] ?? '';
 
 				<label>Phone Number</label><br>
 				<input type="text" name="phone_No" class="details2" value="<?php echo $uPhone; ?>" readonly><br>
+
+				<label>Year of Service</label><br>
+				<input type="text" name="year_of_service" class="details2" value="<?php echo $cYearService; ?>" readonly><br>
 
 				<label>Password</label><br>
 				<input type="password" name="currpass" class="details3" value="<?php echo $currpass; ?>" readonly><br>

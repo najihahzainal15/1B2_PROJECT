@@ -1,23 +1,3 @@
-
-<?php
-
-include 'db_connection.php';
-
-$sql = "SELECT 
-    committee.committeeRole, 
-    event.eventName, 
-    event.eventDate, 
-    event.eventLocation, 
-    event.status
-FROM event
-JOIN committee ON event.eventID = committee.eventID
-JOIN student ON student.studentID = committee.studentID";
-
-       
-
-$result = $conn->query($sql);
-?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -363,8 +343,9 @@ $result = $conn->query($sql);
    background-color: #005bb5;
  }
 	
-.tbody{
-background-color:white;}
+	.tbody {
+		 background-color: white;
+	}
 	
 	
 		
@@ -382,7 +363,7 @@ background-color:white;}
   </div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_displayProfile.php">
+			<a href="s_edit_profile.php">
 				<img src="images/profile.png" alt="Profile" class="logo2">
 			</a>
 		</div> 
@@ -420,37 +401,66 @@ background-color:white;}
         <div class="section-header">EVENT DETAILS</div>
 
 
-      
+      <?php
+// Connect to the database server.
+$link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
+
+// Select the database.
+mysqli_select_db($link, "web_project") or die(mysqli_error($link));
+
+$query = "SELECT * FROM event 
+          JOIN committee ON event.eventID = committee.eventID
+		  JOIN committeerole on committeerole.roleID= committee.eventID";
+
+
+$result = mysqli_query($link, $query);
+
+?>
+
 <table>
   <thead>
     <tr>
+      <th>Student ID</th>
       <th>Committee Role</th>
       <th>Event Name</th>
       <th>Event Date</th>
       <th>Event Location</th>
-      <th>Event Status</th>
+	  <th>Event Status</th>
     </tr>
   </thead>
-  <tbody class='tbody'>
-    <?php if ($result && $result->num_rows > 0): ?>
-        <?php while($row = $result->fetch_assoc()): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($row['committeeRole']); ?></td>
-                <td><?php echo htmlspecialchars($row['eventName']); ?></td>
-                <td><?php echo htmlspecialchars($row['eventDate']); ?></td>
-                <td><?php echo htmlspecialchars($row['eventLocation']); ?></td>
-                <td><?php echo htmlspecialchars($row['status']); ?></td>
-            </tr>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <tr><td colspan="5">No records found.</td></tr>
-    <?php endif; ?>
-  </tbody>
-</table>
+  <tbody class="tbody">
+    <?php
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $commID = htmlspecialchars($row["committeeID"]);
+            $eventID = htmlspecialchars($row["eventID"]);
+            $role = htmlspecialchars($row["committeeRole"]);
+            $studentID = htmlspecialchars($row["studentID"]);
+			$eventName = htmlspecialchars($row["eventName"]);
+            $eventDate = htmlspecialchars($row["eventDate"]);
+			$eventLoc = htmlspecialchars($row["eventLocation"]);
+            $eventStatus = htmlspecialchars($row["status"]);
+			
+			
+            echo "<tr>";
+            echo "<td>$studentID</td>";
+            echo "<td>$role</td>";
+            echo "<td>$eventName</td>";
+            echo "<td>$eventDate</td>";
+			echo "<td>$eventLoc</td>";
+            echo "<td>$eventStatus</td>";
+           echo "<td>
+        
+      </td>";
 
-  
-  
-  
+        }
+    } else {
+        echo "<tr><td colspan='7'>No committee records found.</td></tr>";
+    }
+
+    mysqli_close($link);
+    ?>
+
 
     </div>
   </div>
@@ -462,4 +472,4 @@ background-color:white;}
 	});
 	</script>
 </body>
-</html>                                    
+</html>

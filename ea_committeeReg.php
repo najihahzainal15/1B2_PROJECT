@@ -1,3 +1,22 @@
+<?php
+// db_connect.php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "web_project";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?>
+
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -401,27 +420,53 @@ if ($conn->connect_error) {
         <h2>COMMITTEE MEMBER REGISTRATION</h2>
 		
 		<form action="ea_committeeRegAction.php" method="POST">
-		
-<table class="event-table">
-    <tr>
-        <td><label for="event">Choose an event:</label></td>
-        <td>
-            <select id="event" name="event" required>
-    <option value="">Loading events...</option>
+
+    <table class="event-table">
+        <tr>
+            <td><label for="event">Choose an event:</label></td>
+            <td>
+                <select id="event" name="event" required>
+                    <option value="">Loading events...</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+
+    <div class="form-group">
+        <label for="name">NAME</label>
+        <input type="text" id="name" name="name" placeholder="SITI HAZIRAH">
+    </div>
+
+    <div class="form-group">
+        <label for="roleID">Select Role:</label>
+        <select name="roleID" required>
+  <option value="">-- Select Role --</option>
+  <?php
+  $conn = new mysqli("localhost", "root", "", "web_project");
+  $sql = "SELECT roleID, committeeRole FROM committeerole ORDER BY committeeRole ASC";
+  $result = $conn->query($sql);
+  while ($row = $result->fetch_assoc()) {
+      echo '<option value="' . $row['roleID'] . '">' . htmlspecialchars($row['committeeRole']) . '</option>';
+  }
+  $conn->close();
+  ?>
 </select>
 
-        </td>
-    </tr>
-</table>
+    </div>
 
-        <div class="form-group">
-            <label for="name">NAME</label>
-            <input type="text" id="name" name="name" placeholder="SITI HAZIRAH">
-        </div>
+    <div class="form-group">
+        <label for="student-id">STUDENT ID</label>
+        <input type="text" id="student-id" name="student_id" placeholder="CB23077">
+    </div>
 
-        <div class="form-group">
-            <label for="position">POSITION</label>
-            <input type="text" id="position" name="position" placeholder="FINANCE ANALYST">
+    <div class="form-actions">
+        <button type="button" class="submit-button" onclick="window.location.href='ea_eventCommittee.php'">Back</button>
+        <button type="submit" class="submit-button">Register</button>
+    </div>
+
+</form>
+
+</select>
         </div>
 
         <div class="form-group">

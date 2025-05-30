@@ -271,7 +271,11 @@ $link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
 // Select the database.
 mysqli_select_db($link, "web_project") or die(mysqli_error($link));
 
-$query = "SELECT * FROM committee";
+$query = "SELECT * FROM committee
+
+JOIN committeerole on committeerole.roleID= committee.roleID";
+
+
 
 $result = mysqli_query($link, $query);
 

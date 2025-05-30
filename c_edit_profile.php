@@ -1,13 +1,24 @@
 <?php
+// Initialize the session
 session_start();
 
-if (!isset($_SESSION['userID'])) {
-    header("Location: login_page.php");
-    exit();
+// Check if the user is logged in, if not then redirect him to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: login_page.php");
+    exit;
 }
 
 $link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
-$userID = $_SESSION['userID'];
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
+
+// Get user's name from the database
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($link, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
 
 // Get data from user table
 $queryUser = "SELECT username, email, phone_No, password FROM user WHERE userID = ?";
@@ -17,29 +28,30 @@ mysqli_stmt_execute($stmtUser);
 $resultUser = mysqli_stmt_get_result($stmtUser);
 $userData = mysqli_fetch_assoc($resultUser);
 
-// Get data from student table
-$queryStudent = "SELECT coordinatorID FROM petakomcoordinator WHERE userID = ?";
-$stmtStudent = mysqli_prepare($link, $queryStudent);
-mysqli_stmt_bind_param($stmtStudent, "i", $userID);
-mysqli_stmt_execute($stmtStudent);
-$resultStudent = mysqli_stmt_get_result($stmtStudent);
-$studentData = mysqli_fetch_assoc($resultStudent);
+// Get data from coordinator table
+$queryCoordinator = "SELECT coordinatorID, year_of_service FROM petakomcoordinator WHERE userID = ?";
+$stmtCoordinator = mysqli_prepare($link, $queryCoordinator);
+mysqli_stmt_bind_param($stmtCoordinator, "i", $userID);
+mysqli_stmt_execute($stmtCoordinator);
+$resultCoordinator = mysqli_stmt_get_result($stmtCoordinator);
+$coordinatorData = mysqli_fetch_assoc($resultCoordinator);
 
 // Assign to variables
 $uName = $userData["username"] ?? '';
 $uEmail = $userData["email"] ?? '';
-$cID = $cData["coordinatorID"] ?? '';
+$cID = $coordinatorData["coordinatorID"] ?? '';
 $uPhone = $userData["phone_No"] ?? '';
+$cYearService = $coordinatorData["year_of_service"] ?? '';
 $currpass = $_POST['currpass'] ?? '';
 $newpass = $_POST['npass'] ?? '';
 $conpass = $_POST['conpass'] ?? '';
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 ?>
-
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>STUDENT EDIT PROFILE</title>
+    <title>COORDINATOR EDIT PROFILE</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
@@ -306,7 +318,7 @@ $conpass = $_POST['conpass'] ?? '';
         <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo" />
         <div class="header-center">
             <h2>Profile Settings</h2>
-            <p>Student: Alif</p>
+            <p>Petakom Coordinator: <?php echo  htmlspecialchars($loggedInUser); ?></p>
         </div>
         <div class="header-right">
             <a href="logout_button.php" class="logout">Logout</a>
@@ -360,6 +372,9 @@ $conpass = $_POST['conpass'] ?? '';
 
             <label>Phone Number</label><br>
             <input type="text" name="phone_No" placeholder="Enter your phone number" class="details2" value="<?php echo $uPhone; ?>"><br>
+
+            <label>Year of Service</label><br>
+            <input type="text" name="year_of_service" placeholder="Enter your year of service" class="details2" value="<?php echo $cYearService; ?>"><br>
 
             <label>Current Password</label><br>
             <input type="password" name="currpass" placeholder="Enter your current password" class="details3"><br>

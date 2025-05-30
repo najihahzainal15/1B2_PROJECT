@@ -1,34 +1,32 @@
-<!DOCTYPE html>
-<html>
-<body>
-
 <?php
-// Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $eventID = $_POST["event"];
-    $position = $_POST["position"];
-    $studentID = $_POST["student_id"];
 
-    $link = mysqli_connect("localhost", "root", "") or die("Connection failed: " . mysqli_connect_error());
-    mysqli_select_db($link, "web_project") or die("Database selection failed: " . mysqli_error($link));
+    $eventID = $_POST["event"] ?? null;
+    $roleID = $_POST["roleID"] ?? null;
+    $studentID = $_POST["student_id"] ?? null;
 
-    $query = "INSERT INTO committee (eventID, committeeRole, studentID)
-              VALUES ('$eventID', '$position', '$studentID')";
+    if (!$eventID || !$roleID || !$studentID) {
+        die("Missing data: Please fill all required fields.");
+    }
 
-    $result = mysqli_query($link, $query);
+    $link = mysqli_connect("localhost", "root", "", "web_project") or die("Connection failed");
 
-    if ($result) {
-        echo "Data inserted successfully!";
+    // Check if roleID actually exists in committeerole table
+    $checkRole = mysqli_query($link, "SELECT * FROM committeerole WHERE roleID = '$roleID'");
+    if (mysqli_num_rows($checkRole) == 0) {
+        die("Invalid role selected.");
+    }
+
+    // Insert into committee table
+    $query = "INSERT INTO committee (eventID, roleID, studentID) VALUES ('$eventID', '$roleID', '$studentID')";
+
+    if (mysqli_query($link, $query)) {
+        echo "Committee member registered successfully!";
     } else {
         die("Insert failed: " . mysqli_error($link));
     }
 
     mysqli_close($link);
 }
-
-
 ?>
-
-</body>
-</html>
 
