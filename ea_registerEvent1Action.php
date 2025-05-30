@@ -13,7 +13,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $eventName = mysqli_real_escape_string($link, $_POST['name']);
     $desc = mysqli_real_escape_string($link, $_POST['description']);
     $date = mysqli_real_escape_string($link, $_POST['date']);
-    $time = mysqli_real_escape_string($link, $_POST['time']);
+    $startTime = mysqli_real_escape_string($link, $_POST['startTime']);
+$endTime = mysqli_real_escape_string($link, $_POST['endTime']);
+$time = $startTime . ' to ' . $endTime; // Combine the range as a single string
+
     $geolocation = mysqli_real_escape_string($link, $_POST['geolocation']);
     $venue = mysqli_real_escape_string($link, $_POST['venue']);
 	$meritScore = mysqli_real_escape_string($link, $_POST['meritScore']);

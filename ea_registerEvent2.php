@@ -2,8 +2,13 @@
 // Connect to DB and get event details
 $link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
 
+
 if (isset($_GET['id'])) {
     $id = (int)$_GET['id']; // Cast to int for safety
+	
+$eventUrl = "http://10.66.58.29/YAYA/1B2_PROJECT/ea_registerEvent3.php?id=$id";
+ // ✅ Correct URL
+
     $query = "SELECT * FROM event WHERE eventID = $id";
     $result = mysqli_query($link, $query);
     $row = mysqli_fetch_assoc($result);
@@ -145,31 +150,32 @@ if (isset($_GET['id'])) {
 
     
 
-    /* Main content area */
-    .content {
-      margin-left: 170px;
-      padding: 80px 20px 20px; /* top padding to clear fixed header */
-      background-color: #f4f8ff;
-      min-height: calc(100vh - 60px);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
+   .content {
+  margin-left: 170px;
+  padding: 80px 20px 60px;
+  background-color: #f4f8ff;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
 
-    /* QR Container */
-    .qr-container {
-      background: white;
-      padding: 30px 40px;
-      border-radius: 15px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
-      max-width: 400px;
-      width: 100%;
-    }
+.qr-container {
+  background: white;
+  padding: 60px 70px;
+  margin-bottom: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
 
     .qr-container h2 {
       color: #0074e4;
-      margin-bottom: 20px;
+      margin-bottom: 5px;
     }
 
     .event-detail {
@@ -262,10 +268,7 @@ if (isset($_GET['id'])) {
     <div class="qr-container">
       <h2>Event QR Code</h2>
 
-      <div class="event-detail"><strong></strong> <?= htmlspecialchars($eventName) ?></div>
-      <div class="event-detail"><strong>Date:</strong> <?= htmlspecialchars($eventDate) ?></div>
-	  <div class="event-detail"><strong>Time:</strong> <?= htmlspecialchars($eventTime) ?></div>
-      <div class="event-detail"><strong>Location:</strong> <?= htmlspecialchars($eventLocation) ?></div>
+      
 
       <canvas id="qrcode"></canvas>
 
@@ -274,15 +277,17 @@ if (isset($_GET['id'])) {
   </div>
 
   <script>
-    const canvas = document.getElementById("qrcode");
-    const qrData = `Event Name: <?= addslashes($eventName) ?>\nDate: <?= $eventDate ?>\nTime: <?= $eventTime ?>\nLocation: <?= $eventLocation ?>`;
+   const canvas = document.getElementById("qrcode");
 
-    QRCode.toCanvas(canvas, qrData, function (error) {
-      if (error) {
-        console.error("QR Error:", error);
-        canvas.outerHTML = "<p style='color:red;'>Failed to generate QR code.</p>";
-      }
-    });
+const qrData = <?= json_encode($eventUrl) ?>;
+
+
+QRCode.toCanvas(canvas, qrData, function (error) {
+  if (error) {
+    console.error("QR Error:", error);
+    canvas.outerHTML = "<p style='color:red;'>Failed to generate QR code.</p>";
+  }
+});
 
     // Optional: Toggle submenu on clicking Events/Attendance
     $(document).ready(function() {
@@ -291,6 +296,7 @@ if (isset($_GET['id'])) {
         $(this).next('.sub-menu').slideToggle();
       });
     });
+	
   </script>
 </body>
 </html>
