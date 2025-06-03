@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 <?php
 // Connect to the database server.
 $link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
@@ -457,6 +458,8 @@ $result = mysqli_query($link, $query);
       });
     });
 =======
+=======
+>>>>>>> Stashed changes
 <?php
 // Connect to the database server.
 $link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
