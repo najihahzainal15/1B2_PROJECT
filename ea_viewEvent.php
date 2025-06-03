@@ -459,25 +459,25 @@ $result = mysqli_query($link, $query);
         });
 
         function sortTable(columnIndex) {
-            var table = document.querySelector(".event-table");
-            var tbody = table.tBodies[0];
-            var rows = Array.from(tbody.rows);
-            var isAscending = table.getAttribute("data-sort-dir") !== "asc";
+    const table = document.querySelector(".event-table");
+    const tbody = table.tBodies[0];
+    const rows = Array.from(tbody.rows);
+    let isAsc = table.getAttribute("data-sort-dir") === "asc";
 
-            rows.sort(function (a, b) {
-                var aText = a.cells[columnIndex].textContent.trim().toLowerCase();
-                var bText = b.cells[columnIndex].textContent.trim().toLowerCase();
+    rows.sort((a, b) => {
+        let aText = a.cells[columnIndex].textContent.trim().toLowerCase();
+        let bText = b.cells[columnIndex].textContent.trim().toLowerCase();
+        return isAsc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+    });
 
-                if (columnIndex === 1 && !isNaN(Date.parse(aText)) && !isNaN(Date.parse(bText))) {
-                    return isAscending ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
-                }
+    // Re-append sorted rows
+    rows.forEach(row => tbody.appendChild(row));
 
-                return isAscending ? aText.localeCompare(bText) : bText.localeCompare(aText);
-            });
+    // Toggle sort direction
+    table.setAttribute("data-sort-dir", isAsc ? "desc" : "asc");
+}
 
-            rows.forEach(row => tbody.appendChild(row));
-            table.setAttribute("data-sort-dir", isAscending ? "asc" : "desc");
-        }
     </script>
 </body>
 </html>
+
