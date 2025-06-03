@@ -306,7 +306,7 @@ $currpass = $userData["password"] ?? '';
 		<img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
 		<div class="header-center">
 			<h2>Profile Settings</h2>
-			<p>Event Advisor: Prof. Hakeem</p>
+			<p>Event Advisor: </p>
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
