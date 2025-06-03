@@ -2,13 +2,8 @@
 // Connect to DB and get event details
 $link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
 
-
 if (isset($_GET['id'])) {
     $id = (int)$_GET['id']; // Cast to int for safety
-	
-$eventUrl = "http://10.66.58.29/YAYA/1B2_PROJECT/ea_registerEvent3.php?id=$id";
- // ✅ Correct URL
-
     $query = "SELECT * FROM event WHERE eventID = $id";
     $result = mysqli_query($link, $query);
     $row = mysqli_fetch_assoc($result);
@@ -16,8 +11,9 @@ $eventUrl = "http://10.66.58.29/YAYA/1B2_PROJECT/ea_registerEvent3.php?id=$id";
     if ($row) {
         $eventName = $row['eventName'];
         $eventDate = $row['eventDate'];
-		$eventTime = $row['eventTime'];
+        $eventTime = $row['eventTime'];
         $eventLocation = $row['eventLocation'];
+        $existingQRCode = $row['eventQRCode']; // If you want to show or use it
     } else {
         die("Event not found.");
     }
@@ -150,32 +146,31 @@ $eventUrl = "http://10.66.58.29/YAYA/1B2_PROJECT/ea_registerEvent3.php?id=$id";
 
     
 
-   .content {
-  margin-left: 170px;
-  padding: 80px 20px 60px;
-  background-color: #f4f8ff;
-  min-height: calc(100vh - 60px);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-}
+    /* Main content area */
+    .content {
+      margin-left: 170px;
+      padding: 80px 20px 20px; /* top padding to clear fixed header */
+      background-color: #f4f8ff;
+      min-height: calc(100vh - 60px);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
 
-.qr-container {
-  background: white;
-  padding: 60px 70px;
-  margin-bottom: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  text-align: center;
-  max-width: 400px;
-  width: 100%;
-}
-
+    /* QR Container */
+    .qr-container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
 
     .qr-container h2 {
       color: #0074e4;
-      margin-bottom: 5px;
+      margin-bottom: 20px;
     }
 
     .event-detail {
@@ -221,7 +216,23 @@ $eventUrl = "http://10.66.58.29/YAYA/1B2_PROJECT/ea_registerEvent3.php?id=$id";
 
     button.save-btn:hover, button.download-btn:hover, .submit-button:hover {
       background-color: #0264c2;
-    }
+    } 
+	
+	button.save-btn {
+  padding: 10px 20px;
+  background-color: #0096D6;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  margin-top: 30px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
   </style>
 </head>
 
@@ -266,37 +277,51 @@ $eventUrl = "http://10.66.58.29/YAYA/1B2_PROJECT/ea_registerEvent3.php?id=$id";
 
   <div class="content">
     <div class="qr-container">
-      <h2>Event QR Code</h2>
-
-      
-
+      <h2>Scan Event QR Code</h2>
       <canvas id="qrcode"></canvas>
-
-     
+      <button id="saveQRBtn" class="save-btn">Save QR Code</button>
+      <p id="saveStatus" style="margin-top:20px; font-weight:600;"></p>
     </div>
   </div>
 
+  
   <script>
-   const canvas = document.getElementById("qrcode");
+    const eventId = <?php echo (int)$id; ?>;
+    const localIP = "10.66.35.157";  // Your PC's IP
+    const projectFolder = "yeyaya"; // Replace accordingly
+    const qrData = `http://${localIP}/${projectFolder}/event_details.php?id=${eventId}`;
 
-const qrData = <?= json_encode($eventUrl) ?>;
+    QRCode.toCanvas(document.getElementById("qrcode"), qrData, function (error) {
+      if (error) {
+        console.error("QR Error:", error);
+        document.getElementById("qrcode").outerHTML = "<p style='color:red;'>Failed to generate QR code.</p>";
+      }
+    });
 
+    document.getElementById('saveQRBtn').addEventListener('click', function() {
+      const canvas = document.getElementById('qrcode');
+      const qrImageBase64 = canvas.toDataURL('image/png');
 
-QRCode.toCanvas(canvas, qrData, function (error) {
-  if (error) {
-    console.error("QR Error:", error);
-    canvas.outerHTML = "<p style='color:red;'>Failed to generate QR code.</p>";
-  }
-});
-
-    // Optional: Toggle submenu on clicking Events/Attendance
-    $(document).ready(function() {
-      $('.sub-button').click(function(e) {
-        e.preventDefault();
-        $(this).next('.sub-menu').slideToggle();
+      $.ajax({
+        url: 'save_qr.php',
+        method: 'POST',
+        data: {
+          eventID: eventId,
+          qrData: qrData,
+          qrImage: qrImageBase64
+        },
+        success: function(response) {
+          $('#saveStatus').text(response).css('color', 'green');
+        },
+        error: function() {
+          $('#saveStatus').text('Error saving QR code.').css('color', 'red');
+        }
       });
     });
-	
   </script>
+</body>
+</html>
+
+
 </body>
 </html>
