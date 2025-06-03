@@ -364,6 +364,11 @@
         ?>
 
         <table class="event-table">
+            <div style="margin-left: 30px; margin-bottom: 15px; display: flex; gap: 20px; flex-wrap: wrap;">
+    <input type="text" id="searchEvent" placeholder="Search by event name..." style="padding: 8px; width: 250px; font-family: 'Poppins', sans-serif;">
+    <input type="text" id="searchDate" placeholder="Search by date..." style="padding: 8px; width: 200px; font-family: 'Poppins', sans-serif;">
+</div>
+
             <thead class="thead">
                 <tr>
                     <th>EVENT NAME</th>
@@ -413,6 +418,22 @@
             });
         });
     </script>
+    <script>
+    $(document).ready(function () {
+        $('.sub-button').click(function () {
+            $(this).next('.sub-menu').slideToggle();
+        });
+
+        // Search filter
+        $('#searchInput').on('keyup', function () {
+            var value = $(this).val().toLowerCase();
+            $('.event-table tbody tr').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+
 </body>
 
 </html>
