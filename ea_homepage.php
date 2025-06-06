@@ -67,7 +67,8 @@ while ($row = mysqli_fetch_assoc($committeeResult)) {
 	$role = $row['committeeRole'];
 	$count = (int)$row['count'];
 	$roleCounts[$role] = $count;
-$totalCommittees += $count; }
+	$totalCommittees += $count;
+}
 
 ?>
 
@@ -345,20 +346,20 @@ $totalCommittees += $count; }
 		}
 
 		#chart-container {
-		width: 90%;
-		max-width: 900px;
-		margin: 0 auto;
-		background-color: #fff;
-		padding: 30px;
-		border-radius: 12px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-	}
+			width: 90%;
+			max-width: 900px;
+			margin: 0 auto;
+			background-color: #fff;
+			padding: 30px;
+			border-radius: 12px;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		}
 
-	canvas {
-		width: 100% !important;
-		max-height: 400px;
-		margin-bottom: 40px;
-	}
+		canvas {
+			width: 100% !important;
+			max-height: 400px;
+			margin-bottom: 40px;
+		}
 
 		#eventStatusChart {
 			width: 100% !important;
@@ -446,83 +447,99 @@ $totalCommittees += $count; }
 					<td>Cancelled Events: <?php echo $cancelledEvents; ?></td>
 					<td>Postponed Events: <?php echo $postponedEvents; ?></td>
 				</tr>
-				
+
 				<tr>
-	<td>Total Committees: <?php echo $totalCommittees; ?></td>
-	<?php foreach ($roleCounts as $role => $count): ?>
-		<td><?php echo htmlspecialchars($role); ?>: <?php echo $count; ?></td>
-	<?php endforeach; ?>
-</tr>
+					<td>Total Committees: <?php echo $totalCommittees; ?></td>
+					<?php foreach ($roleCounts as $role => $count): ?>
+						<td><?php echo htmlspecialchars($role); ?>: <?php echo $count; ?></td>
+					<?php endforeach; ?>
+				</tr>
 
 			</table>
 		</div>
 
-		
+
 
 		<div id="chart-container">
-	<h2>Event Status Distribution (Pie Chart)</h2>
-	<canvas id="eventStatusChartPie"></canvas>
+			<h2>Event Status Distribution (Pie Chart)</h2>
+			<canvas id="eventStatusChartPie"></canvas>
 
-	<h2 style="margin-top:40px;">Committee Role Distribution (Bar Chart)</h2>
-	<canvas id="committeeRoleBarChart"></canvas>
-</div>
+			<h2 style="margin-top:40px;">Committee Role Distribution (Bar Chart)</h2>
+			<canvas id="committeeRoleBarChart"></canvas>
+		</div>
 
 
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.sub-button').click(function() {
+					$(this).next('.sub-menu').slideToggle();
+				});
+			});
+		</script>
 
 		<script>
-		const committeeRoles = <?= json_encode(array_keys($roleCounts)); ?>;
-		const committeeCounts = <?= json_encode(array_values($roleCounts)); ?>;
-	</script>
+			const committeeRoles = <?= json_encode(array_keys($roleCounts)); ?>;
+			const committeeCounts = <?= json_encode(array_values($roleCounts)); ?>;
+		</script>
 
-	<!-- Charts Initialization -->
-	<script>
-		// Pie Chart for Event Status
-		const ctx1 = document.getElementById('eventStatusChartPie').getContext('2d');
-		new Chart(ctx1, {
-			type: 'pie',
-			data: {
-				labels: ['Active', 'Postpone', 'Canceled'],
-				datasets: [{
-					data: [<?= $statusCounts['active'] ?>, <?= $statusCounts['postpone'] ?>, <?= $statusCounts['canceled'] ?>],
-					backgroundColor: ['#36A2EB', '#FFCE56', '#FF6384'],
-					borderWidth: 1
-				}]
-			},
-			options: {
-				responsive: true,
-				plugins: {
-					legend: { position: 'bottom' }
-				}
-			}
-		});
-
-		// Bar Chart for Committee Roles
-		const ctx2 = document.getElementById('committeeRoleBarChart').getContext('2d');
-		new Chart(ctx2, {
-			type: 'bar',
-			data: {
-				labels: committeeRoles,
-				datasets: [{
-					label: 'Committee Count',
-					data: committeeCounts,
-					backgroundColor: '#4CAF50',
-					borderColor: '#388E3C',
-					borderWidth: 1
-				}]
-			},
-			options: {
-				responsive: true,
-				scales: {
-					y: {
-						beginAtZero: true,
-						title: { display: true, text: 'Number of Committees' }
-					},
-					x: {
-						title: { display: true, text: 'Committee Roles' }
+		<!-- Charts Initialization -->
+		<script>
+			// Pie Chart for Event Status
+			const ctx1 = document.getElementById('eventStatusChartPie').getContext('2d');
+			new Chart(ctx1, {
+				type: 'pie',
+				data: {
+					labels: ['Active', 'Postpone', 'Canceled'],
+					datasets: [{
+						data: [<?= $statusCounts['active'] ?>, <?= $statusCounts['postpone'] ?>, <?= $statusCounts['canceled'] ?>],
+						backgroundColor: ['#36A2EB', '#FFCE56', '#FF6384'],
+						borderWidth: 1
+					}]
+				},
+				options: {
+					responsive: true,
+					plugins: {
+						legend: {
+							position: 'bottom'
+						}
 					}
 				}
-			}
-		});
-	</script>
+			});
+
+			// Bar Chart for Committee Roles
+			const ctx2 = document.getElementById('committeeRoleBarChart').getContext('2d');
+			new Chart(ctx2, {
+				type: 'bar',
+				data: {
+					labels: committeeRoles,
+					datasets: [{
+						label: 'Committee Count',
+						data: committeeCounts,
+						backgroundColor: '#4CAF50',
+						borderColor: '#388E3C',
+						borderWidth: 1
+					}]
+				},
+				options: {
+					responsive: true,
+					scales: {
+						y: {
+							beginAtZero: true,
+							title: {
+								display: true,
+								text: 'Number of Committees'
+							}
+						},
+						x: {
+							title: {
+								display: true,
+								text: 'Committee Roles'
+							}
+						}
+					}
+				}
+			});
+		</script>
 </body>
+
 </html>
