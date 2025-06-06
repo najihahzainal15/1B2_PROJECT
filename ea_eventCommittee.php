@@ -1,30 +1,3 @@
-<?php
-// Initialize the session
-session_start();
-
-// Check if the user is logged in, if not then redirect him to login page
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-  header("location: login_page.php");
-  exit;
-}
-
-// Database connection
-$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
-$userID = $_SESSION["userID"];
-$role = $_SESSION["role"];
-
-// Fetch username from database
-$queryUser = "SELECT username FROM user WHERE userID = ?";
-$stmtUser = mysqli_prepare($link, $queryUser);
-mysqli_stmt_bind_param($stmtUser, "i", $userID);
-mysqli_stmt_execute($stmtUser);
-$resultUser = mysqli_stmt_get_result($stmtUser);
-$userData = mysqli_fetch_assoc($resultUser);
-
-// Assign username after database query
-$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
-?>
-
 <!DOCTYPE html>
 <html>
 
@@ -312,8 +285,8 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     <img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
     <div class="header-center">
-      <h2>Register Committee Event</h2>
-      <p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
+      <h2>Committee Event</h2>
+      <p>Event Advisor: Prof. Hakeem</p>
     </div>
     <div class="header-right">
       <a href="logout_button.php" class="logout">Logout</a>
@@ -435,8 +408,30 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     });
   </script>
 
+
   <!-- Bootstrap Bundle JS (includes Popper) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $('.sub-button').click(function (event) {
+      event.preventDefault();
+      $(this).next('.sub-menu').slideToggle();
+    });
+
+    // Filter rows by role
+    $('#searchRole').on('keyup', function () {
+      let value = $(this).val().toLowerCase();
+      $('.tbody tr').filter(function () {
+        $(this).toggle($(this).children().eq(2).text().toLowerCase().indexOf(value) > -1);
+      });
+    });
+  });
+</script>
+
+
+<!-- Bootstrap Bundle JS (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 
 </body>
