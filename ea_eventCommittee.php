@@ -34,6 +34,10 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
     body {
       margin: 0;
@@ -270,6 +274,41 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       margin-left: 1px;
       /* Push it slightly from the left */
     }
+	
+	.search-container {
+  margin: 20px 0;
+  padding: 10px 15px;
+  background-color: #f0f7ff;
+  border-left: 4px solid #0074e4;
+  border-radius: 8px;
+  width: fit-content;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-container label {
+  margin-right: 10px;
+  font-size: 16px;
+  color: #333;
+}
+
+#searchRole {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #0074e4;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#searchRole:focus {
+  border-color: #005bb5;
+  box-shadow: 0 0 5px rgba(0, 116, 228, 0.5);
+}
+
+
+
+
+
   </style>
 </head>
 
@@ -315,11 +354,19 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
   <div class="content">
     <div class="table-container">
+	
+
+
       <table>
         <div class="button-container">
           <a href="ea_committeeReg.php" class="button">REGISTER NEW COMMITTEE MEMBER</a>
         </div>
       </table>
+	  
+	  <div class="search-container">
+  <label for="searchRole"><strong>Search by Role:</strong></label>
+  <input type="text" id="searchRole" placeholder="e.g. Leader, Treasurer">
+</div>
 
       <?php
       // Connect to the database server.
@@ -357,10 +404,15 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
               echo "<td>$eventID</td>";
               echo "<td>$role</td>";
               echo "<td>$studentID</td>";
-              echo "<td>
-        <a href='ea_eventCommitteeUpdate.php?id=$commID'>EDIT</a> || 
-        <a href='ea_eventCommitteeDelete.php?id=$commID' onclick=\"return confirm('Are you sure to delete this record?');\">DELETE</a>
-      </td>";
+             
+			  
+			  echo "<td>
+  <a href='ea_eventCommitteeUpdate.php?id=$commID' class='btn btn-sm btn-primary me-2'>EDIT</a>
+  <a href='ea_eventCommitteeDelete.php?id=$commID' class='btn btn-sm btn-danger' onclick=\"return confirm('Are you sure to delete this record?');\">DELETE</a>
+</td>";
+
+
+        
             }
           } else {
             echo "<tr><td colspan='5'>No committee records found.</td></tr>";
@@ -381,6 +433,27 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       });
     });
   </script>
+
+<script>
+  $(document).ready(function () {
+    $('.sub-button').click(function (event) {
+      event.preventDefault();
+      $(this).next('.sub-menu').slideToggle();
+    });
+
+    // Filter rows by role
+    $('#roleSearch').on('keyup', function () {
+      let value = $(this).val().toLowerCase();
+      $('.tbody tr').filter(function () {
+        $(this).toggle($(this).children().eq(2).text().toLowerCase().indexOf(value) > -1);
+      });
+    });
+  });
+</script>
+
+<!-- Bootstrap Bundle JS (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
 </body>
 
