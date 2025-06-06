@@ -1,3 +1,30 @@
+<?php
+// Initialize the session
+session_start();
+
+// Check if the user is logged in, if not then redirect him to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+  header("location: login_page.php");
+  exit;
+}
+
+// Database connection
+$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
+
+// Fetch username from database
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($link, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
+
+// Assign username after database query
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
+?>
+
 <!DOCTYPE html>
 <html>
 
@@ -252,7 +279,7 @@
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
     <div class="header-center">
       <h2>Register Committee Event</h2>
-      <p>Event Advisor: Prof. Hakeem</p>
+      <p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
     </div>
     <div class="header-right">
       <a href="logout_button.php" class="logout">Logout</a>

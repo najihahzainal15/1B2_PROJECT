@@ -1,4 +1,13 @@
 <?php
+// Initialize the session
+session_start();
+
+// Check if the user is logged in, if not then redirect him to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+  header("location: login_page.php");
+  exit;
+}
+
 // db_connect.php
 $servername = "localhost";
 $username = "root";
@@ -12,7 +21,22 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 }
+
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
+
+// Fetch username from database
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($conn, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
+
+// Assign username after database query
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -20,7 +44,6 @@ if ($conn->connect_error) {
 <head>
   <title>EVENT ADVISOR REGISTER COMMITTEE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyPetakom Event Advisor Homepage</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
@@ -346,7 +369,7 @@ if ($conn->connect_error) {
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
     <div class="header-center">
       <h2>Register Committee Member</h2>
-      <p>Event Advisor: Prof. Hakeem</p>
+      <p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
     </div>
     <div class="header-right">
       <a href="logout_button.php" class="logout">Logout</a>

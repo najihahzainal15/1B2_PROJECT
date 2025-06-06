@@ -195,8 +195,13 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 		.content {
 			background-color: #e6f0ff;
 			margin-left: 160px;
-			height: 100vh;
+			/* leave space for the nav */
+			padding: 20px;
+			min-height: calc(100vh - 60px);
+			/* subtract the height of header */
+			box-sizing: border-box;
 		}
+
 
 		.logo {
 			height: 40px;
@@ -238,8 +243,10 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 			width: 90%;
 			border-collapse: collapse;
 			background: #d0e6ff;
-			margin-left: 30px;
+			margin: 30px auto;
+			/* Center horizontally and add vertical spacing */
 		}
+
 
 		.event-table th,
 		.event-table td {
@@ -311,7 +318,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 		<img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
 		<div class="header-center">
 			<h2>Attendance Slot</h2>
-			<p>Event Advisor: <?php echo  htmlspecialchars($loggedInUser); ?></p>
+			<p>Student: <?php echo  htmlspecialchars($loggedInUser); ?></p>
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>

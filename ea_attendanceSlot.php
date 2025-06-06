@@ -235,7 +235,6 @@ if ($result) {
 			margin-left: 40px;
 			flex-grow: 1;
 			margin-bottom: 50px;
-
 		}
 
 		.event-table th,
