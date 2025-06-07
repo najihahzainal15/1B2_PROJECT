@@ -1,39 +1,13 @@
-<?php
-// Initialize the session
-session_start();
-
-// Check if the user is logged in, if not then redirect him to login page
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-  header("location: login_page.php");
-  exit;
-}
-
-// Database connection
-$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
-$userID = $_SESSION["userID"];
-$role = $_SESSION["role"];
-
-// Fetch username from database
-$queryUser = "SELECT username FROM user WHERE userID = ?";
-$stmtUser = mysqli_prepare($link, $queryUser);
-mysqli_stmt_bind_param($stmtUser, "i", $userID);
-mysqli_stmt_execute($stmtUser);
-$resultUser = mysqli_stmt_get_result($stmtUser);
-$userData = mysqli_fetch_assoc($resultUser);
-
-// Assign username after database query
-$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
-?>
-
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>EVENT ADVISOR VIEW EVENT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+  
   <style>
     body {
       margin: 0;
@@ -168,8 +142,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       background-color: white;
     }
 
-    .event-table th,
-    .event-table td {
+    .event-table th, .event-table td {
       border: 2px solid #666;
       padding: 10px;
       text-align: center;
@@ -226,7 +199,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
 
     .search-box {
-      margin: 20px 30px;
+      margin: 20px 1px;
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
@@ -252,17 +225,15 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
 <body>
   <div class="header1">
-    <img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
+    <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo">
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
     <div class="header-center">
       <h2>View Event</h2>
-      <p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
+      <p>Event Advisor: Prof. Hakeem</p>
     </div>
     <div class="header-right">
       <a href="logout_button.php" class="logout">Logout</a>
-      <a href="ea_displayProfile.php">
-        <img src="images/profile.png" alt="Profile" class="logo2">
-      </a>
+      <a href="s_edit_profile.html"><img src="images/profile.png" alt="Profile" class="logo2"></a>
     </div>
   </div>
 
@@ -296,13 +267,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       </div>
     </div>
 
-    <?php
-    $link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
-    mysqli_select_db($link, "web_project") or die(mysqli_error($link));
-    $query = "SELECT * FROM event";
-    $result = mysqli_query($link, $query);
-    ?>
-
+    
     <table class="event-table" data-sort-dir="asc">
       <thead class="thead">
         <tr>
@@ -313,51 +278,72 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
         </tr>
       </thead>
       <tbody class="tbody">
-        <?php
-        if (mysqli_num_rows($result) > 0) {
-          while ($row = mysqli_fetch_assoc($result)) {
-            $eventID = htmlspecialchars($row["eventID"]);
-            $eventName = htmlspecialchars($row["eventName"]);
-            $date = htmlspecialchars($row["eventDate"]);
-            $status = htmlspecialchars($row["status"]);
-            echo "<tr>";
-            echo "<td>$eventName</td>";
-            echo "<td>$date</td>";
-            echo "<td>$status</td>";
-            echo "<td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=$eventID'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=$eventID' onclick=\"return confirm('Are you sure to delete this record?');\">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=$eventID'>QR</a>
-                  </td>";
-            echo "</tr>";
-          }
-        } else {
-          echo "<tr><td colspan='4'>No event records found.</td></tr>";
-        }
-        mysqli_close($link);
-        ?>
-      </tbody>
+        <tr><td>TechFront: Faculty of Computing Innovation Day</td><td>12 August 2025</td><td>ACTIVE</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=10'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=10' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=10'>QR</a>
+                  </td></tr><tr><td>CodeSprint: Annual Programming Challenge</td><td>25 August 2025</td><td>ACTIVE</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=11'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=11' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=11'>QR</a>
+                  </td></tr><tr><td>CompFair: Computing and IT Exhibition</td><td>1 September 202</td><td>POSTPONE</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=12'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=12' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=12'>QR</a>
+                  </td></tr><tr><td>CyberCon: Cybersecurity Awareness Seminar</td><td>5 September 202</td><td>CANCELED</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=13'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=13' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=13'>QR</a>
+                  </td></tr><tr><td>AppThon: Mobile App Development Hackathon</td><td>10–11 September</td><td>ACTIVE</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=14'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=14' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=14'>QR</a>
+                  </td></tr><tr><td>DataDive: Data Science and AI Workshop</td><td>15 September 20</td><td>POSTPONE</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=15'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=15' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=15'>QR</a>
+                  </td></tr><tr><td>CompTalks: Industry Insights &amp; Career Sharing</td><td>20 September 20</td><td>ACTIVE</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=16'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=16' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=16'>QR</a>
+                  </td></tr><tr><td>DevConnect: Software Engineering Networking Day</td><td>22 September 20</td><td>POSTPONE</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=17'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=17' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=17'>QR</a>
+                  </td></tr><tr><td>FutureTech: Emerging Technologies Forum</td><td>1 October 2025</td><td>ACTIVE</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=18'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=18' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=18'>QR</a>
+                  </td></tr><tr><td>UXperience: Human-Computer Interaction Showcase</td><td>5 October 2025</td><td>CANCELED</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=19'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=19' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=19'>QR</a>
+                  </td></tr><tr><td>FLUUTER PROMAX</td><td>2025-05-27</td><td>ACTIVE</td><td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=21'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=21' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=21'>QR</a>
+                  </td></tr>      </tbody>
     </table>
 
     <button class="submit-button">Back</button>
   </div>
 
   <script>
-    $(document).ready(function() {
-      $('.sub-button').click(function() {
+    $(document).ready(function () {
+      $('.sub-button').click(function () {
         $(this).next('.sub-menu').slideToggle();
       });
 
-      $('#searchEvent').on('keyup', function() {
+      $('#searchEvent').on('keyup', function () {
         var value = $(this).val().toLowerCase();
-        $('.event-table tbody tr').filter(function() {
+        $('.event-table tbody tr').filter(function () {
           $(this).toggle($(this).children().eq(0).text().toLowerCase().indexOf(value) > -1);
         });
       });
 
-      $('#searchDate').on('keyup', function() {
+      $('#searchDate').on('keyup', function () {
         var value = $(this).val().toLowerCase();
-        $('.event-table tbody tr').filter(function() {
+        $('.event-table tbody tr').filter(function () {
           $(this).toggle($(this).children().eq(1).text().toLowerCase().indexOf(value) > -1);
         });
       });
@@ -380,5 +366,4 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
   </script>
 </body>
-
 </html>
