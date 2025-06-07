@@ -249,7 +249,7 @@ if ($result) {
 			font-weight: bold;
 		}
 
-		.status.cancelled {
+		.status.canceled {
 			background-color: #f6c6c6;
 			font-weight: bold;
 		}
