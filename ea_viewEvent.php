@@ -267,7 +267,13 @@
       </div>
     </div>
 
-    
+    <?php
+    $link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
+    mysqli_select_db($link, "web_project") or die(mysqli_error($link));
+    $query = "SELECT * FROM event";
+    $result = mysqli_query($link, $query);
+    ?>
+
     <table class="event-table" data-sort-dir="asc">
       <thead class="thead">
         <tr>
@@ -278,51 +284,30 @@
         </tr>
       </thead>
       <tbody class="tbody">
-        <tr><td>TechFront: Faculty of Computing Innovation Day</td><td>12 August 2025</td><td>ACTIVE</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=10'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=10' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=10'>QR</a>
-                  </td></tr><tr><td>CodeSprint: Annual Programming Challenge</td><td>25 August 2025</td><td>ACTIVE</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=11'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=11' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=11'>QR</a>
-                  </td></tr><tr><td>CompFair: Computing and IT Exhibition</td><td>1 September 202</td><td>POSTPONE</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=12'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=12' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=12'>QR</a>
-                  </td></tr><tr><td>CyberCon: Cybersecurity Awareness Seminar</td><td>5 September 202</td><td>CANCELED</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=13'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=13' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=13'>QR</a>
-                  </td></tr><tr><td>AppThon: Mobile App Development Hackathon</td><td>10–11 September</td><td>ACTIVE</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=14'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=14' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=14'>QR</a>
-                  </td></tr><tr><td>DataDive: Data Science and AI Workshop</td><td>15 September 20</td><td>POSTPONE</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=15'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=15' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=15'>QR</a>
-                  </td></tr><tr><td>CompTalks: Industry Insights &amp; Career Sharing</td><td>20 September 20</td><td>ACTIVE</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=16'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=16' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=16'>QR</a>
-                  </td></tr><tr><td>DevConnect: Software Engineering Networking Day</td><td>22 September 20</td><td>POSTPONE</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=17'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=17' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=17'>QR</a>
-                  </td></tr><tr><td>FutureTech: Emerging Technologies Forum</td><td>1 October 2025</td><td>ACTIVE</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=18'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=18' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=18'>QR</a>
-                  </td></tr><tr><td>UXperience: Human-Computer Interaction Showcase</td><td>5 October 2025</td><td>CANCELED</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=19'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=19' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=19'>QR</a>
-                  </td></tr><tr><td>FLUUTER PROMAX</td><td>2025-05-27</td><td>ACTIVE</td><td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=21'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=21' onclick="return confirm('Are you sure to delete this record?');">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=21'>QR</a>
-                  </td></tr>      </tbody>
+        <?php
+        if (mysqli_num_rows($result) > 0) {
+          while ($row = mysqli_fetch_assoc($result)) {
+            $eventID = htmlspecialchars($row["eventID"]);
+            $eventName = htmlspecialchars($row["eventName"]);
+            $date = htmlspecialchars($row["eventDate"]);
+            $status = htmlspecialchars($row["status"]);
+            echo "<tr>";
+            echo "<td>$eventName</td>";
+            echo "<td>$date</td>";
+            echo "<td>$status</td>";
+            echo "<td class='action-buttons'>
+                    <a class='edit' href='ea_viewEventUpdate.php?id=$eventID'>EDIT</a>
+                    <a class='delete' href='ea_viewEventDelete.php?id=$eventID' onclick=\"return confirm('Are you sure to delete this record?');\">DELETE</a>
+                    <a class='qr' href='ea_registerEvent2.php?id=$eventID'>QR</a>
+                  </td>";
+            echo "</tr>";
+          }
+        } else {
+          echo "<tr><td colspan='4'>No event records found.</td></tr>";
+        }
+        mysqli_close($link);
+        ?>
+      </tbody>
     </table>
 
     <button class="submit-button">Back</button>
