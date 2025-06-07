@@ -150,6 +150,7 @@ if (isset($_GET['event_id'])) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -484,7 +485,7 @@ if (isset($_GET['event_id'])) {
     
     <div class="header-center">
       <h2>Attendance QR Code</h2>
-      <p>Event Advisor: Prof. Hakeem</p>
+      <!-- <p>Event Advisor:</p> -->
     </div>
     
     <div class="header-right">
