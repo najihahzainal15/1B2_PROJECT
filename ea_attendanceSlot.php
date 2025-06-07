@@ -1,11 +1,28 @@
 <?php
 require_once "config.php";
 
-// // Check if user is logged in as event advisor
-// if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'event_advisor') {
-//     header("Location: login.php");
-//     exit();
-// }
+// Initialize the session
+session_start();
+
+// Check if the user is logged in, if not then redirect him to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+	header("location: login_page.php");
+	exit;
+}
+
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
+
+// Fetch username from database
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($link, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
+
+// Assign username after database query
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 
 // Fetch events from database
 $events = [];
@@ -306,7 +323,7 @@ if ($result) {
 		<img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
 		<div class="header-center">
 			<h2>Attendance Slot</h2>
-			<p>Event Advisor: Prof. Hakeem</p>
+			<p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
