@@ -7,6 +7,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: login_page.php");
     exit();
 }
+$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
 
 // Get user info
 $userID = $_SESSION["userID"];
@@ -20,7 +21,7 @@ $userData = mysqli_fetch_assoc($resultUser);
 $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 
 // Initialize variables
-$eventName = $eventDate = $eventTime = $eventLocation = '';
+$eventName = $eventDate = $eventTime = $eventLocation = $eventGeolocation = '';
 $errorMessage = '';
 $successMessage = '';
 
@@ -48,8 +49,8 @@ if (isset($_GET['slot_id']) && is_numeric($_GET['slot_id'])) {
 
 // Only proceed if we have a valid slot ID
 if ($slotID > 0) {
-    // Fetch event details
-    $sql = "SELECT e.eventName, e.eventDate, e.eventTime, e.eventLocation 
+    // Fetch event details including geolocation
+    $sql = "SELECT e.eventName, e.eventDate, e.eventTime, e.eventLocation, e.eventGeolocation 
             FROM event e
             JOIN attendanceslot a ON e.eventID = a.eventID
             WHERE a.slot_ID = ?";
@@ -57,87 +58,120 @@ if ($slotID > 0) {
     if ($stmt = mysqli_prepare($link, $sql)) {
         mysqli_stmt_bind_param($stmt, "i", $slotID);
         mysqli_stmt_execute($stmt);
-        mysqli_stmt_bind_result($stmt, $eventName, $eventDate, $eventTime, $eventLocation);
+        mysqli_stmt_bind_result($stmt, $eventName, $eventDate, $eventTime, $eventLocation, $eventGeolocation);
         mysqli_stmt_fetch($stmt);
         mysqli_stmt_close($stmt);
     }
 
     // Process attendance submission
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_attendance'])) {
-        $studentID = trim($_POST['student_id']);
-        $password = trim($_POST['password']);
-
-        if (empty($studentID)) {
-            $errorMessage = "Student ID is required";
-        } elseif (empty($password)) {
-            $errorMessage = "Password is required";
-        } else {
-            try {
-                // Verify student credentials
-                $sql = "SELECT s.studentID, u.password 
-                        FROM student s
-                        JOIN user u ON s.userID = u.userID
-                        WHERE UPPER(s.studentID) = UPPER(?) AND u.role = 'Student'";
-
-                if ($stmt = mysqli_prepare($link, $sql)) {
-                    mysqli_stmt_bind_param($stmt, "s", $studentID);
-                    mysqli_stmt_execute($stmt);
-                    mysqli_stmt_store_result($stmt);
-                    
-                    if (mysqli_stmt_num_rows($stmt) == 1) {
-                        mysqli_stmt_bind_result($stmt, $dbStudentID, $dbPassword);
-                        mysqli_stmt_fetch($stmt);
-                        mysqli_stmt_close($stmt);
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        // Check if this is the geolocation verification step
+        if (isset($_POST['verify_geolocation'])) {
+            $studentID = trim($_POST['student_id']);
+            $password = trim($_POST['password']);
+            $userLat = floatval($_POST['user_lat']);
+            $userLng = floatval($_POST['user_lng']);
+            
+            // Parse event geolocation (format: "lat, lng")
+            $eventCoords = explode(',', $eventGeolocation);
+            $eventLat = floatval(trim($eventCoords[0]));
+            $eventLng = floatval(trim($eventCoords[1]));
+            
+            // Calculate distance between points (in kilometers)
+            $theta = $eventLng - $userLng;
+            $distance = sin(deg2rad($eventLat)) * sin(deg2rad($userLat)) + 
+                        cos(deg2rad($eventLat)) * cos(deg2rad($userLat)) * cos(deg2rad($theta));
+            $distance = acos($distance);
+            $distance = rad2deg($distance);
+            $distance = $distance * 60 * 1.1515 * 1.609344; // Convert to kilometers
+            
+            // Allow 500 meter radius (0.5 km) instead of 100m
+            if ($distance > 0.5) {
+                $errorMessage = "You are too far from the event location (".round($distance*1000)." meters away). Please be at the event venue to record attendance.";
+                // Debug output - you can remove this after testing
+                $errorMessage .= "<br>Event location: ".$eventGeolocation;
+                $errorMessage .= "<br>Your location: ".$userLat.", ".$userLng;
+            } else {
+                // Location verified - proceed with attendance recording
+                try {
+                    // Check if attendance already exists for this student and slot
+                    $checkAttendanceSql = "SELECT attendanceID FROM attendance WHERE StudentID = ? AND slot_ID = ?";
+                    if ($checkStmt = mysqli_prepare($link, $checkAttendanceSql)) {
+                        mysqli_stmt_bind_param($checkStmt, "si", $studentID, $slotID);
+                        mysqli_stmt_execute($checkStmt);
+                        mysqli_stmt_store_result($checkStmt);
                         
-                        // Check password
-                        if ($password === $dbPassword) {
-                            // Check if attendance already exists for this student and slot
-                            $checkAttendanceSql = "SELECT attendanceID FROM attendance WHERE StudentID = ? AND slot_ID = ?";
-                            if ($checkStmt = mysqli_prepare($link, $checkAttendanceSql)) {
-                                mysqli_stmt_bind_param($checkStmt, "ss", $studentID, $slotID);
-                                mysqli_stmt_execute($checkStmt);
-                                mysqli_stmt_store_result($checkStmt);
-                                
-                                if (mysqli_stmt_num_rows($checkStmt) > 0) {
-                                    $errorMessage = "Attendance already recorded for this student";
+                        if (mysqli_stmt_num_rows($checkStmt) > 0) {
+                            $errorMessage = "Attendance already recorded for this student";
+                        } else {
+                            // Record attendance
+                            $insertSql = "INSERT INTO attendance (StudentID, date, time, slot_ID) 
+                                         VALUES (?, CURDATE(), CURTIME(), ?)";
+                            
+                            if ($insertStmt = mysqli_prepare($link, $insertSql)) {
+                                $slotIDStr = strval($slotID);
+                                mysqli_stmt_bind_param($insertStmt, "si", $studentID, $slotID);
+                                if (mysqli_stmt_execute($insertStmt)) {
+                                    $successMessage = "Attendance recorded successfully for ".htmlspecialchars($eventName);
+                                    error_log("Attendance recorded - Student: $studentID, Slot: $slotID, Time: " . date('Y-m-d H:i:s'));
                                 } else {
-                                    // Record attendance - Note: slot_ID is varchar in database
-                                    $insertSql = "INSERT INTO attendance (StudentID, date, time, slot_ID) 
-                                                 VALUES (?, CURDATE(), CURTIME(), ?)";
-                                    
-                                    if ($insertStmt = mysqli_prepare($link, $insertSql)) {
-                                        // Convert slotID to string since database expects varchar
-                                        $slotIDStr = strval($slotID);
-                                        mysqli_stmt_bind_param($insertStmt, "si", $studentID, $slotID);                                        
-                                        if (mysqli_stmt_execute($insertStmt)) {
-                                            $successMessage = "Attendance recorded successfully for ".htmlspecialchars($eventName);
-                                            error_log("Attendance recorded - Student: $studentID, Slot: $slotID, Time: " . date('Y-m-d H:i:s'));
-                                        } else {
-                                            $errorMessage = "Error recording attendance: ".mysqli_error($link);
-                                            error_log("Failed to insert attendance - Student: $studentID, Slot: $slotID, Error: " . mysqli_error($link));
-                                        }
-                                        mysqli_stmt_close($insertStmt);
-                                    } else {
-                                        $errorMessage = "Database error: Could not prepare attendance insert statement";
-                                        error_log("Failed to prepare attendance insert statement: " . mysqli_error($link));
-                                    }
+                                    $errorMessage = "Error recording attendance: ".mysqli_error($link);
+                                    error_log("Failed to insert attendance - Student: $studentID, Slot: $slotID, Error: " . mysqli_error($link));
                                 }
-                                mysqli_stmt_close($checkStmt);
+                                mysqli_stmt_close($insertStmt);
+                            }
+                        }
+                        mysqli_stmt_close($checkStmt);
+                    }
+                } catch (Exception $e) {
+                    $errorMessage = "System error: ".$e->getMessage();
+                    error_log("Attendance error: ".$e->getMessage());
+                }
+            }
+        }
+        // Original credential verification step
+        elseif (isset($_POST['submit_attendance'])) {
+            $studentID = trim($_POST['student_id']);
+            $password = trim($_POST['password']);
+
+            if (empty($studentID)) {
+                $errorMessage = "Student ID is required";
+            } elseif (empty($password)) {
+                $errorMessage = "Password is required";
+            } else {
+                try {
+                    // Verify student credentials
+                    $sql = "SELECT s.studentID, u.password 
+                            FROM student s
+                            JOIN user u ON s.userID = u.userID
+                            WHERE UPPER(s.studentID) = UPPER(?) AND u.role = 'Student'";
+
+                    if ($stmt = mysqli_prepare($link, $sql)) {
+                        mysqli_stmt_bind_param($stmt, "s", $studentID);
+                        mysqli_stmt_execute($stmt);
+                        mysqli_stmt_store_result($stmt);
+                        
+                        if (mysqli_stmt_num_rows($stmt) == 1) {
+                            mysqli_stmt_bind_result($stmt, $dbStudentID, $dbPassword);
+                            mysqli_stmt_fetch($stmt);
+                            mysqli_stmt_close($stmt);
+                            
+                            // Check password
+                            if ($password === $dbPassword) {
+                                // Credentials valid - now we need geolocation verification
+                                // This will be handled by JavaScript
+                            } else {
+                                $errorMessage = "Invalid student ID or password";
                             }
                         } else {
                             $errorMessage = "Invalid student ID or password";
+                            mysqli_stmt_close($stmt);
                         }
-                    } else {
-                        $errorMessage = "Invalid student ID or password";
-                        mysqli_stmt_close($stmt);
                     }
-                } else {
-                    $errorMessage = "Database error: Could not prepare student verification statement";
-                    error_log("Failed to prepare student verification statement: " . mysqli_error($link));
+                } catch (Exception $e) {
+                    $errorMessage = "System error: ".$e->getMessage();
+                    error_log("Attendance error: ".$e->getMessage());
                 }
-            } catch (Exception $e) {
-                $errorMessage = "System error: ".$e->getMessage();
-                error_log("Attendance error: ".$e->getMessage());
             }
         }
     }
@@ -389,6 +423,54 @@ if ($slotID > 0) {
             width: 80%;
             margin: 20px auto;
         }
+
+        .geolocation-container {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f9ff;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .geolocation-message {
+            margin: 15px 0;
+            font-size: 16px;
+        }
+
+        #location-status {
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f8f8;
+        }
+
+        .location-success {
+            color: #2e7d32;
+            background: #e8f5e9;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .location-error {
+            color: #d32f2f;
+            background: #ffebee;
+            border-left: 4px solid #d32f2f;
+        }
+
+        #location-status i {
+            margin-right: 8px;
+        }
+
+        #retry-location {
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #retry-location:hover {
+            background: #005bb5;
+        }
     </style>
 </head>
 <body>
@@ -460,23 +542,45 @@ if ($slotID > 0) {
 
             <?php if(empty($successMessage)): ?>
                 <div class="form-container">
-                    <form method="post">
+                    <form id="attendanceForm" method="post">
                         <input type="hidden" name="slot_id" value="<?php echo $slotID; ?>">
+                        <input type="hidden" id="user_lat" name="user_lat" value="">
+                        <input type="hidden" id="user_lng" name="user_lng" value="">
                         
-                        <div class="form-group">
-                            <label for="student_id">Student ID:</label>
-                            <input type="text" id="student_id" name="student_id" required 
-                                   placeholder="Enter your student ID (e.g., CB23024)"
-                                   value="<?php echo isset($_POST['student_id']) ? htmlspecialchars($_POST['student_id']) : ''; ?>">
+                        <div id="credentialSection">
+                            <div class="form-group">
+                                <label for="student_id">Student ID:</label>
+                                <input type="text" id="student_id" name="student_id" required 
+                                       placeholder="Enter your student ID (e.g., CB23024)"
+                                       value="<?php echo isset($_POST['student_id']) ? htmlspecialchars($_POST['student_id']) : ''; ?>">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password">Password:</label>
+                                <input type="password" id="password" name="password" required 
+                                       placeholder="Enter your password">
+                            </div>
+                            
+                            <button type="submit" name="submit_attendance" class="submit-button">Submit Attendance</button>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="password">Password:</label>
-                            <input type="password" id="password" name="password" required 
-                                   placeholder="Enter your password">
+                        <div id="geolocationSection" class="geolocation-container">
+                        <div class="geolocation-message">
+                            <h3>Location Verification Required</h3>
+                            <p>To prevent fraudulent attendance, we need to verify you're physically present at:</p>
+                            <p><strong><?php echo htmlspecialchars($eventLocation); ?></strong></p>
+                            <div id="location-status">Checking your location...</div>
+                            <p class="p1"><i class="fas fa-info-circle"></i> Please ensure:</p>
+                            <ul style="text-align: left; margin: 10px auto; max-width: 400px;">
+                                <li>Location/GPS is enabled on your device</li>
+                                <li>You're at the actual event venue</li>
+                                <li>You're using a device with GPS capabilities</li>
+                            </ul>
                         </div>
-                        
-                        <button type="submit" name="submit_attendance" class="submit-button">Submit Attendance</button>
+                        <button type="submit" name="verify_geolocation" class="submit-button" id="verifyButton" disabled>
+                            <i class="fas fa-check-circle"></i> Verify Location and Record Attendance
+                        </button>
+                    </div>
                     </form>
                 </div>
             <?php else: ?>
@@ -503,6 +607,88 @@ if ($slotID > 0) {
                     $(this).prev('.sub-button').addClass('active-parent');
                 }
             });
+            
+            // Handle form submission
+           // Handle form submission
+$('#attendanceForm').on('submit', function(e) {
+    if ($('button[name="submit_attendance"]').is(':focus')) {
+        e.preventDefault();
+        // First validate credentials on client side (simple check)
+        if ($('#student_id').val().trim() === '' || $('#password').val().trim() === '') {
+            return;
+        }
+        
+        // Show geolocation section
+        $('#credentialSection').hide();
+        $('#geolocationSection').show();
+        
+        // Get user's current location
+        if (navigator.geolocation) {
+            $('#location-status').html('<i class="fas fa-spinner fa-spin"></i> Detecting your location...').removeClass('location-error location-success');
+            
+            const options = {
+                enableHighAccuracy: true,  // Try to get the most accurate location
+                timeout: 10000,           // Maximum time to wait for location (10 seconds)
+                maximumAge: 0             // Don't use cached location
+            };
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy; // Accuracy in meters
+                    
+                    // Store coordinates in hidden fields
+                    $('#user_lat').val(userLat);
+                    $('#user_lng').val(userLng);
+                    
+                    // Show accuracy information to user
+                    let statusMessage = `<i class="fas fa-check-circle"></i> Location detected (accuracy: ${Math.round(accuracy)} meters)`;
+                    
+                    // Warn if accuracy is poor
+                    if (accuracy > 5000) {
+                        statusMessage += `<br><i class="fas fa-exclamation-triangle"></i> Warning: Low location accuracy`;
+                    }
+                    
+                    $('#location-status').html(statusMessage).removeClass('location-error').addClass('location-success');
+                    
+                    // Enable verify button
+                    $('#verifyButton').prop('disabled', false);
+                },
+                function(error) {
+                    let errorMessage = "<i class='fas fa-exclamation-circle'></i> ";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage += "Location access was denied. Please enable location services in your browser settings and reload the page.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage += "Your location could not be determined. Please check your internet/GPS connection.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage += "The request to get your location timed out. Please try again in an area with better signal.";
+                            break;
+                        default:
+                            errorMessage += "An unknown error occurred while getting your location.";
+                    }
+                    
+                    $('#location-status').html(errorMessage).removeClass('location-success').addClass('location-error');
+                    $('#verifyButton').prop('disabled', true);
+                    
+                    // Show option to try again
+                    $('#location-status').append('<br><button type="button" id="retry-location" style="margin-top: 10px; padding: 5px 10px; background: #0074e4; color: white; border: none; border-radius: 5px;">Try Again</button>');
+                    
+                    $('#retry-location').click(function() {
+                        $(this).remove();
+                        $('#attendanceForm').trigger('submit');
+                    });
+                },
+                options
+            );
+        } else {
+            $('#location-status').html("<i class='fas fa-exclamation-circle'></i> Geolocation is not supported by your browser. Please use a modern browser that supports location services.").addClass('location-error');
+        }
+    }
+});
             
             // Auto-focus on student ID field when page loads
             const studentIdField = document.getElementById('student_id');
