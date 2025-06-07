@@ -1,39 +1,13 @@
-<?php
-// Initialize the session
-session_start();
-
-// Check if the user is logged in, if not then redirect him to login page
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-  header("location: login_page.php");
-  exit;
-}
-
-// Database connection
-$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
-$userID = $_SESSION["userID"];
-$role = $_SESSION["role"];
-
-// Fetch username from database
-$queryUser = "SELECT username FROM user WHERE userID = ?";
-$stmtUser = mysqli_prepare($link, $queryUser);
-mysqli_stmt_bind_param($stmtUser, "i", $userID);
-mysqli_stmt_execute($stmtUser);
-$resultUser = mysqli_stmt_get_result($stmtUser);
-$userData = mysqli_fetch_assoc($resultUser);
-
-// Assign username after database query
-$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
-?>
-
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>EVENT ADVISOR VIEW EVENT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+  
   <style>
     body {
       margin: 0;
@@ -168,8 +142,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       background-color: white;
     }
 
-    .event-table th,
-    .event-table td {
+    .event-table th, .event-table td {
       border: 2px solid #666;
       padding: 10px;
       text-align: center;
@@ -226,7 +199,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
 
     .search-box {
-      margin: 20px 30px;
+      margin: 20px 1px;
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
@@ -252,17 +225,15 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
 <body>
   <div class="header1">
-    <img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
+    <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo">
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
     <div class="header-center">
       <h2>View Event</h2>
-      <p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
+      <p>Event Advisor: Prof. Hakeem</p>
     </div>
     <div class="header-right">
       <a href="logout_button.php" class="logout">Logout</a>
-      <a href="ea_displayProfile.php">
-        <img src="images/profile.png" alt="Profile" class="logo2">
-      </a>
+      <a href="s_edit_profile.html"><img src="images/profile.png" alt="Profile" class="logo2"></a>
     </div>
   </div>
 
@@ -343,21 +314,21 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
   </div>
 
   <script>
-    $(document).ready(function() {
-      $('.sub-button').click(function() {
+    $(document).ready(function () {
+      $('.sub-button').click(function () {
         $(this).next('.sub-menu').slideToggle();
       });
 
-      $('#searchEvent').on('keyup', function() {
+      $('#searchEvent').on('keyup', function () {
         var value = $(this).val().toLowerCase();
-        $('.event-table tbody tr').filter(function() {
+        $('.event-table tbody tr').filter(function () {
           $(this).toggle($(this).children().eq(0).text().toLowerCase().indexOf(value) > -1);
         });
       });
 
-      $('#searchDate').on('keyup', function() {
+      $('#searchDate').on('keyup', function () {
         var value = $(this).val().toLowerCase();
-        $('.event-table tbody tr').filter(function() {
+        $('.event-table tbody tr').filter(function () {
           $(this).toggle($(this).children().eq(1).text().toLowerCase().indexOf(value) > -1);
         });
       });
@@ -380,5 +351,4 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
   </script>
 </body>
-
 </html>

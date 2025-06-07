@@ -1,423 +1,515 @@
+<?php
+require_once "config.php";
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: login_page.php");
+    exit();
+}
+
+// Get user info
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($link, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
+
+// Initialize variables
+$eventName = $eventDate = $eventTime = $eventLocation = '';
+$errorMessage = '';
+$successMessage = '';
+
+// Get slot_id from URL with proper validation
+$slotID = 0;
+if (isset($_GET['slot_id']) && is_numeric($_GET['slot_id'])) {
+    $slotID = intval($_GET['slot_id']);
+    
+    // Verify slot exists in database
+    $checkSlotSql = "SELECT slot_ID FROM attendanceslot WHERE slot_ID = ?";
+    if ($checkStmt = mysqli_prepare($link, $checkSlotSql)) {
+        mysqli_stmt_bind_param($checkStmt, "i", $slotID);
+        mysqli_stmt_execute($checkStmt);
+        mysqli_stmt_store_result($checkStmt);
+        
+        if (mysqli_stmt_num_rows($checkStmt) == 0) {
+            $errorMessage = "Invalid attendance slot ID (not found in database)";
+            error_log("Slot ID $slotID not found in database");
+        }
+        mysqli_stmt_close($checkStmt);
+    }
+} else {
+    $errorMessage = "No valid attendance slot ID provided";
+}
+
+// Only proceed if we have a valid slot ID
+if ($slotID > 0) {
+    // Fetch event details
+    $sql = "SELECT e.eventName, e.eventDate, e.eventTime, e.eventLocation 
+            FROM event e
+            JOIN attendanceslot a ON e.eventID = a.eventID
+            WHERE a.slot_ID = ?";
+
+    if ($stmt = mysqli_prepare($link, $sql)) {
+        mysqli_stmt_bind_param($stmt, "i", $slotID);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_result($stmt, $eventName, $eventDate, $eventTime, $eventLocation);
+        mysqli_stmt_fetch($stmt);
+        mysqli_stmt_close($stmt);
+    }
+
+    // Process attendance submission
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_attendance'])) {
+        $studentID = trim($_POST['student_id']);
+        $password = trim($_POST['password']);
+
+        if (empty($studentID)) {
+            $errorMessage = "Student ID is required";
+        } elseif (empty($password)) {
+            $errorMessage = "Password is required";
+        } else {
+            try {
+                // Verify student credentials
+                $sql = "SELECT s.studentID, u.password 
+                        FROM student s
+                        JOIN user u ON s.userID = u.userID
+                        WHERE UPPER(s.studentID) = UPPER(?) AND u.role = 'Student'";
+
+                if ($stmt = mysqli_prepare($link, $sql)) {
+                    mysqli_stmt_bind_param($stmt, "s", $studentID);
+                    mysqli_stmt_execute($stmt);
+                    mysqli_stmt_store_result($stmt);
+                    
+                    if (mysqli_stmt_num_rows($stmt) == 1) {
+                        mysqli_stmt_bind_result($stmt, $dbStudentID, $dbPassword);
+                        mysqli_stmt_fetch($stmt);
+                        mysqli_stmt_close($stmt);
+                        
+                        // Check password
+                        if ($password === $dbPassword) {
+                            // Check if attendance already exists for this student and slot
+                            $checkAttendanceSql = "SELECT attendanceID FROM attendance WHERE StudentID = ? AND slot_ID = ?";
+                            if ($checkStmt = mysqli_prepare($link, $checkAttendanceSql)) {
+                                mysqli_stmt_bind_param($checkStmt, "ss", $studentID, $slotID);
+                                mysqli_stmt_execute($checkStmt);
+                                mysqli_stmt_store_result($checkStmt);
+                                
+                                if (mysqli_stmt_num_rows($checkStmt) > 0) {
+                                    $errorMessage = "Attendance already recorded for this student";
+                                } else {
+                                    // Record attendance - Note: slot_ID is varchar in database
+                                    $insertSql = "INSERT INTO attendance (StudentID, date, time, slot_ID) 
+                                                 VALUES (?, CURDATE(), CURTIME(), ?)";
+                                    
+                                    if ($insertStmt = mysqli_prepare($link, $insertSql)) {
+                                        // Convert slotID to string since database expects varchar
+                                        $slotIDStr = strval($slotID);
+                                        mysqli_stmt_bind_param($insertStmt, "si", $studentID, $slotID);                                        
+                                        if (mysqli_stmt_execute($insertStmt)) {
+                                            $successMessage = "Attendance recorded successfully for ".htmlspecialchars($eventName);
+                                            error_log("Attendance recorded - Student: $studentID, Slot: $slotID, Time: " . date('Y-m-d H:i:s'));
+                                        } else {
+                                            $errorMessage = "Error recording attendance: ".mysqli_error($link);
+                                            error_log("Failed to insert attendance - Student: $studentID, Slot: $slotID, Error: " . mysqli_error($link));
+                                        }
+                                        mysqli_stmt_close($insertStmt);
+                                    } else {
+                                        $errorMessage = "Database error: Could not prepare attendance insert statement";
+                                        error_log("Failed to prepare attendance insert statement: " . mysqli_error($link));
+                                    }
+                                }
+                                mysqli_stmt_close($checkStmt);
+                            }
+                        } else {
+                            $errorMessage = "Invalid student ID or password";
+                        }
+                    } else {
+                        $errorMessage = "Invalid student ID or password";
+                        mysqli_stmt_close($stmt);
+                    }
+                } else {
+                    $errorMessage = "Database error: Could not prepare student verification statement";
+                    error_log("Failed to prepare student verification statement: " . mysqli_error($link));
+                }
+            } catch (Exception $e) {
+                $errorMessage = "System error: ".$e->getMessage();
+                error_log("Attendance error: ".$e->getMessage());
+            }
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
-  <title>STUDENT ATTENDANCE VERIFICATION 3</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyPetakom Coordinator Homepage</title>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
-  <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
-  <style>
-	body{
-		  margin: 0;
-		  font-family: 'Poppins', sans-serif;
-		  overflow: hidden;
-	}
-	
-	.header1 {
-	   display: flex;
-	  align-items: center;
-	  justify-content: space-between;
-	  background-color: #0074e4;
-	  padding: 10px 20px;
-	  margin-left: 160px;
-	  color: white;
-		}
-		
-		.header-right {
-		  float: right;
-		   display: flex;
-		  align-items: center;
-		}
-		.header-center {
-	  text-align: center;
-	  flex-grow: 1;
-	}
+    <title>Attendance Verification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+        }
 
-	.header-center h2 {
-	  margin: 0;
-	  font-size: 22px;
-	}
+        .header1 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #0074e4;
+            padding: 10px 20px;
+            margin-left: 160px;
+            color: white;
+        }
 
-	.header-center p {
-	  margin: 0;
-	  font-size: 14px;
-	}
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
 
-	.header-left {
-	  display: flex;
-	  align-items: center;
-	  gap: 10px;
-	  min-width: 120px;
-	}
+        .header-right .logout {
+            color: white;
+            font-size: 14px;
+            margin-right: 15px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
 
-	.logo-left {
-	  max-height: 40px;
-	  max-width: 60px;
-	  object-fit: contain;
-	}
+        .header-right .logout:hover {
+            color: #ddd;
+        }
 
+        .header-center {
+            text-align: center;
+            flex-grow: 1;
+        }
 
-	p{
-		margin: 0px 40px;
-		font-size: 16px;
-	}
-	
-	.p1{
-		margin: 5px;
-		font-size: 14px;
-	}
-	
-	
-	h2{
-	margin: 0px 40px;
-	font-size: 25px;
-	}
-	
-	
-	.nav {
-	  height: 100%;
-	  width: 170px;
-	  position: fixed;
-	  z-index: 1;
-	  top: 0;
-	  left: 0;
-	  background-color: #0074e4;
-	  overflow-x: hidden;
-	  padding-top: 20px;
-	}
-	
-	.nav a {
-	  padding: 6px 8px 6px 16px;
-	  margin: 10px;
-	  text-decoration: none;
-	  font-size: 16px;
-	  color: white;
-	  display: flex;    
-	  justify-content: space-between;
-      align-items: center;	  
-	}
+        .header-center h2 {
+            margin: 0;
+            font-size: 22px;
+        }
 
-	.nav a.active {
-	  background-color: #0264c2;
-	  color: white;
-      padding-left: 30px;
-      width: 100%;
-      box-sizing: border-box;
+        .header-center p {
+            margin: 0;
+            font-size: 14px;
+        }
 
-	}
-	
-	.nav a:hover {
-	  background-color: #0264c2;
-	  transition: all 0.4s ease;
-	}
-		
-	.sub-menu{
-		background: #044e95;
-		display: none;
-	}
-	
-	.sub-menu a{
-		padding-left: 30px;
-		font-size: 12px;
-	}
-    .sub-menu a.active {
-      background-color: #0264c2; /* darker shade for nested active */
-      font-weight: bold;
-    }
-    .nav a.active-parent {
-    background-color: #0264c2;
-    color: white;
-    }
+        h2 {
+            margin: 0px 40px;
+            font-size: 25px;
+        }
 
-    /* .sub-menu1{
-		background: #044e95;
-		display: none;
-	}
-	
-	.sub-menu1 a{
-		padding-left: 30px;
-		font-size: 12px;
-	} */
+        p {
+            margin: 0px 40px;
+            font-size: 16px;
+        }
 
+        .p1 {
+            margin: 5px;
+            font-size: 14px;
+        }
 
-	.button{
-	  background-color: #D2D2D2; 
-	  border: 2px solid #D0D0D0;
-	  color: black;
-	  padding: 16px 30px;
-	  text-align: center;
-	  text-decoration: none;
-	  display: inline-block;
-	  font-size: 16px;
-	  margin: 4px 25px;
-	  cursor: pointer;
-	}
-	
-	.content{ 
-	  background-color: #e6f0ff; 
-	  margin-left: 160px;
-	  height: 100vh;
-	}
+        .nav {
+            height: 100%;
+            width: 170px;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #0074e4;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
 
-	.logo{
-	  height: 40px;
-	
-	}
-	
-	.logo2{
-	  height: 35px;
-	  border-radius: 50%;
-	}
-	
-	
-    .register-btn, .back-btn {
-      background: #e6e6e6;
-      padding: 10px 20px;
-      border: 2px solid #999;
-      font-weight: bold;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
+        .nav a {
+            padding: 6px 8px 6px 16px;
+            margin: 10px;
+            text-decoration: none;
+            font-size: 16px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    .back-btn {
-      margin-top: 30px;
-      background: #fff;
-      border: 2px solid #000;
-    }
+        .nav a.active {
+            background-color: #0264c2;
+            color: white;
+        }
 
-    .event-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #d0e6ff;
-    }
+        .nav a:hover {
+            background-color: #0264c2;
+            transition: all 0.4s ease;
+        }
 
-    .event-table th, .event-table td {
-      border: 2px solid #666;
-      padding: 10px;
-      text-align: center;
-    }
+        .sub-menu {
+            background: #044e95;
+            display: none;
+        }
 
-    .status.active {
-      background-color: #c6f6c6;
-      font-weight: bold;
-    }
+        .sub-menu a {
+            padding-left: 30px;
+            font-size: 12px;
+        }
 
-    .status.cancelled {
-      background-color: #f6c6c6;
-      font-weight: bold;
-    }
+        .content {
+            background-color: #e6f0ff;
+            margin-left: 160px;
+            padding: 20px;
+            min-height: calc(100vh - 60px);
+            box-sizing: border-box;
+        }
 
-    .status.postpone {
-      background-color: #fff0b3;
-      font-weight: bold;
-    }
+        .logo {
+            height: 40px;
+            margin: 10px;
+        }
 
-    .action-btn {
-      margin: 0 5px;
-      padding: 5px 10px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-	   
-	.tbody {
-	background-color: white;}
-    .submit-button{
-   background-color: #0074e4; 
-   font-family: 'Poppins', sans-serif;
-   border: none;
-   border-radius: 10px;
-   color: white;
-   padding: 8px 14px;
-   text-align: center;
-   text-decoration: none;
-   display: inline-block;
-   font-size: 14px;
-   margin: 4px 25px;
-   cursor: pointer;
-   transition: 0.3s;
-    }
- 
-    .submit-button:hover {
-    background-color: #005bb5;
-    }
-    .scan-button{
-   background-color: #0074e4; 
-   font-family: 'Poppins', sans-serif;
-   border: none;
-   border-radius: 10px;
-   color: white;
-   padding: 8px 14px;
-   text-align: center;
-   text-decoration: none;
-   display: inline-block;
-   font-size: 14px;
-   margin: 4px 25px;
-   cursor: pointer;
-   transition: 0.3s;
-    }
- 
-    .scan-button:hover {
-    background-color: #005bb5;
-    }
-    .desc{
-        padding: 20px; 
-        font-weight: bold;
-    }
-    .event_name{
-        text-align: center; 
-        padding: 20px;
-        background-color: white; 
-        border: 2px solid #aaa; 
-        border-radius: 8px;
-        font-weight: bold;
-        left: 180px;
-		margin: 10px 200px 0px;
-    }
-    .qr{
-        text-align: center; 
-        background-color: #d0e6ff; 
-        display: inline-block; 
-        padding: 5px 20px; 
-        border-radius: 6px;
-    }
- 
+        .logo2 {
+            height: 35px;
+            margin: 10px;
+        }
 
- /* td .QRButton{
-    border-style: none;
-    background-color: #6666f0ff; 
+        .back-btn {
+            background-color: #0074e4;
+            font-family: 'Poppins', sans-serif;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 6px 14px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 20px 0 20px 30px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
- } */
-	
-	
-  </style>
+        .event-info {
+            background: #d0e6ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px auto;
+            width: 90%;
+            border: 2px solid #666;
+        }
+
+        .event-info h2 {
+            color: #0074e4;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .event-info p {
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 80%;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #0074e4;
+            outline: none;
+        }
+
+        .submit-button {
+            background-color: #0074e4;
+            font-family: 'Poppins', sans-serif;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .submit-button:hover {
+            background-color: #005bb5;
+        }
+
+        .error { 
+            color: #d32f2f;
+            padding: 15px;
+            background-color: #ffebee;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #d32f2f;
+            width: 80%;
+            margin: 20px auto;
+        }
+
+        .success { 
+            color: #2e7d32;
+            padding: 15px;
+            background-color: #e8f5e8;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2e7d32;
+            width: 80%;
+            margin: 20px auto;
+        }
+    </style>
 </head>
-
 <body>
 
-  <div class="header1">
-  <div class="header-left">
-  <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo logo-left">
-  <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo logo-left">
-</div>
-
-  
-  <div class="header-center">
-    <h2>Attendance</h2>
-    <p>Student : Alif</p>
-  </div>
-
-  <div class="header-right">
-			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_edit_profile.php">
-				<img src="images/profile.png" alt="Profile" class="logo2">
-			</a>
- </div>  
-		
-
-  
- <div class="nav">
-	<div class="menu">
-		<div class="item"><a href="s_homepage.html">Dashboard</a></div>
-		<div class="item">
-			<a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
-			<div class="sub-menu">
-				<a href="s_membership.html" class="sub-item">Membership Application</a>
-			</div>
-		</div>
-		<div class="item">
-			<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
-			<div class="sub-menu">
-				<a href="#events" class="sub-item">View Event</a>
-			</div>
-		</div>
-		
-		<div class="item">
-			<a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
-			<div class="sub-menu">
-				<a class="active" href="s_attendanceSlot.html" class="sub-item">Attendance Slot</a>
-			</div>
-		</div>
-		
-	</div>
-  </div>
-  
-  
-  <div class="content">
-  <br>
-
-     <div class="event_name">
-        <h2>HACKATON FUN RUN</h2>
-        <div class="desc">
-            <p>DATE: 25 APRIL 2025</p>
-            <p>TIME: 9AM - 12PM</p>
+    <div class="header1">
+        <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo">
+        <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
+        <div class="header-center">
+            <h2>Attendance Verification</h2>
+            <p>Student: <?php echo htmlspecialchars($loggedInUser); ?></p>
         </div>
-        
-    <div class="qr">
-        <h3 >ATTENDANCE QR CODE</h3>
-        <img src="images/hackatonAttendanceQR.jpg" alt="QR Code" style="width: 150px; height: 150px; margin-top: 10px;" />
+        <div class="header-right">
+            <a href="logout_button.php" class="logout">Logout</a>
+            <a href="s_displayProfile.php">
+                <img src="images/profile.png" alt="Profile" class="logo2">
+            </a>
+        </div>
     </div>
-    <div>
-        <button class="scan-button">SCAN QR</button>
+
+    <div class="nav">
+        <div class="menu">
+            <div class="item"><a href="s_homepage.php">Dashboard</a></div>
+            
+            <div class="item">
+                <a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
+                <div class="sub-menu">
+                    <a href="s_membership.php" class="sub-item">Membership Application</a>
+                </div>
+            </div>
+
+            <div class="item">
+                <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
+                <div class="sub-menu">
+                    <a href="s_homepage.php" class="sub-item">View Event</a>
+                </div>
+            </div>
+
+            <div class="item">
+                <a href="#attendance" class="sub-button active-parent">Attendance<i class="fa-solid fa-caret-down"></i></a>
+                <div class="sub-menu">
+                    <a href="s_attendance1.php" class="sub-item active">Attendance Slot</a>
+                </div>
+            </div>
+        </div>
     </div>
-    <br><br>
 
-    <button class="submit-button">Back</button>
+    <div class="content">
+        <?php if(!empty($errorMessage)): ?>
+            <div class="error">
+                <strong>Error:</strong> <?php echo $errorMessage; ?>
+                <?php if(strpos($errorMessage, 'Invalid attendance slot') !== false): ?>
+                    <p>Please ensure you scanned the correct QR code for this event.</p>
+                <?php endif; ?>
+            </div>
+        <?php elseif(!empty($successMessage)): ?>
+            <div class="success">
+                <strong>Success!</strong> <?php echo $successMessage; ?>
+                <p>Your attendance has been recorded in the system.</p>
+            </div>
+        <?php endif; ?>
 
-	</div>
-  </div>
-	<script type="text/javascript">
-	$(document).ready(function(){
-		$('.sub-button').click(function(){
-			$(this).next('.sub-menu').slideToggle();
-		});
+        <?php if($slotID > 0): ?>
+            <div class="event-info">
+                <h2><?php echo htmlspecialchars($eventName); ?></h2>
+                <p><strong>Date:</strong> <?php echo htmlspecialchars($eventDate); ?></p>
+                <p><strong>Time:</strong> <?php echo htmlspecialchars($eventTime); ?></p>
+                <p><strong>Location:</strong> <?php echo htmlspecialchars($eventLocation); ?></p>
+            </div>
 
-         // Automatically open sub-menu if it contains an active item
-        $('.sub-menu').each(function(){
-            if($(this).find('.active').length > 0){
-            $(this).show();
-            $(this).prev('.sub-button').addClass('active-parent');
+            <?php if(empty($successMessage)): ?>
+                <div class="form-container">
+                    <form method="post">
+                        <input type="hidden" name="slot_id" value="<?php echo $slotID; ?>">
+                        
+                        <div class="form-group">
+                            <label for="student_id">Student ID:</label>
+                            <input type="text" id="student_id" name="student_id" required 
+                                   placeholder="Enter your student ID (e.g., CB23024)"
+                                   value="<?php echo isset($_POST['student_id']) ? htmlspecialchars($_POST['student_id']) : ''; ?>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" name="password" required 
+                                   placeholder="Enter your password">
+                        </div>
+                        
+                        <button type="submit" name="submit_attendance" class="submit-button">Submit Attendance</button>
+                    </form>
+                </div>
+            <?php else: ?>
+                <div style="text-align: center; margin-top: 30px;">
+                    <p style="font-size: 18px;">Thank you for attending this event!</p>
+                    <a href="s_attendance1.php" class="back-btn">Back to Attendance</a>
+                </div>
+            <?php endif; ?>
+        <?php else: ?>
+            <a href="s_attendance1.php" class="back-btn">Back to Attendance</a>
+        <?php endif; ?>
+    </div>
+    
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('.sub-button').click(function() {
+                $(this).next('.sub-menu').slideToggle();
+            });
+
+            // Automatically open sub-menu if it contains an active item
+            $('.sub-menu').each(function() {
+                if ($(this).find('.active').length > 0) {
+                    $(this).show();
+                    $(this).prev('.sub-button').addClass('active-parent');
+                }
+            });
+            
+            // Auto-focus on student ID field when page loads
+            const studentIdField = document.getElementById('student_id');
+            if (studentIdField && !studentIdField.value) {
+                studentIdField.focus();
             }
         });
-	});
-  // Show popup when scan button clicked
-document.querySelector('.scan-button').addEventListener('click', function() {
-    document.getElementById('qrPopup').style.display = 'block';
-});
-
-// Close popup function
-function closePopup() {
-    document.getElementById('qrPopup').style.display = 'none';
-}
-
-// Handle form submission
-document.getElementById('verifyForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const studentID = document.getElementById('studentID').value;
-    const password = document.getElementById('password').value;
-
-    // TODO: Send these to server via AJAX or form post
-    console.log("Submitted:", studentID, password);
-
-    // Example only: close the popup
-    closePopup();
-
-    alert("Attendance submitted for " + studentID);
-});
-	</script>
-
-  <!-- Popup Modal -->
-<div id="qrPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
-  <div style="background: white; width: 300px; margin: 100px auto; padding: 20px; border-radius: 10px; text-align: center;">
-    <h3>Verify Attendance</h3>
-    <form id="verifyForm">
-      <input type="text" id="studentID" placeholder="Student ID" required style="width: 90%; margin-bottom: 10px;"><br>
-      <input type="password" id="password" placeholder="Password" required style="width: 90%; margin-bottom: 20px;"><br>
-      <button type="button" onclick="closePopup()" class="submit-button" style="background-color: #ccc;">Cancel</button>
-      <button type="submit" class="submit-button">Submit</button>
-    </form>
-  </div>
-</div>
-
+    </script>
 </body>
 </html>

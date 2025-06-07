@@ -266,7 +266,7 @@ if ($result) {
 			font-weight: bold;
 		}
 
-		.status.cancelled {
+		.status.canceled {
 			background-color: #f6c6c6;
 			font-weight: bold;
 		}
@@ -319,7 +319,7 @@ if ($result) {
 
 <body>
 	<div class="header1">
-		<img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
+		<img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo">
 		<img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
 		<div class="header-center">
 			<h2>Attendance Slot</h2>
