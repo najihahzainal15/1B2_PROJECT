@@ -1,10 +1,128 @@
 <?php
+// Handle AJAX requests first
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-cache, must-revalidate');
+    
+    require_once "config.php";
+    
+    // Handle QR code verification
+    if (isset($_POST['qrCode']) && isset($_POST['eventId'])) {
+        $response = array('success' => false, 'message' => '');
+        $eventId = intval($_POST['eventId']);
+        $qrCode = $_POST['qrCode'];
+        
+        try {
+            // Verify QR code matches event
+            $qrSql = "SELECT slot_ID, attendance_QRcode FROM attendanceslot WHERE eventID = ?";
+            
+            if ($qrStmt = mysqli_prepare($link, $qrSql)) {
+                mysqli_stmt_bind_param($qrStmt, "i", $eventId);
+                
+                if (mysqli_stmt_execute($qrStmt)) {
+                    mysqli_stmt_store_result($qrStmt);
+                    
+                    if (mysqli_stmt_num_rows($qrStmt) == 1) {
+                        mysqli_stmt_bind_result($qrStmt, $slotId, $validQrCode);
+                        mysqli_stmt_fetch($qrStmt);
+                        mysqli_stmt_close($qrStmt);
+                        
+                        // Check if QR code matches
+                        if ($qrCode === $validQrCode) {
+                            $response['success'] = true;
+                            $response['message'] = 'QR code verified successfully!';
+                            $response['slotId'] = $slotId;
+                            $response['redirect'] = "s_attendance3.php?slot_id=" . $slotId;
+                            
+                            error_log("QR code verified - Event: $eventId, Slot: $slotId");
+                        } else {
+                            $response['message'] = 'Invalid QR code for this event';
+                        }
+                    } else {
+                        $response['message'] = 'No attendance slot found for this event';
+                    }
+                } else {
+                    $response['message'] = 'Database error: Could not verify QR code';
+                }
+            } else {
+                $response['message'] = 'Database error: Could not prepare QR verification statement';
+            }
+            
+        } catch (Exception $e) {
+            $response['message'] = 'System error: ' . $e->getMessage();
+            error_log("QR verification error: " . $e->getMessage());
+        }
+        
+        echo json_encode($response);
+        exit;
+    }
+    
+    // Handle event location lookup
+    if (isset($_POST['eventId']) && !isset($_POST['qrCode'])) {
+        $response = array('success' => false, 'eventName' => '', 'eventLocation' => '');
+        $eventId = intval($_POST['eventId']);
+        
+        try {
+            $sql = "SELECT eventName, eventLocation FROM event WHERE eventID = ?";
+            
+            if ($stmt = mysqli_prepare($link, $sql)) {
+                mysqli_stmt_bind_param($stmt, "i", $eventId);
+                
+                if (mysqli_stmt_execute($stmt)) {
+                    mysqli_stmt_store_result($stmt);
+                    
+                    if (mysqli_stmt_num_rows($stmt) == 1) {
+                        mysqli_stmt_bind_result($stmt, $eventName, $eventLocation);
+                        mysqli_stmt_fetch($stmt);
+                        
+                        $response['success'] = true;
+                        $response['eventName'] = $eventName;
+                        $response['eventLocation'] = $eventLocation;
+                    } else {
+                        $response['message'] = 'Event not found';
+                    }
+                } else {
+                    $response['message'] = 'Database query failed';
+                }
+                mysqli_stmt_close($stmt);
+            } else {
+                $response['message'] = 'Database preparation failed';
+            }
+        } catch (Exception $e) {
+            $response['message'] = 'Database error: ' . $e->getMessage();
+            error_log("Get event location error: " . $e->getMessage());
+        }
+        
+        echo json_encode($response);
+        exit;
+    }
+}
+
+// Main page logic
+session_start();
 require_once "config.php";
+
+// Check if user is logged in
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: login_page.php");
+    exit();
+}
+
+// Get user's name from the database
+$userID = $_SESSION["userID"];
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($link, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
+
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 
 // Initialize variables
 $eventName = $eventDate = $eventTime = $eventLocation = $eventDescription = $qrCode = '';
 $errorMessage = '';
-$eventID = isset($_GET['event_id']) ? $_GET['event_id'] : null;
+$eventID = isset($_GET['event_id']) ? intval($_GET['event_id']) : null;
 
 if($eventID) {
     // Fetch event details and QR code from database
@@ -54,7 +172,7 @@ if($eventID) {
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
 
   <style>
-    body{
+    body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
     }
@@ -77,7 +195,7 @@ if($eventID) {
     .header-right .logout {
       color: white;
       font-size: 14px;      
-      margin-right: 15px;   /* space between Logout and profile icon */
+      margin-right: 15px;
       text-decoration: none;
       transition: color 0.3s;
     }
@@ -86,20 +204,19 @@ if($eventID) {
       color: #ddd;         
     }
     
-    h2{
-    margin: 0px 40px;
-    font-size: 25px;
-    color: white;
+    .header-center {
+      text-align: center;
+      flex-grow: 1;
     }
-    
-    p{
-        margin: 0px 40px;
-        font-size: 16px;
+
+    .header-center h2 {
+      margin: 0;
+      font-size: 22px;
     }
-    
-    .p1{
-        margin: 5px;
-        font-size: 14px;
+
+    .header-center p {
+      margin: 0;
+      font-size: 14px;
     }
     
     .nav {
@@ -135,78 +252,24 @@ if($eventID) {
       transition: all 0.4s ease;
     }
         
-    .sub-menu{
-        background: #044e95;
-        display: none;
+    .sub-menu {
+      background: #044e95;
+      display: none;
     }
     
-    .sub-menu a{
-        padding-left: 30px;
-        font-size: 12px;
+    .sub-menu a {
+      padding-left: 30px;
+      font-size: 12px;
     }
 
-    .button{
-      background-color: #D2D2D2; 
-      border: 2px solid #D0D0D0;
-      color: black;
-      padding: 16px 30px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      margin: 4px 25px;
-      cursor: pointer;
-    }
-    
-    .logo{
+    .logo {
       height: 40px;
       margin: 10px;
     }
     
-    .logo2{
+    .logo2 {
       height: 35px;
       margin: 10px;
-    }
-    
-    .events-container{
-        height: auto;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 30px;
-        margin-left: 30px;
-    }
-    
-    .event{
-        width: 300px;
-        height: 330px;
-        background: white;
-        margin: 20px;
-        box-sizing: border-box;
-        font-size: 14px;
-        box-shadow: 0px 0px 10px 2px grey;
-        transition: 1s;
-    }
-    
-    .event:hover{
-        transform: scale(1.05);
-        z-index: 2;
-    }
-    
-    .eventImage{
-      height: 260px;
-      width: 300px;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .icons{
-        background: white;
-        border: 0.1 rem solid black;
-        padding: 2rem;
-        display: flex;
-        align-items: center;
-        flex: 1 1 25rem;
     }
     
     .header-left {
@@ -215,38 +278,15 @@ if($eventID) {
       gap: 10px;
     }
 
-    .header-center {
-      text-align: center;
-      flex-grow: 1;
-    }
-
-    .header-center h2 {
-      margin: 0;
-      font-size: 22px;
-    }
-
-   .content {
-      margin-left: 148px;
+    .content {
+      margin-left: 170px;
       padding: 20px;
       background-color: #e6f0ff;
       display: flex;
       justify-content: center;
-      width: calc(100% - 170px);  /* Use available space */
-      flex-direction: column; /* Stack items vertically */
-    }
-
-    @media (max-width: 800px) {
-      .table-container {
-        margin-left: 20px;
-        margin-right: 20px;
-        width: calc(100% - 40px); /* Adjust for small screens */
-        padding: 10px; /* Less padding on small screens */
-      }
-
-      .identity-row input,
-      .event-details input {
-        font-size: 14px; /* Smaller text for smaller screens */
-      }
+      width: calc(100% - 170px);
+      min-height: 100vh;
+      box-sizing: border-box;
     }
 
     .section-header {
@@ -264,6 +304,9 @@ if($eventID) {
       grid-template-columns: 1fr 2fr;
       gap: 10px;
       padding: 20px;
+      background: white;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .form-grid label {
@@ -273,12 +316,13 @@ if($eventID) {
       text-align: center;
     }
 
-    input[type="text"], textarea {
+    input[type="text"], input[type="password"], textarea {
       width: 100%;
       padding: 10px;
       border: 1px solid #666;
       background: white;
       font-size: 14px;
+      box-sizing: border-box;
     }
 
     textarea {
@@ -286,27 +330,86 @@ if($eventID) {
       height: 60px;
     }
 
-    .merit-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
+    .scan-button {
+      text-align: center;
+      background-color: #0074e4;
+      font-family: 'Poppins', sans-serif;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      padding: 12px 20px;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    
+    .scan {
+      text-align: center;
       padding: 20px;
     }
 
-    .form-btn {
-      padding: 12px 20px;
-      font-size: 14px;
-      cursor: pointer;
-      border: 2px solid #999;
-      background: #f2f2f2;
+    .scan-button:hover {
+      background-color: #005bb5;
+    }
+    
+    .error-message {
+      color: red;
+      text-align: center;
+      padding: 20px;
+      font-weight: bold;
+      background: #ffeeee;
+      border-radius: 5px;
+      margin: 20px;
+    }
+    
+    .qr-scanner-container {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    #qr-video {
+      width: 100%;
+      max-width: 500px;
+      border: 2px solid #0074e4;
+      border-radius: 5px;
+      transform: scaleX(-1);
+    }
+    
+    .qr-result {
+      margin-top: 10px;
       font-weight: bold;
     }
 
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 15px;
-      padding: 0 20px 30px;
+    .qr-display-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px auto;
+      max-width: 600px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .qr-display-container h3 {
+      color: #0074e4;
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .qr-display-container ol {
+      padding-left: 20px;
+      text-align: left;
+    }
+
+    .qr-display-container li {
+      margin-bottom: 8px;
     }
 
     .submit-button {
@@ -320,95 +423,32 @@ if($eventID) {
       text-decoration: none;
       display: inline-block;
       font-size: 14px;
-      margin: 4px 25px;
+      margin: 4px 10px;
       cursor: pointer;
       transition: 0.3s;
-      float: left;
     }
 
     .submit-button:hover {
       background-color: #005bb5;
     }
-    
-    .scan-button {
-      text-align: center;
-      background-color: #0074e4;
-      font-family: 'Poppins', sans-serif;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      padding: 8px 14px;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 14px;
-      margin: 4px 25px;
-      cursor: pointer;
-      transition: 0.3s;
+
+    .fa-caret-down.rotate {
+      transform: rotate(180deg);
+      transition: transform 0.3s ease;
     }
     
-    .scan{
-        text-align: center;
+    .fa-caret-down {
+      transition: transform 0.3s ease;
     }
 
-    .scan-button:hover {
-      background-color: #005bb5;
-    }
-    
-    .error-message {
-      color: red;
-      text-align: center;
-      padding: 20px;
-      font-weight: bold;
-    }
-    
-    .qr-scanner-container {
-      display: none;
-      margin-top: 20px;
-      text-align: center;
-    }
-    
-    #qr-video {
-      width: 100%;
-      max-width: 500px;
-      border: 2px solid #0074e4;
-      border-radius: 5px;
-    }
-    
-    .qr-result {
-      margin-top: 10px;
-      font-weight: bold;
-    }
-
-    .qr-display-container {
-      background: #f0f0f0;
-      padding: 20px;
+    .table-container {
+      background: white;
       border-radius: 10px;
-      margin: 20px auto;
-      max-width: 600px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    .qr-display-container h3 {
-        color: #0074e4;
-        margin-top: 0;
-    }
-
-    .qr-display-container ol {
-        padding-left: 20px;
-    }
-
-    .qr-display-container li {
-        margin-bottom: 8px;
-    }
-    
-    #qr-video {
+      margin: 20px 0;
       width: 100%;
-      max-width: 500px;
-      border: 2px solid #0074e4;
-      border-radius: 5px;
-      transform: scaleX(-1); /* This flips the video horizontally */
+      max-width: 1000px;
     }
-  
   </style>
 </head>
 <body>
@@ -420,12 +460,12 @@ if($eventID) {
 
     <div class="header-center">
       <h2>Attendance</h2>
-      <p>Student: <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?></p>
+      <p>Student: <?php echo htmlspecialchars($loggedInUser); ?></p>
     </div>
     
     <div class="header-right">
       <a href="logout_button.php" class="logout">Logout</a>
-      <a href="c_edit_profile.php">
+      <a href="s_displayProfile.php">
         <img src="images/profile.png" alt="Profile" class="logo2">
       </a>
     </div>  
@@ -433,26 +473,26 @@ if($eventID) {
   
   <div class="nav">
     <div class="menu">
-      <div class="item"><a href="#membership">Dashboard</a></div>
+      <div class="item"><a href="s_homepage.php">Dashboard</a></div>
+      
       <div class="item">
         <a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a href="c_membership.php" class="sub-item">Membership Approval</a>
+          <a href="s_membership.php" class="sub-item">Membership Application</a>
         </div>
       </div>
-      
+
       <div class="item">
         <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a href="#events" class="sub-item">View Event</a>
-          <a href="#c_meritApp.html" class="sub-item">Merit Application</a>
+          <a href="s_homepage.php" class="sub-item">View Event</a>
         </div>
       </div>
-      
+
       <div class="item">
-        <a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
+        <a href="#attendance" class="sub-button active-parent">Attendance<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a class="active" href="#events" class="sub-item">Attendance Slot</a>
+          <a href="s_attendance1.php" class="sub-item active">Attendance Slot</a>
         </div>
       </div>
     </div>
@@ -487,10 +527,9 @@ if($eventID) {
             </div>
             
             <div class="qr-display-container" id="qr-display" style="display: none; text-align: center;">
-                <h3 style="text-align: center;">Attendance QR Code</h3>
-                <p style="text-align: center;">Please take a photo of this QR code:</p>
+                <h3>Attendance QR Code</h3>
+                <p>Please take a photo of this QR code:</p>
                 
-                <!-- This div will contain the generated QR code -->
                 <div id="qrcode-image" style="margin: 20px auto; padding: 20px; background: white; display: inline-block;"></div>
                 
                 <div style="margin-top: 10px; font-size: 14px; color: #666;">
@@ -499,11 +538,11 @@ if($eventID) {
                 
                 <div style="background: #f8f8f8; padding: 15px; margin: 20px auto; max-width: 500px;">
                     <h4 style="margin-top: 0; text-align: center;">How to use this code:</h4>
-                    <ol style="padding-left: 20px;">
+                    <ol>
                         <li>Take a clear photo of the QR code</li>
                         <li>Click the 'SCAN QR' button</li>
-                        <li>Show the QR into your device camera</li>
-                        <li>Keep the screenshot until attendance is verified</li>
+                        <li>Show the QR code to your device camera</li>
+                        <li>You'll be redirected to verification page</li>
                     </ol>
                 </div>
                 
@@ -517,30 +556,17 @@ if($eventID) {
             </div>
 
             <div class="qr-scanner-container" id="qr-scanner">
-                <h3 style="text-align: center;">Scan Attendance QR Code</h3>
-                <div style="text-align: center;">
-                    <video id="qr-video" playsinline></video>
-                </div>
-                <div class="qr-result" id="qr-result"></div>
-                
-                <!-- Add this authentication form -->
-                <div id="auth-form" style="display: none; margin: 20px auto; max-width: 400px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
-                    <h3 style="text-align: center;">Verify Your Identity</h3>
-                    <div style="margin-bottom: 15px;">
-                        <label for="student-id" style="display: block; margin-bottom: 5px;">Student ID:</label>
-                        <input type="text" id="student-id" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label for="student-password" style="display: block; margin-bottom: 5px;">Password:</label>
-                        <input type="password" id="student-password" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <button id="verify-btn" style="width: 100%; padding: 10px; background-color: #0074e4; color: white; border: none; border-radius: 4px; cursor: pointer;">Verify</button>
-                </div>
-                
-                <div style="text-align: center; margin-top: 20px;">
-                    <button class="submit-button" id="stop-scan-btn">STOP SCANNING</button>
-                </div>
+              <h3>Scan Attendance QR Code</h3>
+              <div style="text-align: center;">
+                <video id="qr-video" playsinline></video>
+              </div>
+              <div class="qr-result" id="qr-result"></div>
+        
+              <div style="text-align: center; margin-top: 20px;">
+                  <button class="submit-button" id="stop-scan-btn">STOP SCANNING</button>
+              </div>
             </div>
+                
         <?php endif; ?>
     </div>
   </div>
@@ -561,7 +587,11 @@ if($eventID) {
                 $('#qr-display').show();
                 $(this).hide();
             } else {
-                alert('No QR code available for this event.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No QR Code',
+                    text: 'No QR code available for this event.'
+                });
             }
         });
         
@@ -574,191 +604,149 @@ if($eventID) {
         const qrScanner = document.getElementById('qr-scanner');
         const qrVideo = document.getElementById('qr-video');
         const qrResult = document.getElementById('qr-result');
-        const authForm = document.getElementById('auth-form');
         let scanner = null;
-        let currentScannedData = null;
         
         $('#scan-qr-btn').click(function() {
             startScanner();
             $(this).hide();
             qrScanner.style.display = 'block';
-            authForm.style.display = 'none';
         });
         
         $('#stop-scan-btn').click(function() {
             stopScanner();
             qrScanner.style.display = 'none';
             $('#scan-qr-btn').show();
-            authForm.style.display = 'none';
         });
-        
-        // Modify the verify-btn click handler
-$('#verify-btn').click(function() {
-    const studentId = $('#student-id').val();
-    const password = $('#student-password').val();
-    
-    if(!studentId || !password) {
-        Swal.fire({
-            title: 'Error!',
-            text: 'Please enter both Student ID and Password',
-            icon: 'error'
-        });
-        return;
-    }
-    
-    // Show loading indicator
-    Swal.fire({
-        title: 'Verifying Attendance',
-        text: 'Please wait while we verify your attendance...',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
-    // Verify student credentials and record attendance
-    $.ajax({
-        url: 'verify_attendance.php',
-        type: 'POST',
-        data: {
-            studentId: studentId,
-            password: password,
-            eventId: <?php echo $eventID; ?>,
-            qrCode: currentScannedData
-        },
-        success: function(response) {
-            Swal.close();
-            const result = JSON.parse(response);
-            if(result.success) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Attendance recorded successfully',
-                    icon: 'success'
-                });
-                authForm.style.display = 'none';
-                stopScanner();
-                qrScanner.style.display = 'none';
-                $('#scan-qr-btn').show();
-            } else {
-                Swal.fire({
-                    title: 'Error!',
-                    text: result.message,
-                    icon: 'error'
-                });
-            }
-        },
-        error: function() {
-            Swal.fire({
-                title: 'Error!',
-                text: 'Failed to verify attendance',
-                icon: 'error'
-            });
-        }
-    });
-});
 
-// Updated QR scanner function
-function startScanner() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then(function(stream) {
-            qrVideo.srcObject = stream;
-            qrVideo.play();
-            
-            scanner = setInterval(function() {
-                if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
-                    try {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = qrVideo.videoWidth;
-                        canvas.height = qrVideo.videoHeight;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(qrVideo, 0, 0, canvas.width, canvas.height);
-                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                        const code = jsQR(imageData.data, imageData.width, imageData.height);
-                        
-                        if (code) {
-                            currentScannedData = code.data;
-                            stopScanner();
-                            
-                            // Extract event ID from QR code
-                            let qrEventId;
-                            if (code.data.startsWith("EVENT_ID:")) {
-                                qrEventId = code.data.split(':')[1].split('_')[0];
-                            } else {
-                                qrEventId = code.data.split('_')[0];
-                            }
-                            
-                            const currentEventId = "<?php echo $eventID; ?>";
-                            
-                            if (qrEventId == currentEventId) {
-                                qrResult.innerHTML = 'Valid QR code for this event';
-                                authForm.style.display = 'block';
-                            } else {
-                                // Fetch event details for the scanned QR code
-                                $.ajax({
-                                    url: 'get_event_location.php',
-                                    type: 'POST',
-                                    data: { eventId: qrEventId },
-                                    success: function(response) {
-                                        const eventData = JSON.parse(response);
-                                        if (eventData.success) {
-                                            Swal.fire({
-                                                title: 'Wrong Location',
-                                                html: `This QR code is for:<br><br>
-                                                       <strong>Event:</strong> ${eventData.eventName}<br>
-                                                       <strong>Location:</strong> ${eventData.eventLocation}`,
-                                                icon: 'error'
-                                            });
-                                        } else {
-                                            Swal.fire({
-                                                title: 'Invalid QR Code',
-                                                text: 'This QR code is not recognized by the system',
-                                                icon: 'error'
-                                            });
-                                        }
-                                        qrScanner.style.display = 'none';
-                                        $('#scan-qr-btn').show();
-                                    },
-                                    error: function() {
-                                        Swal.fire({
-                                            title: 'Error',
-                                            text: 'Could not verify QR code location',
-                                            icon: 'error'
-                                        });
-                                        qrScanner.style.display = 'none';
-                                        $('#scan-qr-btn').show();
-                                    }
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Error scanning QR:", e);
-                    }
-                }
-            }, 100);
-        })
-        .catch(function(err) {
-            console.error("Camera access error:", err);
-            Swal.fire({
-                title: 'Camera Error',
-                text: 'Could not access camera. Please ensure you\'ve granted camera permissions.',
-                icon: 'error'
-            });
-            qrResult.innerHTML = "Could not access camera. Please ensure you've granted camera permissions.";
-        });
-}
-        
-        function stopScanner() {
-            if (scanner) {
-                clearInterval(scanner);
-                scanner = null;
+        // QR Scanner functions
+        function startScanner() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment' 
+                    } 
+                })
+                .then(function(stream) {
+                    qrVideo.srcObject = stream;
+                    qrVideo.setAttribute('playsinline', true);
+                    qrVideo.play();
+                    requestAnimationFrame(scanQRCode);
+                })
+                .catch(function(err) {
+                    console.error('Error accessing camera:', err);
+                    qrResult.innerHTML = '<span style="color: red;">Error accessing camera. Please ensure camera permissions are granted.</span>';
+                });
+            } else {
+                qrResult.innerHTML = '<span style="color: red;">Camera not supported by this browser.</span>';
             }
+        }
+
+        function stopScanner() {
             if (qrVideo.srcObject) {
-                qrVideo.srcObject.getTracks().forEach(track => track.stop());
+                const tracks = qrVideo.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
                 qrVideo.srcObject = null;
             }
-            qrResult.innerHTML = "";
+            qrResult.textContent = '';
         }
+
+        function scanQRCode() {
+            if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = qrVideo.videoWidth;
+                canvas.height = qrVideo.videoHeight;
+                context.drawImage(qrVideo, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (code) {
+                    qrResult.innerHTML = '<span style="color: green;">QR Code detected! Verifying...</span>';
+                    
+                    // Show loading
+                    Swal.fire({
+                        title: 'Verifying QR Code...',
+                        text: 'Please wait while we verify your QR code',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Send QR verification request
+                    $.ajax({
+                        url: window.location.href,
+                        method: 'POST',
+                        data: {
+                            eventId: <?php echo $eventID ? $eventID : 'null'; ?>,
+                            qrCode: code.data
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            Swal.close();
+                            
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: response.message,
+                                    confirmButtonText: 'Continue'
+                                }).then(() => {
+                                    // Stop scanner after successful verification
+                                    stopScanner();
+                                    qrScanner.style.display = 'none';
+                                    $('#scan-qr-btn').show();
+                                    
+                                    // Redirect to verification page
+                                    if (response.redirect) {
+                                        window.location.href = response.redirect;
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Verification Failed',
+                                    text: response.message
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.close();
+                            console.error('AJAX Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'System Error',
+                                text: 'Unable to verify QR code. Please try again.'
+                            });
+                        }
+                    });
+                    
+                    return;
+                }
+            }
+            
+            // Continue scanning if no QR code found
+            if (qrScanner.style.display !== 'none') {
+                requestAnimationFrame(scanQRCode);
+            }
+        }
+
+        // Sub-menu functionality
+        $('.sub-button').click(function(){
+            $(this).next('.sub-menu').slideToggle();
+            $(this).find('.fa-caret-down').toggleClass('rotate');
+        });
+
+        // Automatically open sub-menu if it contains an active item
+        $('.sub-menu').each(function() {
+            if ($(this).find('.active').length > 0) {
+                $(this).show();
+                $(this).prev('.sub-button').addClass('active-parent');
+            }
+        });
     });
 </script>
+
 </body>
 </html>
