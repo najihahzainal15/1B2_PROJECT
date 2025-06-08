@@ -4,8 +4,7 @@ require_once "config.php";
 // Initialize the session
 session_start();
 
-// Check if the user is logged in and is a coordinator, if not then redirect to login page
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION["role"] !== 'COORDINATOR') {
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: login_page.php");
     exit;
 }
@@ -14,7 +13,7 @@ $userID = $_SESSION["userID"];
 
 // Get event ID from URL
 if (!isset($_GET['event_id'])) {
-    header("location: c_viewEvent.php");
+    header("location: c_viewAttendance.php");
     exit;
 }
 
@@ -29,20 +28,16 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $event = mysqli_fetch_assoc($result);
 
-if (!$event) {
-    header("location: c_viewEvent.php");
-    exit;
-}
-
-// Fetch participants for this event
+// Fetch attendance records for this event
 $participants = [];
-$sql = "SELECT p.userID, u.username, u.email, a.attendanceTime 
-        FROM participant p 
-        JOIN user u ON p.userID = u.userID 
-        LEFT JOIN attendance a ON p.userID = a.userID AND a.eventID = ?
-        WHERE p.eventID = ?";
+$sql = "SELECT a.StudentID, u.username, u.email, a.date, a.time, s.studentID 
+        FROM attendance a 
+        JOIN student s ON a.StudentID = s.studentID 
+        JOIN user u ON s.userID = u.userID
+        JOIN attendanceslot ats ON a.slot_ID = ats.slot_ID
+        WHERE ats.eventID = ?";
 $stmt = mysqli_prepare($link, $sql);
-mysqli_stmt_bind_param($stmt, "ii", $eventID, $eventID);
+mysqli_stmt_bind_param($stmt, "s", $eventID);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $participants = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -137,6 +132,26 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
             align-items: center;
         }
 
+        .nav a.active {
+            background-color: #0264c2;
+            color: white;
+        }
+
+        .nav a:hover {
+            background-color: #0264c2;
+            transition: all 0.4s ease;
+        }
+
+        .sub-menu {
+            background: #044e95;
+            display: none;
+        }
+
+        .sub-menu a {
+            padding-left: 30px;
+            font-size: 12px;
+        }
+
         .content {
             background-color: #e6f0ff;
             margin-left: 170px;
@@ -168,6 +183,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
             border-collapse: collapse;
             background: white;
             margin: 20px 40px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
         .participants-table th, .participants-table td {
@@ -265,7 +281,8 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
             <div class="item">
                 <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
                 <div class="sub-menu">
-                    <a href="c_viewEvent.php" class="sub-item">View Event</a>
+                    <a href="#events" class="sub-item">View Event</a>
+                    <a href="c_viewAttendance.php" class="sub-item active">Event Attendance</a>
                     <a href="c_meritApp.php" class="sub-item">Merit Application</a>
                 </div>
             </div>
@@ -274,11 +291,13 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
     <div class="content">
         <div class="event-details">
-            <h2><?php echo htmlspecialchars($event['eventName']); ?></h2>
-            <p><strong>Date:</strong> <?php echo htmlspecialchars($event['eventDate']); ?></p>
-            <p><strong>Location:</strong> <?php echo htmlspecialchars($event['location']); ?></p>
-            <p><strong>Description:</strong> <?php echo htmlspecialchars($event['description']); ?></p>
-            <p><strong>Status:</strong> <span class="status <?php echo strtolower($event['status']); ?>"><?php echo htmlspecialchars($event['status']); ?></span></p>
+            <h2><?php echo isset($event['eventName']) ? htmlspecialchars($event['eventName']) : 'Event Not Found'; ?></h2>
+            <p><strong>Date:</strong> <?php echo isset($event['eventDate']) ? htmlspecialchars($event['eventDate']) : 'N/A'; ?></p>
+            <p><strong>Location:</strong> <?php echo isset($event['eventLocation']) ? htmlspecialchars($event['eventLocation']) : 'N/A'; ?></p>
+            <p><strong>Description:</strong> <?php echo isset($event['eventDesc']) ? htmlspecialchars($event['eventDesc']) : 'N/A'; ?></p>
+            <p><strong>Status:</strong> <span class="status <?php echo isset($event['status']) ? strtolower($event['status']) : ''; ?>">
+                <?php echo isset($event['status']) ? htmlspecialchars($event['status']) : 'N/A'; ?>
+            </span></p>
         </div>
 
         <h2 style="margin: 20px 40px;">Participants List</h2>
@@ -299,18 +318,22 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
                             <td><?php echo $index + 1; ?></td>
                             <td><?php echo htmlspecialchars($participant['username']); ?></td>
                             <td><?php echo htmlspecialchars($participant['email']); ?></td>
-                            <td><?php echo $participant['attendanceTime'] ? htmlspecialchars($participant['attendanceTime']) : 'Not attended'; ?></td>
+                            <td><?php 
+                                echo (isset($participant['date']) && isset($participant['time'])) 
+                                    ? htmlspecialchars($participant['date'] . ' ' . $participant['time'])
+                                    : 'Not attended';
+                            ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="4" style="text-align: center;">No participants registered for this event</td>
+                        <td colspan="4" style="text-align: center;">No attendance records found for this event</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
 
-        <button class="back-btn" onclick="window.location.href='c_viewEvent.php'">Back to Events</button>
+        <button class="back-btn" onclick="window.location.href='c_viewAttendance.php'">Back to Events</button>
     </div>
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -114,6 +114,26 @@ if ($result) {
             align-items: center;
         }
 
+        .nav a.active {
+            background-color: #0264c2;
+            color: white;
+        }
+
+        .nav a:hover {
+            background-color: #0264c2;
+            transition: all 0.4s ease;
+        }
+
+        .sub-menu {
+            background: #044e95;
+            display: none;
+        }
+
+        .sub-menu a {
+            padding-left: 30px;
+            font-size: 12px;
+        }
+
         .content {
             background-color: #e6f0ff;
             margin-left: 170px;
@@ -231,7 +251,7 @@ if ($result) {
             <div class="item">
                 <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
                 <div class="sub-menu">
-                    <a href="#events" class="sub-item">View Event</a>
+                    <a href="#events" class="sub-item active">View Event</a>
                     <a href="c_viewAttendance.php" class="sub-item">Event Attendance</a>
                     <a href="c_meritApp.php" class="sub-item">Merit Application</a>
                 </div>
@@ -258,7 +278,7 @@ if ($result) {
                             <?php echo htmlspecialchars($event['status']); ?>
                         </td>
                         <td>
-                            <a href="c_viewAttendance.php?event_id=<?php echo $event['eventID']; ?>">
+                            <a href="c_viewAttendance2.php?event_id=<?php echo $event['eventID']; ?>">
                                 <button class="action-btn" <?php echo strtoupper($event['status']) !== 'ACTIVE' ? 'disabled' : ''; ?>>
                                     View Attendance
                                 </button>

@@ -464,7 +464,7 @@ $pieBorderColors = [
 
                 <!-- Pie Chart -->
                 <div class="pie-chart">
-                    <h3>Student Attendance by Course</h3>
+                    <h3>Student Attendance by Course (Pie Chart)</h3>
                     <div class="pie-chart-container">
                         <canvas id="attendanceByCourseChart"></canvas>
                     </div>
