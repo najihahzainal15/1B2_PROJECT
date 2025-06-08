@@ -354,7 +354,7 @@
 
 <body>
   <div class="header1">
-	<img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
+	<img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo">
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
 		
 		<div class="header-center">
