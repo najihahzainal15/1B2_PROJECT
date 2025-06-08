@@ -347,7 +347,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 			<div class="item">
 				<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 				<div class="sub-menu">
-					<a href="s_homepage.php" class="sub-item">View Event</a>
+					<a href="s_membershipAppView.php" class="sub-item">View Event</a>
 				</div>
 			</div>
 
@@ -404,6 +404,14 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 		$(document).ready(function() {
 			$('.sub-button').click(function() {
 				$(this).next('.sub-menu').slideToggle();
+			});
+
+			// Automatically open sub-menu if it contains an active item
+			$('.sub-menu').each(function() {
+				if ($(this).find('.active').length > 0) {
+					$(this).show();
+					$(this).prev('.sub-button').addClass('active-parent');
+				}
 			});
 		});
 	</script>
