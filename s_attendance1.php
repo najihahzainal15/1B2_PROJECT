@@ -7,10 +7,25 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: login_page.php");
     exit();
 }
-// Fetch events from database
+
+// Get search parameter
+$searchTerm = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+// Fetch events from database with search functionality
 $events = [];
-$sql = "SELECT eventID, eventName, eventDate, status FROM event";
-$result = mysqli_query($link, $sql);
+if (!empty($searchTerm)) {
+    $sql = "SELECT eventID, eventName, eventDate, status FROM event 
+            WHERE eventName LIKE ? OR eventDate LIKE ? OR status LIKE ? 
+            ORDER BY eventDate DESC";
+    $searchParam = '%' . $searchTerm . '%';
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "sss", $searchParam, $searchParam, $searchParam);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+} else {
+    $sql = "SELECT eventID, eventName, eventDate, status FROM event ORDER BY eventDate DESC";
+    $result = mysqli_query($link, $sql);
+}
 
 if ($result) {
     $events = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -134,6 +149,9 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
         .nav a.active {
             background-color: #0264c2;
             color: white;
+            padding-left: 30px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .nav a:hover {
@@ -149,6 +167,16 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
         .sub-menu a {
             padding-left: 30px;
             font-size: 12px;
+        }
+
+        .sub-menu a.active {
+            background-color: #0264c2;
+            font-weight: bold;
+        }
+
+        .nav a.active-parent {
+            background-color: #0264c2;
+            color: white;
         }
 
         .button {
@@ -167,10 +195,8 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
         .content {
             background-color: #e6f0ff;
             margin-left: 160px;
-            /* leave space for the nav */
             padding: 20px;
             min-height: calc(100vh - 60px);
-            /* subtract the height of header */
             box-sizing: border-box;
         }
 
@@ -210,12 +236,112 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
             transition: 0.3s;
         }
 
+        /* Search Container Styling */
+        .search-container {
+            width: 80%;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        .search-container form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Search Box Styling */
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            border-color: #0074e4;
+        }
+
+        .search-box::placeholder {
+            color: #999;
+        }
+
+        /* Search Button Styling */
+        .search-btn {
+            background-color: #0074e4;
+            font-family: 'Poppins', sans-serif;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover {
+            background-color: #005bb5;
+        }
+
+        .search-btn i {
+            margin-right: 5px;
+        }
+
+        /* Clear Search Button */
+        .clear-search {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .clear-search:hover {
+            background-color: #c82333;
+        }
+
+        .clear-search i {
+            margin-right: 5px;
+        }
+
+        /* Search Results Message */
+        .search-results {
+            color: #666;
+            font-style: italic;
+            width: 80%;
+            margin: 10px auto;
+            max-width: 600px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 5px;
+            border-left: 4px solid #0074e4;
+        }
+
         .event-table {
             width: 90%;
             border-collapse: collapse;
             background: #d0e6ff;
-            margin: 30px auto;
-            /* Center horizontally and add vertical spacing */
+            margin-top: 20px;
+            margin-left: auto;
+            margin-right: auto;
+            flex-grow: 1;
+            margin-bottom: 50px;
         }
 
         .event-table th,
@@ -242,9 +368,19 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
         .action-btn {
             margin: 0 5px;
-            padding: 5px 10px;
+            padding: 8px 15px;
             font-weight: bold;
             cursor: pointer;
+            background-color: #0074e4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            transition: background-color 0.3s;
+        }
+
+        .action-btn:hover {
+            background-color: #005bb5;
         }
 
         .tbody {
@@ -262,19 +398,93 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
             text-decoration: none;
             display: inline-block;
             font-size: 14px;
-            margin: 4px 25px;
+            margin: 20px 0 20px 30px;
             cursor: pointer;
             transition: 0.3s;
-            float: left;
         }
 
         .submit-button:hover {
             background-color: #005bb5;
         }
 
-        td .QRButton {
+        .QRButton {
             border-style: none;
-            background-color: #6666f0ff;
+            background-color: white;
+        }
+
+        .unavailable-text {
+            color: grey;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        .no-events {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 18px;
+            width: 80%;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .no-events h3 {
+            color: #0074e4;
+            margin-bottom: 15px;
+        }
+
+        .no-events a {
+            color: #0074e4;
+            text-decoration: none;
+        }
+
+        .no-events a:hover {
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background-color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .search-container {
+                width: 95%;
+                margin: 15px auto;
+            }
+            
+            .search-container form {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .search-btn, .clear-search {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .search-results {
+                width: 95%;
+                margin: 10px auto;
+            }
+            
+            .event-table {
+                width: 95%;
+                font-size: 14px;
+            }
+            
+            .no-events {
+                width: 95%;
+                margin: 15px auto;
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
@@ -324,44 +534,108 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     </div>
 
     <div class="content">
-        <table class="event-table">
-            <thead>
-                <tr>
-                    <th>EVENT NAME</th>
-                    <th>DATE</th>
-                    <th>STATUS</th>
-                    <th>ATTENDANCE QR GENERATOR</th>
-                </tr>
-            </thead>
-            <tbody class="tbody">
-                <?php foreach ($events as $event): ?>
+        <!-- Search Section -->
+        <div class="search-container">
+            <form method="GET" action="">
+                <input type="text" name="search" class="search-box" 
+                       placeholder="Search by event name, date, or status..." 
+                       value="<?php echo htmlspecialchars($searchTerm); ?>">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <?php if (!empty($searchTerm)): ?>
+                    <a href="?" class="clear-search">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                <?php endif; ?>
+            </form>
+        </div>
+
+        <?php if (!empty($searchTerm)): ?>
+            <div class="search-results">
+                <?php 
+                $resultCount = count($events);
+                if ($resultCount > 0) {
+                    echo "<i class='fas fa-info-circle'></i> Found " . $resultCount . " result" . ($resultCount != 1 ? "s" : "") . " for '" . htmlspecialchars($searchTerm) . "'";
+                } else {
+                    echo "<i class='fas fa-exclamation-circle'></i> No results found for '" . htmlspecialchars($searchTerm) . "'";
+                }
+                ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (empty($events)): ?>
+            <div class="no-events">
+                <?php if (!empty($searchTerm)): ?>
+                    <h3><i class="fas fa-search"></i> No Events Found</h3>
+                    <p>No events match your search criteria "<strong><?php echo htmlspecialchars($searchTerm); ?></strong>"</p>
+                    <p><a href="?"><i class="fas fa-list"></i> View all events</a></p>
+                <?php else: ?>
+                    <h3><i class="fas fa-calendar-times"></i> No Events Found</h3>
+                    <p>There are currently no events in the system.</p>
+                <?php endif; ?>
+            </div>
+        <?php else: ?>
+            <table class="event-table">
+                <thead>
                     <tr>
-                        <td><?php echo htmlspecialchars($event['eventName']); ?></td>
-                        <td><?php echo htmlspecialchars($event['eventDate']); ?></td>
-                        <td class="status <?php echo strtolower($event['status']); ?>">
-                            <?php echo htmlspecialchars($event['status']); ?>
-                        </td>
-
-                        <td class="QRButton">
-                            <?php if (strtoupper($event['status']) === 'ACTIVE'): ?>
-                                <a href="s_attendance2.php?event_id=<?php echo $event['eventID']; ?>">
-                                    <button class="action-btn">VERIFY ATTENDANCE</button>
-                                </a>
-                            <?php else: ?>
-                                <span style="color: grey; font-weight: bold;">Unavailable</span>
-                            <?php endif; ?>
-                        </td>
+                        <th>EVENT NAME</th>
+                        <th>DATE</th>
+                        <th>STATUS</th>
+                        <th>ATTENDANCE QR GENERATOR</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    <br>
-    <br>
+                </thead>
+                <tbody class="tbody">
+                    <?php foreach ($events as $event): ?>
+                        <tr>
+                            <td>
+                                <?php 
+                                $eventName = htmlspecialchars($event['eventName']);
+                                if (!empty($searchTerm) && stripos($eventName, $searchTerm) !== false) {
+                                    $eventName = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $eventName);
+                                }
+                                echo $eventName;
+                                ?>
+                            </td>
+                            <td>
+                                <?php 
+                                $eventDate = htmlspecialchars($event['eventDate']);
+                                if (!empty($searchTerm) && stripos($eventDate, $searchTerm) !== false) {
+                                    $eventDate = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $eventDate);
+                                }
+                                echo $eventDate;
+                                ?>
+                            </td>
+                            <td class="status <?php echo strtolower($event['status']); ?>">
+                                <?php 
+                                $status = htmlspecialchars($event['status']);
+                                if (!empty($searchTerm) && stripos($status, $searchTerm) !== false) {
+                                    $status = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $status);
+                                }
+                                echo $status;
+                                ?>
+                            </td>
 
-    <button class="submit-button">Back</button>
-    </main>
+                            <td class="QRButton">
+                                <?php if (strtoupper($event['status']) === 'ACTIVE'): ?>
+                                    <a href="s_attendance2.php?event_id=<?php echo $event['eventID']; ?>">
+                                        <button class="action-btn">VERIFY ATTENDANCE</button>
+                                    </a>
+                                <?php else: ?>
+                                    <span class="unavailable-text">Unavailable</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+        
+        <button class="submit-button" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
     </div>
+
     <script type="text/javascript">
         $(document).ready(function() {
             $('.sub-button').click(function() {
@@ -374,6 +648,25 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
                     $(this).show();
                     $(this).prev('.sub-button').addClass('active-parent');
                 }
+            });
+
+            // Auto-focus on search box when page loads (if empty)
+            const searchBox = $('.search-box');
+            if (searchBox.val() === '') {
+                searchBox.focus();
+            }
+
+            // Allow pressing Enter to search
+            $('.search-box').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $(this).closest('form').submit();
+                }
+            });
+
+            // Clear search functionality
+            $('.clear-search').on('click', function(e) {
+                e.preventDefault();
+                window.location.href = window.location.pathname;
             });
         });
     </script>
