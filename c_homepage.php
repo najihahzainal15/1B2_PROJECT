@@ -51,6 +51,42 @@ function getAttendanceByActiveEvents($link) {
     return $data;
 }
 
+// Function to get attendance data by course
+function getAttendanceByCourse($link) {
+    $data = [];
+    
+    // Query to get attendance count by course prefix
+    $sql = "SELECT 
+                CASE 
+                    WHEN LEFT(a.StudentID, 2) = 'CA' THEN 'BCN'
+                    WHEN LEFT(a.StudentID, 2) = 'CB' THEN 'BCS'
+                    WHEN LEFT(a.StudentID, 2) = 'RC' THEN 'DRC'
+                    WHEN LEFT(a.StudentID, 2) = 'CF' THEN 'BCY'
+                    WHEN LEFT(a.StudentID, 2) = 'CD' THEN 'BCG'
+                    ELSE 'Other'
+                END AS course,
+                COUNT(*) AS count
+            FROM attendance a
+            JOIN attendanceslot s ON a.slot_ID = s.slot_ID
+            JOIN event e ON s.eventID = e.eventID
+            WHERE e.status = 'ACTIVE'
+            GROUP BY course
+            ORDER BY count DESC";
+    
+    $result = mysqli_query($link, $sql);
+    
+    if ($result && mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = [
+                'course' => $row['course'],
+                'count' => $row['count']
+            ];
+        }
+    }
+    
+    return $data;
+}
+
 $attendanceData = getAttendanceByActiveEvents($link);
 $chartLabels = [];
 $chartValues = [];
@@ -58,6 +94,15 @@ $chartValues = [];
 foreach ($attendanceData as $item) {
     $chartLabels[] = $item['event'];
     $chartValues[] = $item['count'];
+}
+
+$attendanceByCourse = getAttendanceByCourse($link);
+$courseLabels = [];
+$courseValues = [];
+
+foreach ($attendanceByCourse as $item) {
+    $courseLabels[] = $item['course'];
+    $courseValues[] = $item['count'];
 }
 
 // Generate colors for pie chart
@@ -119,7 +164,6 @@ $pieBorderColors = [
             color: white;
             font-size: 14px;
             margin-right: 15px;
-            /* space between Logout and profile icon */
             text-decoration: none;
             transition: color 0.3s;
         }
@@ -262,14 +306,12 @@ $pieBorderColors = [
             align-items: center;
         }
 
-        /* ---- dashboard cards ---- */
         .dashboard-content h3 {
             margin-top: 0;
             font-size: 20px;
             color: #333;
         }
 
-        /* stats grid */
         .stats-grid {
             display: flex;
             gap: 20px;
@@ -300,7 +342,6 @@ $pieBorderColors = [
             font-weight: bold;
         }
 
-        /* Charts container */
         .charts-container {
             display: flex;
             gap: 30px;
@@ -343,7 +384,7 @@ $pieBorderColors = [
         }
 
         #attendanceChart,
-        #attendancePieChart {
+        #attendanceByCourseChart {
             width: 100% !important;
             height: 100% !important;
         }
@@ -388,7 +429,7 @@ $pieBorderColors = [
             <div class="item">
                 <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
                 <div class="sub-menu">
-                    <a href="#events" class="sub-item">View Event</a>
+                    <a href="c_viewEvent.php" class="sub-item">View Event</a>
                     <a href="c_meritApp.php" class="sub-item">Merit Application</a>
                 </div>
             </div>
@@ -422,9 +463,9 @@ $pieBorderColors = [
 
                 <!-- Pie Chart -->
                 <div class="pie-chart">
-                    <h3>Student Attendance by Active Event (Pie Chart)</h3>
+                    <h3>Student Attendance by Course</h3>
                     <div class="pie-chart-container">
-                        <canvas id="attendancePieChart"></canvas>
+                        <canvas id="attendanceByCourseChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -527,17 +568,17 @@ $pieBorderColors = [
                         }
                     });
 
-                    // Create the attendance pie chart
-                    const pieCtx = document.getElementById('attendancePieChart').getContext('2d');
-                    new Chart(pieCtx, {
+                    // Create the attendance by course pie chart
+                    const courseCtx = document.getElementById('attendanceByCourseChart').getContext('2d');
+                    new Chart(courseCtx, {
                         type: 'pie',
                         data: {
-                            labels: <?php echo json_encode($chartLabels); ?>,
+                            labels: <?php echo json_encode($courseLabels); ?>,
                             datasets: [{
-                                label: 'Students Attended',
-                                data: <?php echo json_encode($chartValues); ?>,
-                                backgroundColor: <?php echo json_encode(array_slice($pieColors, 0, count($chartLabels))); ?>,
-                                borderColor: <?php echo json_encode(array_slice($pieBorderColors, 0, count($chartLabels))); ?>,
+                                label: 'Students Attended by Course',
+                                data: <?php echo json_encode($courseValues); ?>,
+                                backgroundColor: <?php echo json_encode(array_slice($pieColors, 0, count($courseLabels))); ?>,
+                                borderColor: <?php echo json_encode(array_slice($pieBorderColors, 0, count($courseLabels))); ?>,
                                 borderWidth: 2
                             }]
                         },
