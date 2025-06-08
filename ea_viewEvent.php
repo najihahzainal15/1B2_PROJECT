@@ -1,5 +1,32 @@
+<?php
+// Initialize the session
+session_start();
+
+// Check if the user is logged in, if not then redirect him to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+  header("location: login_page.php");
+  exit;
+}
+
+// Database connection
+$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
+
+// Fetch username from database
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($link, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
+
+// Assign username after database query
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
+?>
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>EVENT ADVISOR VIEW EVENT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,7 +34,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
-  
+
   <style>
     body {
       margin: 0;
@@ -142,8 +169,9 @@
       background-color: white;
     }
 
-    .event-table th, .event-table td {
-      border: 2px solid #666;
+    .event-table th,
+    .event-table td {
+      border: 1px solid #ddd;
       padding: 10px;
       text-align: center;
     }
@@ -220,6 +248,57 @@
       box-shadow: 0 0 6px rgba(0, 116, 228, 0.3);
       outline: none;
     }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 30px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar input[type="text"] {
+      padding: 10px 14px;
+      border: 2px solid #0074e4;
+      border-radius: 8px;
+      font-size: 15px;
+      width: 250px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .search-bar input[type="text"]:focus {
+      border-color: #005bb5;
+      box-shadow: 0 0 6px rgba(0, 116, 228, 0.3);
+      outline: none;
+    }
+
+    .register-bar {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .register-btn {
+      background-color: #0074e4;
+      color: white;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .register-btn:hover {
+      background-color: #005bb5;
+    }
   </style>
 </head>
 
@@ -229,7 +308,7 @@
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
     <div class="header-center">
       <h2>View Event</h2>
-      <p>Event Advisor: Prof. Hakeem</p>
+      <p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
     </div>
     <div class="header-right">
       <a href="logout_button.php" class="logout">Logout</a>
@@ -259,11 +338,13 @@
   </div>
 
   <div class="content">
-    <div class="register-btn-container">
-      <a href="ea_registerEvent1.php" class="register-btn">REGISTER NEW EVENT</a>
-      <div class="search-box">
+    <div class="top-bar">
+      <div class="search-bar">
         <input type="text" id="searchEvent" placeholder="Search by event name..." />
         <input type="text" id="searchDate" placeholder="Search by date..." />
+      </div>
+      <div class="register-bar">
+        <a href="ea_registerEvent1.php" class="register-btn">REGISTER NEW EVENT</a>
       </div>
     </div>
 
@@ -296,10 +377,10 @@
             echo "<td>$date</td>";
             echo "<td>$status</td>";
             echo "<td class='action-buttons'>
-                    <a class='edit' href='ea_viewEventUpdate.php?id=$eventID'>EDIT</a>
-                    <a class='delete' href='ea_viewEventDelete.php?id=$eventID' onclick=\"return confirm('Are you sure to delete this record?');\">DELETE</a>
-                    <a class='qr' href='ea_registerEvent2.php?id=$eventID'>QR</a>
-                  </td>";
+                  <a class='edit' href='ea_viewEventUpdate.php?id=$eventID'>EDIT</a>
+                  <a class='delete' href='ea_viewEventDelete.php?id=$eventID' onclick=\"return confirm('Are you sure to delete this record?');\">DELETE</a>
+                  <a class='qr' href='ea_registerEvent2.php?id=$eventID'>QR</a>
+                </td>";
             echo "</tr>";
           }
         } else {
@@ -313,22 +394,31 @@
     <button class="submit-button">Back</button>
   </div>
 
-  <script>
-    $(document).ready(function () {
-      $('.sub-button').click(function () {
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('.sub-button').click(function() {
         $(this).next('.sub-menu').slideToggle();
       });
 
-      $('#searchEvent').on('keyup', function () {
+      // Automatically open sub-menu if it contains an active item
+      $('.sub-menu').each(function() {
+        if ($(this).find('.active').length > 0) {
+          $(this).show();
+          $(this).prev('.sub-button').addClass('active-parent');
+        }
+      });
+
+      $('#searchEvent').on('keyup', function() {
         var value = $(this).val().toLowerCase();
-        $('.event-table tbody tr').filter(function () {
+        $('.event-table tbody tr').filter(function() {
           $(this).toggle($(this).children().eq(0).text().toLowerCase().indexOf(value) > -1);
         });
       });
 
-      $('#searchDate').on('keyup', function () {
+      $('#searchDate').on('keyup', function() {
         var value = $(this).val().toLowerCase();
-        $('.event-table tbody tr').filter(function () {
+        $('.event-table tbody tr').filter(function() {
           $(this).toggle($(this).children().eq(1).text().toLowerCase().indexOf(value) > -1);
         });
       });
@@ -351,4 +441,5 @@
     }
   </script>
 </body>
+
 </html>

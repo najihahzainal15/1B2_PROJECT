@@ -311,7 +311,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     <img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
     <div class="header-center">
-      <h2>Committee Event</h2>
+      <h2>Event Committee</h2>
       <p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
     </div>
     <div class="header-right">
@@ -331,7 +331,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
         <div class="sub-menu">
           <a href="ea_viewEvent.php" class="sub-item">View Event</a>
           <a href="ea_registerEvent1.php" class="sub-item">Register New Event</a>
-          <a href="ea_eventCommittee.php" class="sub-item">Event Committee</a>
+          <a class="active" href="ea_eventCommittee.php" class="sub-item">Event Committee</a>
           <a href="ea_committeeReg.php" class="sub-item">Register Committee Event</a>
         </div>
       </div>
@@ -417,11 +417,18 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
   <!-- Bootstrap Bundle JS (includes Popper) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
+  <script type="text/javascript">
     $(document).ready(function() {
-      $('.sub-button').click(function(event) {
-        event.preventDefault();
+      $('.sub-button').click(function() {
         $(this).next('.sub-menu').slideToggle();
+      });
+
+      // Automatically open sub-menu if it contains an active item
+      $('.sub-menu').each(function() {
+        if ($(this).find('.active').length > 0) {
+          $(this).show();
+          $(this).prev('.sub-button').addClass('active-parent');
+        }
       });
 
       // Filter rows by role

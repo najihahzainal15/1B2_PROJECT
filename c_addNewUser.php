@@ -333,6 +333,14 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 			$('.sub-button').click(function() {
 				$(this).next('.sub-menu').slideToggle();
 			});
+
+			// Automatically open sub-menu if it contains an active item
+			$('.sub-menu').each(function() {
+				if ($(this).find('.active').length > 0) {
+					$(this).show();
+					$(this).prev('.sub-button').addClass('active-parent');
+				}
+			});
 		});
 	</script>
 </body>
