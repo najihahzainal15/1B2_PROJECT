@@ -30,14 +30,29 @@ $event = mysqli_fetch_assoc($result);
 
 // Fetch attendance records for this event
 $participants = [];
-$sql = "SELECT a.StudentID, u.username, u.email, a.date, a.time, s.studentID 
+$search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+$sql = "SELECT a.StudentID, u.username, u.email, a.date, a.time, s.studentID, u.username AS student_name
         FROM attendance a 
         JOIN student s ON a.StudentID = s.studentID 
         JOIN user u ON s.userID = u.userID
         JOIN attendanceslot ats ON a.slot_ID = ats.slot_ID
         WHERE ats.eventID = ?";
+
+// Add search condition if search term exists
+if (!empty($search_term)) {
+    $sql .= " AND (a.StudentID LIKE ? OR u.username LIKE ?)";
+    $search_param = "%" . $search_term . "%";
+}
+
 $stmt = mysqli_prepare($link, $sql);
-mysqli_stmt_bind_param($stmt, "s", $eventID);
+
+if (!empty($search_term)) {
+    mysqli_stmt_bind_param($stmt, "iss", $eventID, $search_param, $search_param);
+} else {
+    mysqli_stmt_bind_param($stmt, "i", $eventID);
+}
+
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $participants = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -240,6 +255,33 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
             color: orange;
             font-weight: bold;
         }
+
+        .search-container {
+            margin: 20px 40px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-container input {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .search-container button {
+            background-color: #0074e4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .search-container button:hover {
+            background-color: #005bb5;
+        }
     </style>
 </head>
 
@@ -300,13 +342,25 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
             </span></p>
         </div>
 
+        <div class="search-container">
+            <form method="GET" action="">
+                <input type="hidden" name="event_id" value="<?php echo htmlspecialchars($eventID); ?>">
+                <input type="text" name="search" placeholder="Search by Student ID or Name..." value="<?php echo htmlspecialchars($search_term); ?>">
+                <button type="submit">Search</button>
+                <?php if (!empty($search_term)): ?>
+                    <a href="?event_id=<?php echo htmlspecialchars($eventID); ?>" style="margin-left: 10px;">Clear Search</a>
+                <?php endif; ?>
+            </form>
+        </div>
+
         <h2 style="margin: 20px 40px;">Participants List</h2>
         
         <table class="participants-table">
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Username</th>
+                    <th>Student ID</th>
+                    <th>Name</th>
                     <th>Email</th>
                     <th>Attendance Time</th>
                 </tr>
@@ -316,7 +370,8 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
                     <?php foreach ($participants as $index => $participant): ?>
                         <tr>
                             <td><?php echo $index + 1; ?></td>
-                            <td><?php echo htmlspecialchars($participant['username']); ?></td>
+                            <td><?php echo htmlspecialchars($participant['StudentID']); ?></td>
+                            <td><?php echo htmlspecialchars($participant['student_name']); ?></td>
                             <td><?php echo htmlspecialchars($participant['email']); ?></td>
                             <td><?php 
                                 echo (isset($participant['date']) && isset($participant['time'])) 
@@ -327,7 +382,9 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="4" style="text-align: center;">No attendance records found for this event</td>
+                        <td colspan="6" style="text-align: center;">
+                            <?php echo !empty($search_term) ? 'No matching participants found' : 'No attendance records found for this event'; ?>
+                        </td>
                     </tr>
                 <?php endif; ?>
             </tbody>
