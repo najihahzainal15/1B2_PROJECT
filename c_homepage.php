@@ -25,7 +25,8 @@ $userData = mysqli_fetch_assoc($resultUser);
 $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 
 // Function to get attendance data by active events
-function getAttendanceByActiveEvents($link) {
+function getAttendanceByActiveEvents($link)
+{
     $data = [];
 
     $sql = "SELECT e.eventID, e.eventName, COUNT(a.attendanceID) as attendance_count 
@@ -35,9 +36,9 @@ function getAttendanceByActiveEvents($link) {
             WHERE e.status = 'ACTIVE'
             GROUP BY e.eventID, e.eventName
             ORDER BY attendance_count DESC";
-    
+
     $result = mysqli_query($link, $sql);
-    
+
     if ($result && mysqli_num_rows($result) > 0) {
         $data = [];
         while ($row = mysqli_fetch_assoc($result)) {
@@ -47,14 +48,15 @@ function getAttendanceByActiveEvents($link) {
             ];
         }
     }
-    
+
     return $data;
 }
 
 // Function to get attendance data by course
-function getAttendanceByCourse($link) {
+function getAttendanceByCourse($link)
+{
     $data = [];
-    
+
     // Query to get attendance count by course prefix
     $sql = "SELECT 
                 CASE 
@@ -72,9 +74,9 @@ function getAttendanceByCourse($link) {
             WHERE e.status = 'ACTIVE'
             GROUP BY course
             ORDER BY count DESC";
-    
+
     $result = mysqli_query($link, $sql);
-    
+
     if ($result && mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_assoc($result)) {
             $data[] = [
@@ -83,7 +85,7 @@ function getAttendanceByCourse($link) {
             ];
         }
     }
-    
+
     return $data;
 }
 
@@ -108,7 +110,7 @@ foreach ($attendanceByCourse as $item) {
 // Generate colors for pie chart
 $pieColors = [
     'rgba(255, 99, 132, 0.8)',
-    'rgba(54, 162, 235, 0.8)', 
+    'rgba(54, 162, 235, 0.8)',
     'rgba(255, 205, 86, 0.8)',
     'rgba(75, 192, 192, 0.8)',
     'rgba(153, 102, 255, 0.8)',
@@ -429,7 +431,6 @@ $pieBorderColors = [
             <div class="item">
                 <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
                 <div class="sub-menu">
-                    <a href="#events" class="sub-item">View Event</a>
                     <a href="c_viewAttendance.php" class="sub-item">Event Attendance</a>
                     <a href="c_meritApp.php" class="sub-item">Merit Application</a>
                 </div>

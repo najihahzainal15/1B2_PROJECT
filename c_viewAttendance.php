@@ -148,10 +148,11 @@ if ($result) {
             border-collapse: collapse;
             background: white;
             margin: 20px 40px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        .event-table th, .event-table td {
+        .event-table th,
+        .event-table td {
             border: 1px solid #ddd;
             padding: 12px;
             text-align: left;
@@ -190,22 +191,22 @@ if ($result) {
             color: green;
             font-weight: bold;
         }
-        
+
         .status.canceled {
             color: red;
             font-weight: bold;
         }
-        
+
         .status.postpone {
             color: orange;
             font-weight: bold;
         }
-        
+
         .logo {
             height: 40px;
             margin: 10px;
         }
-        
+
         .logo2 {
             height: 35px;
             margin: 10px;
@@ -251,8 +252,7 @@ if ($result) {
             <div class="item">
                 <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
                 <div class="sub-menu">
-                    <a href="#events" class="sub-item active">View Event</a>
-                    <a href="c_viewAttendance.php" class="sub-item">Event Attendance</a>
+                    <a href="c_viewAttendance.php" class="sub-item active">Event Attendance</a>
                     <a href="c_meritApp.php" class="sub-item">Merit Application</a>
                 </div>
             </div>
@@ -289,14 +289,23 @@ if ($result) {
             </tbody>
         </table>
     </div>
-    
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
+    <script type="text/javascript">
         $(document).ready(function() {
             $('.sub-button').click(function() {
                 $(this).next('.sub-menu').slideToggle();
             });
+
+            // Automatically open sub-menu if it contains an active item
+            $('.sub-menu').each(function() {
+                if ($(this).find('.active').length > 0) {
+                    $(this).show();
+                    $(this).prev('.sub-button').addClass('active-parent');
+                }
+            });
         });
     </script>
 </body>
+
 </html>
