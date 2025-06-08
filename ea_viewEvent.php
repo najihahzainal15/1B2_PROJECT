@@ -391,7 +391,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       </tbody>
     </table>
 
-    <button class="submit-button">Back</button>
   </div>
 
 

@@ -14,12 +14,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $desc = mysqli_real_escape_string($link, $_POST['description']);
     $date = mysqli_real_escape_string($link, $_POST['date']);
     $startTime = mysqli_real_escape_string($link, $_POST['startTime']);
-$endTime = mysqli_real_escape_string($link, $_POST['endTime']);
-$time = $startTime . ' to ' . $endTime; // Combine the range as a single string
+    $endTime = mysqli_real_escape_string($link, $_POST['endTime']);
+    $time = $startTime . ' to ' . $endTime; // Combine the range as a single string
 
     $geolocation = mysqli_real_escape_string($link, $_POST['geolocation']);
     $venue = mysqli_real_escape_string($link, $_POST['venue']);
-	$meritScore = mysqli_real_escape_string($link, $_POST['meritScore']);
+    $meritScore = mysqli_real_escape_string($link, $_POST['meritScore']);
 
     // Handle file upload
     $approvalLetterPath = null;
@@ -56,7 +56,7 @@ $time = $startTime . ' to ' . $endTime; // Combine the range as a single string
 
     if ($result) {
         echo "Data inserted successfully!";
-        echo "<br><a href='ea_registerEvent.php'>Register another event</a>";
+        echo "<br><a href='ea_registerEvent1.php'>Register another event</a>";
     } else {
         die("Insert failed: " . mysqli_error($link));
     }
@@ -65,4 +65,3 @@ $time = $startTime . ' to ' . $endTime; // Combine the range as a single string
 } else {
     echo "Invalid request method.";
 }
-?>

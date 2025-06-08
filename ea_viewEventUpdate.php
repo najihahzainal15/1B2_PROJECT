@@ -16,6 +16,7 @@ $status = htmlspecialchars($row["status"]);
 
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>EVENT ADVISOR EVENT COMMITTEE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -152,7 +153,8 @@ $status = htmlspecialchars($row["status"]);
       border-collapse: collapse;
     }
 
-    table th, table td {
+    table th,
+    table td {
       padding: 10px;
       border: 1px solid #ddd;
       text-align: center;
@@ -163,7 +165,8 @@ $status = htmlspecialchars($row["status"]);
       color: white;
     }
 
-    button.edit-btn, button.delete-btn {
+    button.edit-btn,
+    button.delete-btn {
       padding: 5px 10px;
       margin: 0 5px;
       border: none;
@@ -281,11 +284,12 @@ $status = htmlspecialchars($row["status"]);
     }
 
     .form-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 100px); /* adjust if your header height changes */
-}
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 100px);
+      /* adjust if your header height changes */
+    }
 
 
 
@@ -302,7 +306,9 @@ $status = htmlspecialchars($row["status"]);
       margin-bottom: 8px;
     }
 
-    select, input[type="submit"], input[type="reset"] {
+    select,
+    input[type="submit"],
+    input[type="reset"] {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
@@ -333,8 +339,6 @@ $status = htmlspecialchars($row["status"]);
     input[type="reset"]:hover {
       background-color: #e53935;
     }
-	
-
   </style>
 </head>
 
@@ -375,36 +379,36 @@ $status = htmlspecialchars($row["status"]);
     </div>
   </div>
 
-<div class="content">
-  <div class="form-center">
-    <div class="form-wrapper">
- 
-    <form method="post" action="ea_viewEventUpdate2.php">
-  <h2>Update Event Status</h2>
+  <div class="content">
+    <div class="form-center">
+      <div class="form-wrapper">
 
-  <label for="status">Status:</label>
-  <select name="status" id="status" required>
-    <option value="ACTIVE" <?php if($status == 'ACTIVE') echo 'selected'; ?>>ACTIVE</option>
-    <option value="CANCELED" <?php if($status == 'CANCELED') echo 'selected'; ?>>CANCELED</option>
-    <option value="POSTPONE" <?php if($status == 'POSTPONE') echo 'selected'; ?>>POSTPONE</option>
-  </select>
+        <form method="post" action="ea_viewEventUpdate2.php">
+          <h2>Update Event Status</h2>
 
-  <input type="hidden" name="id2" value="<?php echo $eventID; ?>">
+          <label for="status">Status:</label>
+          <select name="status" id="status" required>
+            <option value="ACTIVE" <?php if ($status == 'ACTIVE') echo 'selected'; ?>>ACTIVE</option>
+            <option value="CANCELED" <?php if ($status == 'CANCELED') echo 'selected'; ?>>CANCELED</option>
+            <option value="POSTPONE" <?php if ($status == 'POSTPONE') echo 'selected'; ?>>POSTPONE</option>
+          </select>
 
-  <input type="submit" value="Update">
-  <input type="reset" value="Cancel">
-</form>
+          <input type="hidden" name="id2" value="<?php echo $eventID; ?>">
+
+          <input type="submit" value="Update">
+          <input type="reset" value="Cancel">
+        </form>
+      </div>
+    </div>
   </div>
-  </div>
-</div>
 
-<script type="text/javascript">
+  <script type="text/javascript">
     $(document).ready(function() {
       $('.sub-button').click(function() {
         $(this).next('.sub-menu').slideToggle();
       });
     });
-	</script>
+  </script>
 </body>
-</html>
 
+</html>
