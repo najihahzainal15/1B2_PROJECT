@@ -1,6 +1,30 @@
 <?php
-session_start();
 require_once "config.php";
+
+// Initialize the session
+session_start();
+
+// Check if the user is logged in, if not then redirect him to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+	header("location: login_page.php");
+	exit;
+}
+$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
+
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
+
+// Fetch username from database
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($link, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
+
+// Assign username after database query
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
+
 
 // Initialize variables
 $eventName = $eventDate = $eventVenue = $qrData = $qrUrl = '';
@@ -478,23 +502,23 @@ if (isset($_GET['event_id'])) {
 
 <body>
   <div class="header1">
-    <div class="header-left">
-      <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo">
-      <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
-    </div>
-    
-    <div class="header-center">
-      <h2>Attendance QR Code</h2>
-      <!-- <p>Event Advisor:</p> -->
-    </div>
-    
-    <div class="header-right">
-      <a href="logout_button.php" class="logout">Logout</a>
-      <a href="ea_displayProfile.php">
-        <img src="images/profile.png" alt="Profile" class="logo2">
-      </a>
-    </div>
+  <div class="header-left">
+    <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo">
+    <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
   </div>
+  
+  <div class="header-center">
+    <h2>Attendance QR Code</h2>
+    <p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
+  </div>
+  
+  <div class="header-right">
+    <a href="logout_button.php" class="logout">Logout</a>
+    <a href="ea_displayProfile.php">
+      <img src="images/profile.png" alt="Profile" class="logo2">
+    </a>
+  </div>
+</div>
 
   <div class="nav">
   <div class="menu">
