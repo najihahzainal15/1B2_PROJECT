@@ -6,8 +6,8 @@ session_start();
 
 // Check if the user is logged in, if not then redirect him to login page
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-	header("location: login_page.php");
-	exit;
+    header("location: login_page.php");
+    exit;
 }
 $link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
 
@@ -25,14 +25,11 @@ $userData = mysqli_fetch_assoc($resultUser);
 // Assign username after database query
 $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 
-
 // Initialize variables
-$eventName = $eventDate = $eventVenue = $qrData = $qrUrl = '';
+$eventName = $eventDate = $eventLocation = $qrData = $qrUrl = '';
 $eventID = '';
 $successMessage = $errorMessage = '';
 $hasQrCode = false;
-$venueChanged = false;
-$originalVenue = '';
 
 // Handle all POST requests (QR code operations only)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -53,15 +50,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         
-        // GENERATE new QR code (preserves original venue)
+        // GENERATE new QR code
         if (isset($_POST['generate_qr'])) {
-            // Get current event details - use eventLocation if eventVenue is empty
-            $eventSql = "SELECT eventVenue, eventLocation FROM event WHERE eventID = '$eventID'";
+            // Get current event details
+            $eventSql = "SELECT eventLocation FROM event WHERE eventID = '$eventID'";
             $eventResult = mysqli_query($link, $eventSql);
             $eventData = mysqli_fetch_assoc($eventResult);
             
-            // Use eventVenue if not empty, otherwise use eventLocation
-            $currentVenue = !empty($eventData['eventVenue']) ? $eventData['eventVenue'] : $eventData['eventLocation'];
+            if (!$eventData) {
+                throw new Exception("Event not found");
+            }
+            
+            $currentVenue = $eventData['eventLocation'];
             
             // Generate new QR data (include venue in the data)
             $newQrData = "EVENT_ID:" . $eventID . "_VENUE:" . $currentVenue . "_" . uniqid();
@@ -82,40 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'QR Code generated!',
-                    'qr_url' => "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($newQrData),
-                    'event_venue' => $currentVenue
+                    'qr_url' => "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($newQrData)
                 ]);
             } else {
                 throw new Exception("QR generation failed: " . mysqli_error($link));
-            }
-            exit;
-        }
-        
-        // UPDATE QR code with new venue (when venue changes)
-        if (isset($_POST['update_qr_venue'])) {
-            // Get current venue - use eventLocation if eventVenue is empty
-            $eventSql = "SELECT eventVenue, eventLocation FROM event WHERE eventID = '$eventID'";
-            $eventResult = mysqli_query($link, $eventSql);
-            $eventData = mysqli_fetch_assoc($eventResult);
-            
-            // Use eventVenue if not empty, otherwise use eventLocation
-            $currentVenue = !empty($eventData['eventVenue']) ? $eventData['eventVenue'] : $eventData['eventLocation'];
-            
-            // Generate new QR data with updated venue
-            $newQrData = "EVENT_ID:" . $eventID . "_VENUE:" . $currentVenue . "_" . uniqid();
-            
-            // Update QR code
-            $updateSql = "UPDATE attendanceslot SET attendance_QRcode = '$newQrData' WHERE eventID = '$eventID'";
-            
-            if (mysqli_query($link, $updateSql)) {
-                echo json_encode([
-                    'status' => 'success',
-                    'message' => 'QR Code updated with new venue!',
-                    'qr_url' => "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($newQrData),
-                    'event_venue' => $currentVenue
-                ]);
-            } else {
-                throw new Exception("QR update failed: " . mysqli_error($link));
             }
             exit;
         }
@@ -130,17 +100,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_GET['event_id'])) {
     $eventID = mysqli_real_escape_string($link, $_GET['event_id']);
     
-    // Get current event details - fetch both venue fields
-    $eventSql = "SELECT eventName, eventDate, eventVenue, eventLocation FROM event WHERE eventID = '$eventID'";
+    // Get current event details
+    $eventSql = "SELECT eventName, eventDate, eventLocation FROM event WHERE eventID = '$eventID'";
     $eventResult = mysqli_query($link, $eventSql);
     
     if ($eventResult && mysqli_num_rows($eventResult) > 0) {
         $eventData = mysqli_fetch_assoc($eventResult);
         $eventName = $eventData['eventName'];
         $eventDate = $eventData['eventDate'];
-        
-        // Use eventVenue if not empty, otherwise use eventLocation
-        $currentVenue = !empty($eventData['eventVenue']) ? $eventData['eventVenue'] : $eventData['eventLocation'];
+        $eventLocation = $eventData['eventLocation'];
         
         // Check for existing QR code
         $qrSql = "SELECT attendance_QRcode FROM attendanceslot WHERE eventID = '$eventID'";
@@ -150,30 +118,12 @@ if (isset($_GET['event_id'])) {
             $qrData = mysqli_fetch_assoc($qrResult)['attendance_QRcode'];
             $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($qrData);
             $hasQrCode = true;
-            
-            // Extract original venue from QR data
-            if (preg_match('/_VENUE:(.*?)_/', $qrData, $matches)) {
-                $originalVenue = $matches[1];
-                $eventVenue = $originalVenue; // Display the venue from QR code
-            
-                // Check if venue has changed
-                if ($originalVenue != $currentVenue) {
-                    $venueChanged = true;
-                }
-            } else {
-                // If no venue in QR data, use current venue
-                $eventVenue = $currentVenue;
-            }
-        } else {
-            // No QR code exists yet, use current venue
-            $eventVenue = $currentVenue;
         }
     } else {
         $errorMessage = "Event not found";
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html>
@@ -335,15 +285,6 @@ if (isset($_GET['event_id'])) {
       margin-bottom: 15px;
     }
     
-    .venue-warning {
-      background-color: #fff3cd;
-      border: 1px solid #ffeaa7;
-      color: #856404;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 15px;
-    }
-    
     .back-btn {
       background-color: #0074e4;
       font-family: 'Poppins', sans-serif;
@@ -401,19 +342,6 @@ if (isset($_GET['event_id'])) {
       font-family: 'Poppins', sans-serif;
     }
     
-    .update-venue-btn {
-      background-color: #ff9800;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 15px;
-      cursor: pointer;
-      font-family: 'Poppins', sans-serif;
-    }
-    
     .action-buttons {
       display: flex;
       gap: 10px;
@@ -432,10 +360,6 @@ if (isset($_GET['event_id'])) {
     
     .generate-btn:hover {
       background-color: #0b7dda;
-    }
-    
-    .update-venue-btn:hover {
-      background-color: #e68900;
     }
     
     .logo {
@@ -556,16 +480,7 @@ if (isset($_GET['event_id'])) {
       <div class="event-info">
         <div class="event-name"><?php echo htmlspecialchars($eventName); ?></div>
         <div class="event-date">Date: <?php echo htmlspecialchars($eventDate); ?></div>
-        <div class="event-venue">Venue: <?php echo htmlspecialchars($eventVenue); ?></div>
-        
-        <?php if($venueChanged): ?>
-          <div class="venue-warning">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>Notice:</strong> The event venue has changed. The QR code still contains the original venue information.
-            <br><strong>Original:</strong> <?php echo htmlspecialchars($originalVenue); ?>
-            <br><strong>Current:</strong> <?php echo htmlspecialchars($currentVenue); ?>
-          </div>
-        <?php endif; ?>
+        <div class="event-venue">Venue: <?php echo htmlspecialchars($eventLocation); ?></div>
       </div>
       
       <?php if(!empty($qrUrl)): ?>
@@ -577,11 +492,6 @@ if (isset($_GET['event_id'])) {
           <button id="generateQrBtn" class="generate-btn">
             <i class="fas fa-sync-alt"></i> Regenerate QR Code
           </button>
-          <?php if($venueChanged): ?>
-            <button id="updateVenueBtn" class="update-venue-btn">
-              <i class="fas fa-map-marker-alt"></i> Update Venue in QR
-            </button>
-          <?php endif; ?>
           <a href="<?php echo $qrUrl; ?>&download=1" class="download-btn">
             <i class="fas fa-download"></i> Download QR Code
           </a>
@@ -735,46 +645,6 @@ if (isset($_GET['event_id'])) {
             error: function(xhr, status, error) {
               alert('Request failed: ' + error);
               $btn.html('Generate').prop('disabled', false);
-              $('#confirmModal').modal('hide');
-            }
-          });
-        });
-        $('#confirmModal').modal('show');
-      });
-
-      // Update QR Code with new venue
-      $('#updateVenueBtn').click(function() {
-        $('#modalMessage').text('Update QR code with the new venue information?');
-        $('#confirmAction').text('Update').off('click').on('click', function() {
-          var $btn = $(this);
-          $btn.html('<i class="fas fa-spinner fa-spin"></i> Updating...').prop('disabled', true);
-          
-          $.ajax({
-            url: window.location.href,
-            type: 'POST',
-            data: { update_qr_venue: true, event_id: '<?php echo $eventID; ?>' },
-            success: function(response) {
-              try {
-                response = typeof response === 'string' ? JSON.parse(response) : response;
-                if(response.status === 'success') {
-                  $('#successMessage').text(response.message);
-                  $('#successModal').modal('show');
-                  setTimeout(function() {
-                    location.reload();
-                  }, 1500);
-                } else {
-                  alert('Error: ' + (response.message || 'Operation failed'));
-                }
-              } catch(e) {
-                console.error('Error:', e, response);
-                alert('Error processing response');
-              }
-              $btn.html('Update').prop('disabled', false);
-              $('#confirmModal').modal('hide');
-            },
-            error: function(xhr, status, error) {
-              alert('Request failed: ' + error);
-              $btn.html('Update').prop('disabled', false);
               $('#confirmModal').modal('hide');
             }
           });
