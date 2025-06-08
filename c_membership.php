@@ -414,6 +414,14 @@ $result = mysqli_query($link, $query);
 			$('.sub-button').click(function() {
 				$(this).next('.sub-menu').slideToggle();
 			});
+
+			// Automatically open sub-menu if it contains an active item
+			$('.sub-menu').each(function() {
+				if ($(this).find('.active').length > 0) {
+					$(this).show();
+					$(this).prev('.sub-button').addClass('active-parent');
+				}
+			});
 		});
 	</script>
 </body>

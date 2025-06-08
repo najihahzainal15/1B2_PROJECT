@@ -21,6 +21,10 @@ $resultUser = mysqli_stmt_get_result($stmtUser);
 $userData = mysqli_fetch_assoc($resultUser);
 
 $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
+
+// handle filters
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$filterRole = isset($_GET['role']) ? $_GET['role'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -183,38 +187,23 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 			margin-bottom: 20px;
 		}
 
-		.back-button {
-			background-color: #0074e4;
-			font-family: 'Poppins', sans-serif;
-			border: none;
-			border-radius: 10px;
-			color: white;
-			padding: 6px 14px;
-			text-align: center;
-			text-decoration: none;
-			display: inline-block;
-			font-size: 14px;
-			margin: 20px 0 20px 30px;
-			cursor: pointer;
-			transition: 0.3s;
-		}
-
-		.back-button:hover {
-			background-color: #005bb5;
-		}
-
 		.member-table {
 			margin-left: 40px;
+			margin-top: 20px;
 			width: 95%;
 			border-collapse: collapse;
-			background: #d0e6ff;
+			background: #0096D6;
 		}
 
 		.member-table th,
 		.member-table td {
-			border: 1px solid #666;
+			border: 1px solid #ddd;
 			border-collapse: collapse;
 			padding: 10px;
+		}
+
+		.member-table th {
+			color: white;
 		}
 
 		.member-table td:last-child {
@@ -249,14 +238,63 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 		.add-btn {
 			background: #0074e4;
 			color: white;
-			padding: 6px 12px;
-			font-size: 14px;
+			padding: 8px 14px;
+			font-size: 16px;
 			border-radius: 6px;
 			text-decoration: none;
 			transition: background 0.3s;
 		}
 
 		.add-btn:hover {
+			background: #005bb5;
+		}
+
+		/* Search/filter + button container */
+		.search-filter-container {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin: 20px 40px 10px;
+		}
+
+		.search-container {
+			background: #f0f7ff;
+			border-left: 4px solid #0074e4;
+			border-radius: 8px;
+			margin: 10px 0;
+			padding: 10px 15px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		.search-container input[type="text"],
+		.search-container select {
+			padding: 8px 12px;
+			font-size: 14px;
+			border: 1px solid #0074e4;
+			border-radius: 5px;
+			outline: none;
+			margin-right: 10px;
+			transition: border-color .3s, box-shadow .3s;
+		}
+
+		.search-container input[type="text"]:focus,
+		.search-container select:focus {
+			border-color: #005bb5;
+			box-shadow: 0 0 5px rgba(0, 116, 228, 0.5);
+		}
+
+		.search-container button {
+			background: #0074e4;
+			color: white;
+			border: none;
+			padding: 8px 14px;
+			border-radius: 5px;
+			cursor: pointer;
+			transition: background .3s;
+			font-size: 14px;
+		}
+
+		.search-container button:hover {
 			background: #005bb5;
 		}
 	</style>
@@ -308,11 +346,24 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 	</div>
 
 	<div class="content">
-		<br>
-
-		<div class="table-header">
-			<a href="c_addNewUser.php" class="add-btn">Add New User</a>
+		<!-- Search + filter + add-user row -->
+		<div class="search-filter-container">
+			<div class="search-container">
+				<form method="GET">
+					<input type="text" name="search" placeholder="Search by name or email"
+						value="<?php echo htmlspecialchars($search); ?>">
+					<select name="role">
+						<option value="">All Roles</option>
+						<option value="Student" <?php if ($filterRole == 'Student') echo ' selected'; ?>>Student</option>
+						<option value="Coordinator" <?php if ($filterRole == 'Coordinator') echo ' selected'; ?>>Coordinator</option>
+						<option value="Event Advisor" <?php if ($filterRole == 'Event Advisor') echo ' selected'; ?>>Event Advisor</option>
+					</select>
+					<button type="submit">Search</button>
+				</form>
+			</div>
+			<a href="c_addNewUser.php" class="add-btn">ADD NEW USER</a>
 		</div>
+
 		<form method="post" action="c_deleteUser.php">
 			<table class="member-table">
 				<thead>
@@ -326,52 +377,54 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 				</thead>
 				<tbody class="tbody">
 					<?php
-					//Connect to the database server.
-					$link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
-
-					//Select the database.
-					mysqli_select_db($link, "web_project") or die(mysqli_error($link));
-
-					//SQL query
-					$query = "SELECT * FROM user"
-						or die(mysqli_connect_error());
-
-					//Execute the query (the recordset $rs contains the result)
-					$result = mysqli_query($link, $query);
-
-					if (mysqli_num_rows($result) > 0) {
+					$sql = "SELECT * FROM user WHERE 1";
+					if ($search !== '') {
+						$s = mysqli_real_escape_string($link, $search);
+						$sql .= " AND (username LIKE '%$s%' OR email LIKE '%$s%')";
+					}
+					if ($filterRole !== '') {
+						$r = mysqli_real_escape_string($link, $filterRole);
+						$sql .= " AND role='$r'";
+					}
+					$res = mysqli_query($link, $sql);
+					if (mysqli_num_rows($res) > 0) {
 						$no = 1;
-						while ($row = mysqli_fetch_assoc($result)) {
-							$ID = $row["userID"];
+						while ($row = mysqli_fetch_assoc($res)) {
 							echo "<tr>";
 							echo "<td>" . $no++ . "</td>";
 							echo "<td>" . htmlspecialchars($row['username']) . "</td>";
 							echo "<td>" . htmlspecialchars($row['role']) . "</td>";
 							echo "<td>" . htmlspecialchars($row['email']) . "</td>";
 							echo "<td>
-						<a href='c_viewUser.php?id=" . $row['userID'] . "' class='action-btn'>VIEW</a> 
-						<a href='c_editUser.php?id=" . $row['userID'] . "' class='action-btn'>EDIT</a>
-						<a href='c_deleteUser.php?id=" . $row['userID'] . "' class='action-btn' onclick=\"return confirm('Are you sure you want to delete this user?');\">DELETE</a>
-					  </td>";
+                                <a href='c_viewUser.php?id={$row['userID']}' class='action-btn'>VIEW</a>
+                                <a href='c_editUser.php?id={$row['userID']}' class='action-btn'>EDIT</a>
+                                <a href='c_deleteUser.php?id={$row['userID']}' class='action-btn'
+                                   onclick=\"return confirm('Are you sure you want to delete this user?');\">DELETE</a>
+                            </td>";
 							echo "</tr>";
 						}
 					} else {
 						echo "<tr><td colspan='5'>No users found.</td></tr>";
 					}
-
 					mysqli_close($link);
 					?>
 				</tbody>
 			</table>
 		</form>
-
-		<button class="back-button">Back</button>
 	</div>
 
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$('.sub-button').click(function() {
 				$(this).next('.sub-menu').slideToggle();
+			});
+
+			// Automatically open sub-menu if it contains an active item
+			$('.sub-menu').each(function() {
+				if ($(this).find('.active').length > 0) {
+					$(this).show();
+					$(this).prev('.sub-button').addClass('active-parent');
+				}
 			});
 		});
 	</script>

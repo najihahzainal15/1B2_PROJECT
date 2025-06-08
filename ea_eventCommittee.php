@@ -206,9 +206,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       background-color: #0074e4;
       border: none;
       color: white;
-      padding: 12px 20px;
-      text-align: left;
-      /* Aligns text to the left */
+      padding: 12px 16px;
       text-decoration: none;
       display: block;
       /* Ensures it takes up full width */
@@ -216,8 +214,9 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       margin: 10px 0;
       /* Reduce vertical spacing */
       cursor: pointer;
-      border-radius: 5px;
+      border-radius: 6px;
       width: fit-content;
+      transition: background 0.3s;
       /* Adjust width dynamically */
 
     }
@@ -276,7 +275,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
 
     .search-container {
-      margin: 20px 0;
+      margin: 10px 0;
       padding: 10px 15px;
       background-color: #f0f7ff;
       border-left: 4px solid #0074e4;
@@ -349,18 +348,14 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
   <div class="content">
     <div class="table-container">
-
-
-
-      <table>
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap" style="gap: 10px;">
+        <div class="search-container">
+          <label for="searchRole"><strong>Search by Role:</strong></label>
+          <input type="text" id="searchRole" placeholder="e.g. Leader, Treasurer">
+        </div>
         <div class="button-container">
           <a href="ea_committeeReg.php" class="button">REGISTER NEW COMMITTEE MEMBER</a>
         </div>
-      </table>
-
-      <div class="search-container">
-        <label for="searchRole"><strong>Search by Role:</strong></label>
-        <input type="text" id="searchRole" placeholder="e.g. Leader, Treasurer">
       </div>
 
       <?php

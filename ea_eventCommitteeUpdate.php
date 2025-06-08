@@ -1,5 +1,32 @@
+<?php
+// Initialize the session
+session_start();
+
+// Check if the user is logged in, if not then redirect him to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+  header("location: login_page.php");
+  exit;
+}
+
+// Database connection
+$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
+
+// Fetch username from database
+$queryUser = "SELECT username FROM user WHERE userID = ?";
+$stmtUser = mysqli_prepare($link, $queryUser);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_execute($stmtUser);
+$resultUser = mysqli_stmt_get_result($stmtUser);
+$userData = mysqli_fetch_assoc($resultUser);
+
+// Assign username after database query
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
+?>
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>EVENT ADVISOR EVENT COMMITTEE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -136,7 +163,8 @@
       border-collapse: collapse;
     }
 
-    table th, table td {
+    table th,
+    table td {
       padding: 10px;
       border: 1px solid #ddd;
       text-align: center;
@@ -147,7 +175,8 @@
       color: white;
     }
 
-    button.edit-btn, button.delete-btn {
+    button.edit-btn,
+    button.delete-btn {
       padding: 5px 10px;
       margin: 0 5px;
       border: none;
@@ -265,11 +294,12 @@
     }
 
     .form-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 100px); /* adjust if your header height changes */
-}
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 100px);
+      /* adjust if your header height changes */
+    }
 
 
 
@@ -286,7 +316,9 @@
       margin-bottom: 8px;
     }
 
-    select, input[type="submit"], input[type="reset"] {
+    select,
+    input[type="submit"],
+    input[type="reset"] {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
@@ -317,8 +349,6 @@
     input[type="reset"]:hover {
       background-color: #e53935;
     }
-	
-
   </style>
 </head>
 
@@ -328,7 +358,7 @@
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
     <div class="header-center">
       <h2>Committee Event</h2>
-      <p>Event Advisor: Prof. Hakeem</p>
+      <p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
     </div>
     <div class="header-right">
       <a href="logout_button.php" class="logout">Logout</a>
@@ -359,28 +389,41 @@
     </div>
   </div>
 
-<div class="content">
-  <div class="form-center">
-    <div class="form-wrapper">
- 
-    <form method="post" action="ea_eventCommitteeUpdate2.php">
-      <label for="roleID">Role:</label>
-      <select name="roleID" id="roleID" required>
-        <option value='1' >Event Director</option><option value='2' >Vice Director</option><option value='3' >Secretary</option><option value='4' >Assistant Secretary</option><option value='5' >Treasurer</option><option value='6' >Assistant Treasurer</option><option value='7' selected>Technical Coordinator</option><option value='8' >Safety &amp; Health Officer</option><option value='9' >Publicity &amp; Media Team</option><option value='10' >Photographer/Videographer</option><option value='11' >Graphic Designer</option><option value='12' >Sponsorship &amp; Fundraising</option>      </select>
-      <input type="hidden" name="id2" value="27">
-      <input type="submit" value="Update">
-      <input type="reset" value="Cancel">
-    </form>
-  </div>
-  </div>
-</div>
+  <div class="content">
+    <div class="form-center">
+      <div class="form-wrapper">
 
-<script type="text/javascript">
+        <form method="post" action="ea_eventCommitteeUpdate2.php">
+          <label for="roleID">Role:</label>
+          <select name="roleID" id="roleID" required>
+            <option value='1'>Event Director</option>
+            <option value='2'>Vice Director</option>
+            <option value='3'>Secretary</option>
+            <option value='4'>Assistant Secretary</option>
+            <option value='5'>Treasurer</option>
+            <option value='6'>Assistant Treasurer</option>
+            <option value='7' selected>Technical Coordinator</option>
+            <option value='8'>Safety &amp; Health Officer</option>
+            <option value='9'>Publicity &amp; Media Team</option>
+            <option value='10'>Photographer/Videographer</option>
+            <option value='11'>Graphic Designer</option>
+            <option value='12'>Sponsorship &amp; Fundraising</option>
+          </select>
+          <input type="hidden" name="id2" value="27">
+          <input type="submit" value="Update">
+          <input type="reset" value="Cancel">
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
     $(document).ready(function() {
       $('.sub-button').click(function() {
         $(this).next('.sub-menu').slideToggle();
       });
     });
-	</script>
+  </script>
 </body>
+
 </html>

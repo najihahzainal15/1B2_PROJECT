@@ -31,7 +31,6 @@ if ($statusFilter !== '') {
   $query = "SELECT * FROM event";
 }
 
-
 $result = mysqli_query($link, $query);
 
 ?>
