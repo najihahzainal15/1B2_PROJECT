@@ -299,7 +299,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     <div class="nav">
         <div class="menu">
             <div class="item"><a href="s_homepage.php">Dashboard</a></div>
-            
+
             <div class="item">
                 <a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
                 <div class="sub-menu">
@@ -310,7 +310,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
             <div class="item">
                 <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
                 <div class="sub-menu">
-                    <a href="s_homepage.php" class="sub-item">View Event</a>
+                    <a href="s_membershipAppView.php" class="sub-item">View Event</a>
                 </div>
             </div>
 
