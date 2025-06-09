@@ -316,7 +316,7 @@
   $servername = "localhost";
   $username = "root"; // Your database username
   $password = "";     // Your database password
-  $dbname = "your_database_name"; // Replace with your actual database name
+  $dbname = "laravel"; // Replace with your actual database name
 
   // Create connection
   $conn = new mysqli($servername, $username, $password, $dbname);
