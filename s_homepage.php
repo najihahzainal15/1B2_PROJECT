@@ -155,7 +155,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 		.content {
 			background-color: #e6f0ff;
 			margin-left: 160px;
-			height: 100vh;
+			height: auto;
 		}
 
 
@@ -180,19 +180,29 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
 		.event {
 			width: 300px;
-			height: 330px;
 			background: white;
+			box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 			margin: 20px;
-			box-sizing: border-box;
-			font-size: 14px;
-			box-shadow: 0px 0px 10px 2px grey;
-			transition: 1s;
+			border-radius: 8px;
+			transition: 0.3s;
+			overflow: hidden;
 		}
 
 		.event:hover {
-			transform: scale(1.05);
-			z-index: 2;
+			transform: scale(1.03);
 		}
+
+		.event-content h3 {
+			font-size: 18px;
+			color: #0074e4;
+			margin-bottom: 10px;
+		}
+
+		.event-content p {
+			font-size: 14px;
+			margin: 5px 0;
+		}
+
 
 		.eventImage {
 			height: 260px;
@@ -251,40 +261,50 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 		</h2>
 		<p>Welcome to MyPetakom's home.</p>
 		<br>
-		<h2>Upcoming Events</h2>
+		<h2>Events</h2>
+		<div style="margin-left:30px; margin-bottom:20px;">
+			<input type="text" id="searchInput" placeholder="Search events..." style="padding:10px; width:300px; border-radius:4px; border:1px solid #ccc;">
+		</div>
+
 		<div class="events-container">
-			<div class="event">
-				<img src="images/larian_amal.jpg" class="eventImage">
-				<div class="event-content">
-					<p align="center" class="p1">Larian Amal UMPSA 2025</h3><br>
-					<p align="center" class="p1">31 May 2025</p>
-				</div>
-			</div>
+			<?php
+			$query = "SELECT eventName, eventDesc, eventDate, eventTime, eventLocation FROM event ORDER BY eventDate DESC";
+			$result = mysqli_query($link, $query);
 
-			<div class="event">
-				<img src="images/hackaton.jpg" class="eventImage">
-				<div class="event-content">
-					<p align="center" class="p1">Hackaton X: Smart City 2025</h3><br>
-					<p align="center" class="p1">28 May 2025</p>
-				</div>
-			</div>
-
-			<div class="event">
-				<img src="images/combat.jpg" class="eventImage">
-				<div class="event-content">
-					<p align="center" class="p1">COMBAT 2025</h3><br>
-					<p align="center" class="p1">9 May-23 May 2025</p>
-				</div>
-			</div>
+			if (mysqli_num_rows($result) > 0) {
+				while ($event = mysqli_fetch_assoc($result)) {
+					echo '<div class="event">';
+					echo '<div class="event-content" style="padding:15px;">';
+					echo '<h3 class="event-title" style="margin:0;">' . htmlspecialchars($event["eventName"]) . '</h3>';
+					echo '<p>' . htmlspecialchars($event["eventDesc"]) . '</p>';
+					echo '<p><strong>Date:</strong> ' . htmlspecialchars($event["eventDate"]) . '</p>';
+					echo '<p><strong>Time:</strong> ' . htmlspecialchars($event["eventTime"]) . '</p>';
+					echo '<p><strong>Location:</strong> ' . htmlspecialchars($event["eventLocation"]) . '</p>';
+					echo '</div></div>';
+				}
+			} else {
+				echo "<p style='margin-left:30px;'>No events available.</p>";
+			}
+			?>
 		</div>
 
 		<script type="text/javascript">
 			$(document).ready(function() {
+				// Toggle sub-menu
 				$('.sub-button').click(function() {
 					$(this).next('.sub-menu').slideToggle();
 				});
+
+				// Search event cards
+				$('#searchInput').on('keyup', function() {
+					var value = $(this).val().toLowerCase();
+					$('.event').filter(function() {
+						$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+					});
+				});
 			});
 		</script>
+
 </body>
 
 </html>
