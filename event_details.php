@@ -82,10 +82,13 @@ $conn->close();
 </head>
 <body>
   <div class="event-container">
-    <h1><?php echo htmlspecialchars($event['eventName']); ?></h1>
+    <h1><?php echo htmlspecialchars($event['eventName']); ?></h1> 
+    <p><strong>Description:</strong> <?php echo htmlspecialchars($event['eventDesc']); ?></p>
     <p><strong>Date:</strong> <?php echo htmlspecialchars($event['eventDate']); ?></p>
     <p><strong>Time:</strong> <?php echo htmlspecialchars($event['eventTime']); ?></p>
-    <p><strong>Location:</strong> <?php echo htmlspecialchars($event['eventLocation']); ?></p>
+    <p><strong>Location:</strong> <?php echo htmlspecialchars($event['eventLocation']); ?></p> 
+ <p><strong>Geolocation:</strong> <?php echo htmlspecialchars($event['eventGeolocation']); ?></p>
+    <p><strong>Event Status:</strong> <?php echo htmlspecialchars($event['status']); ?></p>
   </div>
 </body>
 </html>

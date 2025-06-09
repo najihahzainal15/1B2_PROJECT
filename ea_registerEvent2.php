@@ -287,7 +287,7 @@ if (isset($_GET['id'])) {
   
   <script>
     const eventId = <?php echo (int)$id; ?>;
-    const localIP = "10.66.35.157";  // Your PC's IP
+    const localIP = "172.20.10.7";  // Your PC's IP
     const projectFolder = "yeyaya"; // Replace accordingly
     const qrData = `http://${localIP}/${projectFolder}/event_details.php?id=${eventId}`;
 
