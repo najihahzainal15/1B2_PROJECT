@@ -7,7 +7,8 @@ if (!isset($_SESSION['userID'])) {
 }
 
 $link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
-$userID = $_SESSION['userID'];
+$userID = $_SESSION["userID"];
+$role = $_SESSION["role"];
 
 // Get data from user table
 $queryUser = "SELECT userID, username, email, phone_No, password FROM user WHERE userID = ?";
@@ -24,6 +25,9 @@ mysqli_stmt_bind_param($stmtAdvisor, "i", $userID);
 mysqli_stmt_execute($stmtAdvisor);
 $resultAdvisor = mysqli_stmt_get_result($stmtAdvisor);
 $advisorData = mysqli_fetch_assoc($resultAdvisor);
+
+// Assign username after database query
+$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 
 // Assign to variables
 $ID = $userData["userID"];
@@ -306,7 +310,7 @@ $currpass = $userData["password"] ?? '';
 		<img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
 		<div class="header-center">
 			<h2>Profile Settings</h2>
-			<p>Event Advisor: </p>
+			<p>Event Advisor: <?php echo htmlspecialchars($loggedInUser); ?></p>
 		</div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
