@@ -1,3 +1,45 @@
+<?php
+session_start(); // Start the session at the very beginning
+
+// Database connection (assuming you have a db_connect.php or similar)
+$servername = "localhost";
+$username = "root"; // Your database username
+$password = "";     // Your database password
+$dbname = "laravel"; // Replace with your actual database name
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$loggedInStudentName = "Guest"; // Default name
+$loggedInStudentEmail = ""; // Default email
+$loggedInStudentId = ""; // Default student ID
+
+if (isset($_SESSION['email'])) {
+    $loggedInStudentEmail = $_SESSION['email'];
+
+    // Fetch student's name and ID based on the logged-in email
+    $stmt = $conn->prepare("SELECT student_name, student_id FROM students WHERE student_email = ?");
+    $stmt->bind_param("s", $loggedInStudentEmail);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $loggedInStudentName = $row['student_name'];
+        $loggedInStudentId = $row['student_id'];
+    }
+    $stmt->close();
+} else {
+    // If no email in session, redirect to login page (or handle as appropriate)
+    header("Location: login_page.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -309,48 +351,6 @@
   </style>
 </head>
 <body>
-  <?php
-  session_start(); // Start the session at the very beginning
-
-  // Database connection (assuming you have a db_connect.php or similar)
-  $servername = "localhost";
-  $username = "root"; // Your database username
-  $password = "";     // Your database password
-  $dbname = "laravel"; // Replace with your actual database name
-
-  // Create connection
-  $conn = new mysqli($servername, $username, $password, $dbname);
-
-  // Check connection
-  if ($conn->connect_error) {
-      die("Connection failed: " . $conn->connect_error);
-  }
-
-  $loggedInStudentName = "Guest"; // Default name
-  $loggedInStudentEmail = ""; // Default email
-  $loggedInStudentId = ""; // Default student ID
-
-  if (isset($_SESSION['email'])) {
-      $loggedInStudentEmail = $_SESSION['email'];
-
-      // Fetch student's name and ID based on the logged-in email
-      $stmt = $conn->prepare("SELECT student_name, student_id FROM students WHERE student_email = ?");
-      $stmt->bind_param("s", $loggedInStudentEmail);
-      $stmt->execute();
-      $result = $stmt->get_result();
-
-      if ($result->num_rows > 0) {
-          $row = $result->fetch_assoc();
-          $loggedInStudentName = $row['student_name'];
-          $loggedInStudentId = $row['student_id'];
-      }
-      $stmt->close();
-  } else {
-      // If no email in session, redirect to login page (or handle as appropriate)
-      header("Location: login_page.php");
-      exit();
-  }
-  ?>
   <div class="header1">
     <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo">
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
