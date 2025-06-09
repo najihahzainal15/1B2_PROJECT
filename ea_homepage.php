@@ -363,7 +363,7 @@ while ($row = mysqli_fetch_assoc($committeeResult)) {
 					<a href="ea_viewEvent.php" class="sub-item">View Event</a>
 					<a href="ea_registerEvent1.php" class="sub-item">Register New Event</a>
 					<a href="ea_eventCommittee.php" class="sub-item">Event Committee</a>
-					<a href="ea_committeeReg.php" class="sub-item">Register Committee Event</a>
+					<a href="ea_committeeReg.php" class="sub-item">Register Committee Member</a>
 				</div>
 			</div>
 
