@@ -466,8 +466,11 @@ if (isset($_SESSION['email'])) {
                 student s
             JOIN
                 committee c ON s.studentID = c.studentID
+                JOIN
+                committeerole cr ON c.roleID = cr.roleID
             JOIN
                 event e ON c.eventID = e.eventID
+              
             WHERE
                 s.studentID = '{$loggedInStudentId}'
         ";
