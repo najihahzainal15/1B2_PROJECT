@@ -506,6 +506,8 @@ if (isset($_SESSION['email'])) {
     mysqli_close($link); // Close the database connection
     ?>
 
+	  <div> echo "Session email: " . $_SESSION['email'];
+	  </div>
 
     </div>
   </div>
