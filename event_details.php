@@ -86,7 +86,7 @@ $conn->close();
     <p><strong>Description:</strong> <?php echo htmlspecialchars($event['eventDesc']); ?></p>
     <p><strong>Date:</strong> <?php echo htmlspecialchars($event['eventDate']); ?></p>
     <p><strong>Time:</strong> <?php echo htmlspecialchars($event['eventTime']); ?></p>
-    <p><strong>Location:</strong> <?php echo htmlspecialchars($event['eventLocation']); ?></p>
+    <p><strong>Location:</strong> <?php echo htmlspecialchars($event['eventLocation']); ?></p> 
  <p><strong>Geolocation:</strong> <?php echo htmlspecialchars($event['eventGeolocation']); ?></p>
     <p><strong>Event Status:</strong> <?php echo htmlspecialchars($event['status']); ?></p>
   </div>
