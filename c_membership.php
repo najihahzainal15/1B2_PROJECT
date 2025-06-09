@@ -364,7 +364,7 @@ $result = mysqli_query($link, $query);
 			<div class="item">
 				<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 				<div class="sub-menu">
-					<a href="#events" class="sub-item">View Event</a>
+					<a href="c_viewAttendance.php" class="sub-item">Attendance Event</a>
 					<a href="c_meritApp.php" class="sub-item">Merit Application</a>
 				</div>
 			</div>

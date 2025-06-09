@@ -331,7 +331,7 @@ if ($result) {
             margin: 20px auto;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .no-events h3 {
@@ -359,31 +359,32 @@ if ($result) {
                 width: 95%;
                 margin: 15px auto;
             }
-            
+
             .search-container form {
                 flex-direction: column;
                 gap: 10px;
             }
-            
+
             .search-box {
                 width: 100%;
             }
-            
-            .search-btn, .clear-search {
+
+            .search-btn,
+            .clear-search {
                 width: 100%;
                 justify-content: center;
             }
-            
+
             .search-results {
                 width: 95%;
                 margin: 10px auto;
             }
-            
+
             .event-table {
                 width: 95%;
                 font-size: 14px;
             }
-            
+
             .no-events {
                 width: 95%;
                 margin: 15px auto;
@@ -399,7 +400,7 @@ if ($result) {
         <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
         <div class="header-center">
             <h2>View Events</h2>
-            <p>Coordinator: <?php echo htmlspecialchars($loggedInUser); ?></p>
+            <p>Petakom Coordinator: <?php echo htmlspecialchars($loggedInUser); ?></p>
         </div>
         <div class="header-right">
             <a href="logout_button.php" class="logout">Logout</a>
@@ -442,9 +443,9 @@ if ($result) {
         <!-- Search Section -->
         <div class="search-container">
             <form method="GET" action="">
-                <input type="text" name="search" class="search-box" 
-                       placeholder="Search by event name, date, or status..." 
-                       value="<?php echo htmlspecialchars($searchTerm); ?>">
+                <input type="text" name="search" class="search-box"
+                    placeholder="Search by event name, date, or status..."
+                    value="<?php echo htmlspecialchars($searchTerm); ?>">
                 <button type="submit" class="search-btn">
                     <i class="fas fa-search"></i> Search
                 </button>
@@ -458,7 +459,7 @@ if ($result) {
 
         <?php if (!empty($searchTerm)): ?>
             <div class="search-results">
-                <?php 
+                <?php
                 $resultCount = count($events);
                 if ($resultCount > 0) {
                     echo "<i class='fas fa-info-circle'></i> Found " . $resultCount . " result" . ($resultCount != 1 ? "s" : "") . " for '" . htmlspecialchars($searchTerm) . "'";
@@ -494,7 +495,7 @@ if ($result) {
                     <?php foreach ($events as $event): ?>
                         <tr>
                             <td>
-                                <?php 
+                                <?php
                                 $eventName = htmlspecialchars($event['eventName']);
                                 if (!empty($searchTerm) && stripos($eventName, $searchTerm) !== false) {
                                     $eventName = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $eventName);
@@ -503,7 +504,7 @@ if ($result) {
                                 ?>
                             </td>
                             <td>
-                                <?php 
+                                <?php
                                 $eventDate = htmlspecialchars($event['eventDate']);
                                 if (!empty($searchTerm) && stripos($eventDate, $searchTerm) !== false) {
                                     $eventDate = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $eventDate);
@@ -512,7 +513,7 @@ if ($result) {
                                 ?>
                             </td>
                             <td class="status <?php echo strtolower($event['status']); ?>">
-                                <?php 
+                                <?php
                                 $status = htmlspecialchars($event['status']);
                                 if (!empty($searchTerm) && stripos($status, $searchTerm) !== false) {
                                     $status = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $status);

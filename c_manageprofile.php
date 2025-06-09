@@ -338,7 +338,7 @@ $filterRole = isset($_GET['role']) ? $_GET['role'] : '';
 			<div class="item">
 				<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 				<div class="sub-menu">
-					<a href="#events" class="sub-item">View Event</a>
+					<a href="c_viewAttendance.php" class="sub-item">Event Attendance</a>
 					<a href="c_merit.php" class="sub-item">Merit Application</a>
 				</div>
 			</div>
