@@ -47,6 +47,22 @@ if (isset($_GET['slot_id']) && is_numeric($_GET['slot_id'])) {
     $errorMessage = "No valid attendance slot ID provided";
 }
 
+// Function to calculate distance between two coordinates using Haversine formula
+function calculateDistance($lat1, $lon1, $lat2, $lon2) {
+    $earthRadius = 6371000; // Earth's radius in meters
+    
+    $dLat = deg2rad($lat2 - $lat1);
+    $dLon = deg2rad($lon2 - $lon1);
+    
+    $a = sin($dLat/2) * sin($dLat/2) + 
+         cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * 
+         sin($dLon/2) * sin($dLon/2);
+    
+    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+    
+    return $earthRadius * $c; // Distance in meters
+}
+
 // Only proceed if we have a valid slot ID
 if ($slotID > 0) {
     // Fetch event details including geolocation
@@ -77,20 +93,16 @@ if ($slotID > 0) {
             $eventLat = floatval(trim($eventCoords[0]));
             $eventLng = floatval(trim($eventCoords[1]));
             
-            // Calculate distance between points (in kilometers)
-            $theta = $eventLng - $userLng;
-            $distance = sin(deg2rad($eventLat)) * sin(deg2rad($userLat)) + 
-                        cos(deg2rad($eventLat)) * cos(deg2rad($userLat)) * cos(deg2rad($theta));
-            $distance = acos($distance);
-            $distance = rad2deg($distance);
-            $distance = $distance * 60 * 1.1515 * 1.609344; // Convert to kilometers
+            // Calculate distance using Haversine formula
+            $distance = calculateDistance($eventLat, $eventLng, $userLat, $userLng);
             
-            // Allow 500 meter radius (0.5 km) instead of 100m
-            if ($distance > 0.5) {
-                $errorMessage = "You are too far from the event location (".round($distance*1000)." meters away). Please be at the event venue to record attendance.";
+            // Allow 1000 meter radius (1 km) for more reasonable tolerance
+            if ($distance > 1000) {
+                $errorMessage = "You are too far from the event location (".round($distance)." meters away). Please be at the event venue to record attendance.";
                 // Debug output - you can remove this after testing
                 $errorMessage .= "<br>Event location: ".$eventGeolocation;
                 $errorMessage .= "<br>Your location: ".$userLat.", ".$userLng;
+                $errorMessage .= "<br>Calculated distance: ".round($distance, 2)." meters";
             } else {
                 // Location verified - proceed with attendance recording
                 try {
@@ -112,8 +124,8 @@ if ($slotID > 0) {
                                 $slotIDStr = strval($slotID);
                                 mysqli_stmt_bind_param($insertStmt, "si", $studentID, $slotID);
                                 if (mysqli_stmt_execute($insertStmt)) {
-                                    $successMessage = "Attendance recorded successfully for ".htmlspecialchars($eventName);
-                                    error_log("Attendance recorded - Student: $studentID, Slot: $slotID, Time: " . date('Y-m-d H:i:s'));
+                                    $successMessage = "Attendance recorded successfully for ".htmlspecialchars($eventName)." (Distance: ".round($distance)." meters from venue)";
+                                    error_log("Attendance recorded - Student: $studentID, Slot: $slotID, Time: " . date('Y-m-d H:i:s') . ", Distance: " . round($distance) . "m");
                                 } else {
                                     $errorMessage = "Error recording attendance: ".mysqli_error($link);
                                     error_log("Failed to insert attendance - Student: $studentID, Slot: $slotID, Error: " . mysqli_error($link));
@@ -471,7 +483,53 @@ if ($slotID > 0) {
         #retry-location:hover {
             background: #005bb5;
         }
+
+        .distance-info {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f8ff;
+            border-radius: 5px;
+            border-left: 4px solid #0074e4;
+        }
     </style>
+
+<script>
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+function checkLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            const eventGeo = document.getElementById("eventGeolocation").value;
+            const [eventLat, eventLng] = eventGeo.split(',').map(Number);
+
+            const distance = getDistanceFromLatLonInKm(userLat, userLng, eventLat, eventLng);
+
+            if (distance <= 1.0) {
+                document.getElementById("status").innerHTML = "<span style='color:green;'>Successful register!</span>";
+            } else {
+                document.getElementById("status").innerHTML = "<span style='color:red;'>You are not at the event location.</span>";
+            }
+        }, function(error) {
+            document.getElementById("status").innerHTML = "Error getting location: " + error.message;
+        });
+    } else {
+        document.getElementById("status").innerHTML = "Geolocation not supported.";
+    }
+}
+</script>
+
 </head>
 <body>
 
@@ -538,6 +596,12 @@ if ($slotID > 0) {
                 <p><strong>Date:</strong> <?php echo htmlspecialchars($eventDate); ?></p>
                 <p><strong>Time:</strong> <?php echo htmlspecialchars($eventTime); ?></p>
                 <p><strong>Location:</strong> <?php echo htmlspecialchars($eventLocation); ?></p>
+                <?php if(!empty($eventGeolocation)): ?>
+                    <div class="distance-info">
+                        <p><strong>GPS Coordinates:</strong> <?php echo htmlspecialchars($eventGeolocation); ?></p>
+                        <p><small><i class="fas fa-info-circle"></i> You must be within 1000 meters (1 km) of this location to record attendance</small></p>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <?php if(empty($successMessage)): ?>
@@ -565,22 +629,22 @@ if ($slotID > 0) {
                         </div>
                         
                         <div id="geolocationSection" class="geolocation-container">
-                        <div class="geolocation-message">
-                            <h3>Location Verification Required</h3>
-                            <p>To prevent fraudulent attendance, we need to verify you're physically present at:</p>
-                            <p><strong><?php echo htmlspecialchars($eventLocation); ?></strong></p>
-                            <div id="location-status">Checking your location...</div>
-                            <p class="p1"><i class="fas fa-info-circle"></i> Please ensure:</p>
-                            <ul style="text-align: left; margin: 10px auto; max-width: 400px;">
-                                <li>Location/GPS is enabled on your device</li>
-                                <li>You're at the actual event venue</li>
-                                <li>You're using a device with GPS capabilities</li>
-                            </ul>
+                            <div class="geolocation-message">
+                                <h3>Location Verification Required</h3>
+                                <p>To prevent fraudulent attendance, we need to verify you're physically present at:</p>
+                                <p><strong><?php echo htmlspecialchars($eventLocation); ?></strong></p>
+                                <div id="location-status">Checking your location...</div>
+                                <p class="p1"><i class="fas fa-info-circle"></i> Please ensure:</p>
+                                <ul style="text-align: left; margin: 10px auto; max-width: 400px;">
+                                    <li>Location/GPS is enabled on your device</li>
+                                    <li>You're at the actual event venue (within 1 km)</li>
+                                    <li>You're using a device with GPS capabilities</li>
+                                </ul>
+                            </div>
+                            <button type="submit" name="verify_geolocation" class="submit-button" id="verifyButton" disabled>
+                                <i class="fas fa-check-circle"></i> Verify Location and Record Attendance
+                            </button>
                         </div>
-                        <button type="submit" name="verify_geolocation" class="submit-button" id="verifyButton" disabled>
-                            <i class="fas fa-check-circle"></i> Verify Location and Record Attendance
-                        </button>
-                    </div>
                     </form>
                 </div>
             <?php else: ?>
@@ -609,86 +673,111 @@ if ($slotID > 0) {
             });
             
             // Handle form submission
-           // Handle form submission
-$('#attendanceForm').on('submit', function(e) {
-    if ($('button[name="submit_attendance"]').is(':focus')) {
-        e.preventDefault();
-        // First validate credentials on client side (simple check)
-        if ($('#student_id').val().trim() === '' || $('#password').val().trim() === '') {
-            return;
-        }
-        
-        // Show geolocation section
-        $('#credentialSection').hide();
-        $('#geolocationSection').show();
-        
-        // Get user's current location
-        if (navigator.geolocation) {
-            $('#location-status').html('<i class="fas fa-spinner fa-spin"></i> Detecting your location...').removeClass('location-error location-success');
-            
-            const options = {
-                enableHighAccuracy: true,  // Try to get the most accurate location
-                timeout: 10000,           // Maximum time to wait for location (10 seconds)
-                maximumAge: 0             // Don't use cached location
-            };
-            
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    const accuracy = position.coords.accuracy; // Accuracy in meters
-                    
-                    // Store coordinates in hidden fields
-                    $('#user_lat').val(userLat);
-                    $('#user_lng').val(userLng);
-                    
-                    // Show accuracy information to user
-                    let statusMessage = `<i class="fas fa-check-circle"></i> Location detected (accuracy: ${Math.round(accuracy)} meters)`;
-                    
-                    // Warn if accuracy is poor
-                    if (accuracy > 5000) {
-                        statusMessage += `<br><i class="fas fa-exclamation-triangle"></i> Warning: Low location accuracy`;
+            $('#attendanceForm').on('submit', function(e) {
+                if ($('button[name="submit_attendance"]').is(':focus')) {
+                    e.preventDefault();
+                    // First validate credentials on client side (simple check)
+                    if ($('#student_id').val().trim() === '' || $('#password').val().trim() === '') {
+                        return;
                     }
                     
-                    $('#location-status').html(statusMessage).removeClass('location-error').addClass('location-success');
+                    // Show geolocation section
+                    $('#credentialSection').hide();
+                    $('#geolocationSection').show();
                     
-                    // Enable verify button
-                    $('#verifyButton').prop('disabled', false);
-                },
-                function(error) {
-                    let errorMessage = "<i class='fas fa-exclamation-circle'></i> ";
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage += "Location access was denied. Please enable location services in your browser settings and reload the page.";
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage += "Your location could not be determined. Please check your internet/GPS connection.";
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage += "The request to get your location timed out. Please try again in an area with better signal.";
-                            break;
-                        default:
-                            errorMessage += "An unknown error occurred while getting your location.";
+                    // Get user's current location
+                    if (navigator.geolocation) {
+                        $('#location-status').html('<i class="fas fa-spinner fa-spin"></i> Detecting your location...').removeClass('location-error location-success');
+                        
+                        const options = {
+                            enableHighAccuracy: true,  // Try to get the most accurate location
+                            timeout: 15000,           // Maximum time to wait for location (15 seconds)
+                            maximumAge: 30000         // Use cached location if it's less than 30 seconds old
+                        };
+                        
+                        navigator.geolocation.getCurrentPosition(
+                            function(position) {
+                                const userLat = position.coords.latitude;
+                                const userLng = position.coords.longitude;
+                                const accuracy = position.coords.accuracy; // Accuracy in meters
+                                
+                                // Store coordinates in hidden fields
+                                $('#user_lat').val(userLat);
+                                $('#user_lng').val(userLng);
+                                
+                                // Calculate distance for display (simplified calculation for display purposes)
+                                const eventLat = <?php echo !empty($eventGeolocation) ? floatval(trim(explode(',', $eventGeolocation)[0])) : 0; ?>;
+                                const eventLng = <?php echo !empty($eventGeolocation) ? floatval(trim(explode(',', $eventGeolocation)[1])) : 0; ?>;
+                                
+                                // Haversine formula for distance calculation
+                                function calculateDistance(lat1, lon1, lat2, lon2) {
+                                    const R = 6371000; // Earth's radius in meters
+                                    const dLat = (lat2 - lat1) * Math.PI / 180;
+                                    const dLon = (lon2 - lon1) * Math.PI / 180;
+                                    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                                            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                                            Math.sin(dLon/2) * Math.sin(dLon/2);
+                                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                                    return R * c;
+                                }
+                                
+                                const distance = calculateDistance(eventLat, eventLng, userLat, userLng);
+                                
+                                // Show accuracy and distance information to user
+                                let statusMessage = `<i class="fas fa-check-circle"></i> Location detected<br>`;
+                                statusMessage += `<small>Accuracy: ${Math.round(accuracy)} meters | Distance from venue: ${Math.round(distance)} meters</small>`;
+                                
+                                // Warn if accuracy is poor
+                                if (accuracy > 100) {
+                                    statusMessage += `<br><i class="fas fa-exclamation-triangle"></i> <small>Warning: Location accuracy may be low</small>`;
+                                }
+                                
+                                // Show if within range
+                                if (distance <= 1000) {
+                                    statusMessage += `<br><i class="fas fa-check"></i> <small style="color: green;">You are within the allowed range!</small>`;
+                                } else {
+                                    statusMessage += `<br><i class="fas fa-times"></i> <small style="color: red;">You are too far from the venue (${Math.round(distance)}m > 1000m)</small>`;
+                                }
+                                
+                                $('#location-status').html(statusMessage).removeClass('location-error').addClass('location-success');
+                                
+                                // Enable verify button
+                                $('#verifyButton').prop('disabled', false);
+                            },
+                            function(error) {
+                                let errorMessage = "<i class='fas fa-exclamation-circle'></i> ";
+                                switch(error.code) {
+                                    case error.PERMISSION_DENIED:
+                                        errorMessage += "Location access was denied. Please enable location services in your browser settings and reload the page.";
+                                        break;
+                                    case error.POSITION_UNAVAILABLE:
+                                        errorMessage += "Your location could not be determined. Please check your internet/GPS connection.";
+                                        break;
+                                    case error.TIMEOUT:
+                                        errorMessage += "The request to get your location timed out. Please try again in an area with better signal.";
+                                        break;
+                                    default:
+                                        errorMessage += "An unknown error occurred while getting your location.";
+                                }
+                                
+                                $('#location-status').html(errorMessage).removeClass('location-success').addClass('location-error');
+                                $('#verifyButton').prop('disabled', true);
+                                
+                                // Show option to try again
+                                $('#location-status').append('<br><button type="button" id="retry-location" style="margin-top: 10px; padding: 5px 10px; background: #0074e4; color: white; border: none; border-radius: 5px;">Try Again</button>');
+                                
+                                $('#retry-location').click(function() {
+                                    $(this).remove();
+                                    $('#attendanceForm').trigger('submit');
+                                });
+                            },
+                            options
+                        );
+                    } else {
+                        $('#location-status').html("<i class='fas fa-exclamation-circle'></i> Geolocation is not supported by your browser. Please use a modern browser that supports location services.").addClass('location-error');
                     }
-                    
-                    $('#location-status').html(errorMessage).removeClass('location-success').addClass('location-error');
-                    $('#verifyButton').prop('disabled', true);
-                    
-                    // Show option to try again
-                    $('#location-status').append('<br><button type="button" id="retry-location" style="margin-top: 10px; padding: 5px 10px; background: #0074e4; color: white; border: none; border-radius: 5px;">Try Again</button>');
-                    
-                    $('#retry-location').click(function() {
-                        $(this).remove();
-                        $('#attendanceForm').trigger('submit');
-                    });
-                },
-                options
-            );
-        } else {
-            $('#location-status').html("<i class='fas fa-exclamation-circle'></i> Geolocation is not supported by your browser. Please use a modern browser that supports location services.").addClass('location-error');
-        }
-    }
-});
+                }
+            });
             
             // Auto-focus on student ID field when page loads
             const studentIdField = document.getElementById('student_id');
@@ -697,5 +786,10 @@ $('#attendanceForm').on('submit', function(e) {
             }
         });
     </script>
+
+<input type="hidden" id="eventGeolocation" value="<?php echo $eventGeolocation; ?>">
+<button onclick="checkLocation()">Check In</button>
+<p id="status"></p>
+
 </body>
 </html>

@@ -13,6 +13,12 @@ if (isset($_GET['id'])) {
         $eventDate = $row['eventDate'];
         $eventTime = $row['eventTime'];
         $eventLocation = $row['eventLocation'];
+        $eventGeolocation=$row['eventGeolocation'];
+        $status=$row['status'];
+        $eventDesc=$row['eventDesc'];
+
+
+        
         $existingQRCode = $row['eventQRCode']; // If you want to show or use it
     } else {
         die("Event not found.");
@@ -287,8 +293,8 @@ if (isset($_GET['id'])) {
   
   <script>
     const eventId = <?php echo (int)$id; ?>;
-    const localIP = "172.20.10.7";  // Your PC's IP
-    const projectFolder = "yeyaya"; // Replace accordingly
+    const localIP = "10.66.40.220";  // Your PC's IP
+    const projectFolder = "YAYA/1B2_PROJECT"; // Replace accordingly
     const qrData = `http://${localIP}/${projectFolder}/event_details.php?id=${eventId}`;
 
     QRCode.toCanvas(document.getElementById("qrcode"), qrData, function (error) {
