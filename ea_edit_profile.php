@@ -311,29 +311,22 @@ $conpass = $_POST['conpass'] ?? '';
 
 	<div class="nav">
 		<div class="menu">
-			<div class="item"><a href="#home">Home</a></div>
-			<div class="item"><a href="s_homepage.html">Dashboard</a></div>
-			<div class="item">
-				<a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
-				<div class="sub-menu">
-					<a href="s_membership" class="sub-item">Membership Application</a>
-				</div>
-			</div>
+			<div class="item"><a href="ea_homepage.php">Dashboard</a></div>
 
 			<div class="item">
 				<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 				<div class="sub-menu">
-					<a href="s_homepage.html" class="sub-item">View Event</a>
-					<a href="s_homepage.html" class="sub-item">Register New Event</a>
-					<a href="s_homepage.html" class="sub-item">Event Committee</a>
-					<a href="s_homepage.html" class="sub-item">Register Committee Member</a>
+					<a href="ea_viewEvent.php" class="sub-item">View Event</a>
+					<a href="ea_registerEvent1.php" class="sub-item">Register New Event</a>
+					<a href="ea_eventCommittee.php" class="sub-item">Event Committee</a>
+					<a href="ea_committeeReg.php" class="sub-item">Register Committee Event</a>
 				</div>
 			</div>
 
 			<div class="item">
 				<a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
 				<div class="sub-menu">
-					<a href="s_attendance.html" class="sub-item">Verify Attendance</a>
+					<a href="ea_attendanceSlot.php" class="sub-item">Attendance Slot</a>
 				</div>
 			</div>
 		</div>
