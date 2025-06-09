@@ -63,6 +63,19 @@ if (isset($_SESSION['email'])) {
       align-items: center;
     }
 
+    .header-right .logout {
+      color: white;
+      font-size: 14px;
+      margin-right: 15px;
+      /* space between Logout and profile icon */
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .header-right .logout:hover {
+      color: #ddd;
+    }
+
     p {
       margin: 0px 40px;
       font-size: 16px;
@@ -219,9 +232,6 @@ if (isset($_SESSION['email'])) {
       background-color: #0096D6;
       color: white;
     }
-
-
-
 
     .section-header {
       background: #f0f0f0;
@@ -412,26 +422,25 @@ if (isset($_SESSION['email'])) {
 
   <div class="nav">
     <div class="menu">
-
-      <div class="item"><a class="active" href="#membership">Dashboard</a></div>
+      <div class="item"><a class="active" href="s_homepage.php">Dashboard</a></div>
       <div class="item">
         <a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a href="s_membershipApp.html" class="sub-item">Membership Application</a>
+          <a href="s_membership.php" class="sub-item">Membership Application</a>
         </div>
       </div>
 
       <div class="item">
         <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a href="#events" class="sub-item">View Event</a>
+          <a href="s_committeeAppView.php" class="sub-item">View Event</a>
         </div>
       </div>
 
       <div class="item">
         <a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a href="#events" class="sub-item">Verify Attendance</a>
+          <a href="s_attendance1.php" class="sub-item">Attendance Slot</a>
         </div>
       </div>
     </div>
@@ -440,9 +449,6 @@ if (isset($_SESSION['email'])) {
   <div class="content">
     <div class="table-container">
       <div class="section-header">EVENT DETAILS</div>
-
-
-
 
       <table>
         <thead>
