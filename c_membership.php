@@ -392,19 +392,20 @@ $result = mysqli_query($link, $query);
 				$count = 1;
 				while ($row = mysqli_fetch_assoc($result)) {
 					echo "<tr>";
-					echo "<td>" . $count++ . "</td>"; // Auto-increment row number
+					echo "<td>" . $count++ . "</td>";
 					echo "<td>" . htmlspecialchars($row["studentID"]) . "</td>";
 					echo "<td><a href='" . htmlspecialchars($row["student_card_upload"]) . "' target='_blank'>View</a></td>";
 					echo "<td class='status-text " . strtolower($row["verification_status"]) . "'>" . htmlspecialchars($row["verification_status"]) . "</td>";
 					echo "<td>
-                <form action='c_membership_action.php' method='POST'>
-                    <input type='hidden' name='membership_ID' value='" . htmlspecialchars($row["membership_ID"]) . "'>
-                    <button type='submit' name='approve' class='action-btn'>APPROVE</button>
-                    <button type='submit' name='reject' class='action-btn'>REJECT</button>
-                </form>
-              </td>";
+		<form action='c_membership_action.php' method='POST'>
+			<input type='hidden' name='membership_ID' value='" . htmlspecialchars($row["membership_ID"]) . "'>
+			<button type='submit' name='approve' class='action-btn'>APPROVE</button>
+			<button type='button' class='action-btn reject-btn' data-membershipid='" . htmlspecialchars($row["membership_ID"]) . "'>REJECT</button>
+		</form>
+		</td>";
 					echo "</tr>";
 				}
+
 				?>
 			</tbody>
 
@@ -413,15 +414,34 @@ $result = mysqli_query($link, $query);
 
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$('.sub-button').click(function() {
-				$(this).next('.sub-menu').slideToggle();
-			});
-
-			// Automatically open sub-menu if it contains an active item
-			$('.sub-menu').each(function() {
-				if ($(this).find('.active').length > 0) {
-					$(this).show();
-					$(this).prev('.sub-button').addClass('active-parent');
+			$('.reject-btn').click(function() {
+				let reason = prompt("Please enter the reason for rejection:");
+				if (reason !== null && reason.trim() !== "") {
+					// Create a form dynamically and submit it
+					let membershipID = $(this).data('membershipid');
+					let form = $('<form>', {
+						method: 'POST',
+						action: 'c_membership_action.php'
+					});
+					form.append($('<input>', {
+						type: 'hidden',
+						name: 'reject',
+						value: '1'
+					}));
+					form.append($('<input>', {
+						type: 'hidden',
+						name: 'membership_ID',
+						value: membershipID
+					}));
+					form.append($('<input>', {
+						type: 'hidden',
+						name: 'rejection_reason',
+						value: reason
+					}));
+					$('body').append(form);
+					form.submit();
+				} else {
+					alert("Rejection reason is required.");
 				}
 			});
 		});

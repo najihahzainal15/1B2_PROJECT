@@ -37,9 +37,23 @@ if (isset($_POST["reject"])) {
     $membershipID = $_POST["membership_ID"];
 
     if ($coordinatorID) {
-        $query = "UPDATE membership SET verification_status = 'Rejected', coordinatorID = ? WHERE membership_ID = ?";
+        $rejectionReason = trim($_POST["rejection_reason"] ?? '');
+
+        if (empty($rejectionReason)) {
+            echo "<script>alert('Rejection reason is required.'); window.history.back();</script>";
+            exit;
+        }
+
+        $query = "UPDATE membership 
+          SET verification_status = 'Rejected', 
+              coordinatorID = ?, 
+              rejection_reason = ?
+          WHERE membership_ID = ?";
         $stmt = mysqli_prepare($link, $query);
-        mysqli_stmt_bind_param($stmt, "si", $coordinatorID, $membershipID);
+        mysqli_stmt_bind_param($stmt, "ssi", $coordinatorID, $rejectionReason, $membershipID);
+
+        $stmt = mysqli_prepare($link, $query);
+        mysqli_stmt_bind_param($stmt, "ssi", $coordinatorID, $rejectionReason, $membershipID);
 
         if ($stmt->execute()) {
             echo "<script>alert('Membership rejected successfully'); window.location.href='c_membership.php';</script>";
