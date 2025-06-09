@@ -395,7 +395,7 @@ if (isset($_SESSION['email'])) {
 		
 		<div class="header-center">
     <h2>View Event</h2>
-    <p>Student : Siti Nur Hidayah</p>
+    <p>Student : <?php echo $loggedInStudentName; ?></p>
   </div>
 		<div class="header-right">
 			<a href="logout_button.php" class="logout">Logout</a>
