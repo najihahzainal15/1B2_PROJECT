@@ -10,32 +10,33 @@ $loggedInStudentEmail = ""; // Default email
 $loggedInStudentId = ""; // Default student ID
 
 if (isset($_SESSION['email'])) {
-    $loggedInStudentEmail = mysqli_real_escape_string($link, $_SESSION['email']); // Sanitize for query
+  $loggedInStudentEmail = mysqli_real_escape_string($link, $_SESSION['email']); // Sanitize for query
 
-    // Fetch user's username (for display) and the associated studentID based on the logged-in email
-    // Join user and student tables using userID
-    $queryUserInfo = "
+  // Fetch user's username (for display) and the associated studentID based on the logged-in email
+  // Join user and student tables using userID
+  $queryUserInfo = "
         SELECT u.username, s.studentID
         FROM user u
         JOIN student s ON u.userID = s.userID
         WHERE u.email = '{$loggedInStudentEmail}'
     ";
-    $resultUserInfo = mysqli_query($link, $queryUserInfo) or die(mysqli_error($link));
+  $resultUserInfo = mysqli_query($link, $queryUserInfo) or die(mysqli_error($link));
 
-    if (mysqli_num_rows($resultUserInfo) > 0) {
-        $rowUserInfo = mysqli_fetch_assoc($resultUserInfo);
-        $loggedInStudentName = htmlspecialchars($rowUserInfo['username']); // Use 'username' from 'user' table
-        $loggedInStudentId = htmlspecialchars($rowUserInfo['studentID']); // Get 'studentID' from 'student' table
-    }
+  if (mysqli_num_rows($resultUserInfo) > 0) {
+    $rowUserInfo = mysqli_fetch_assoc($resultUserInfo);
+    $loggedInStudentName = htmlspecialchars($rowUserInfo['username']); // Use 'username' from 'user' table
+    $loggedInStudentId = htmlspecialchars($rowUserInfo['studentID']); // Get 'studentID' from 'student' table
+  }
 } else {
-    // If no email in session, redirect to login page
-    header("Location: login_page.php");
-    exit();
+  // If no email in session, redirect to login page
+  header("Location: login_page.php");
+  exit();
 }
 ?>
 
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>4</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -44,139 +45,143 @@ if (isset($_SESSION['email'])) {
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
   <style>
-	
-	body{
-		  margin: 0;
-		  font-family: 'Poppins', sans-serif;
-	}
-	
-	.header1 {
-	  overflow: hidden;
-	  background-color: #0074e4;
-	  padding: 0px 10px;
-	  margin-left: 160px;
-	}
-	
-	.header-right {
-	  float: right;
-	   display: flex;
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .header1 {
+      overflow: hidden;
+      background-color: #0074e4;
+      padding: 0px 10px;
+      margin-left: 160px;
+    }
+
+    .header-right {
+      float: right;
+      display: flex;
       align-items: center;
-	}
-	
-	p{
-		margin: 0px 40px;
-		font-size: 16px;
-	}
-	
-	.p1{
-		margin: 5px;
-		font-size: 14px;
-	}
-	
-	
-	h2{
-	margin: 0px 40px;
-	font-size: 25px;
-	color:white;
-	}
-	
-	
-	.nav {
-	  height: 100%;
-	  width: 170px;
-	  position: fixed;
-	  z-index: 1;
-	  top: 0;
-	  left: 0;
-	  background-color: #0074e4;
-	  overflow-x: hidden;
-	  padding-top: 20px;
-	}
-	
-	.nav a {
-	  padding: 6px 8px 6px 16px;
-	  margin: 10px;
-	  text-decoration: none;
-	  font-size: 16px;
-	  color: white;
-	  display: flex;    
-	  justify-content: space-between;
-      align-items: center;	  
-	}
+    }
 
-	.nav a.active {
-	  background-color: #0264c2;
-	  color: white;
-	}
-	
-	.nav a:hover {
-	  background-color: #0264c2;
-	  transition: all 0.4s ease;
-	}
-		
-	.sub-menu{
-		background: #044e95;
-		display: none;
-	}
-	
-	.sub-menu a{
-		padding-left: 30px;
-		font-size: 12px;
-	}
+    p {
+      margin: 0px 40px;
+      font-size: 16px;
+    }
+
+    .p1 {
+      margin: 5px;
+      font-size: 14px;
+    }
 
 
-	.button{
-	  background-color: #D2D2D2; 
-	  border: 2px solid #D0D0D0;
-	  color: black;
-	  padding: 16px 30px;
-	  text-align: center;
-	  text-decoration: none;
-	  display: inline-block;
-	  font-size: 16px;
-	  margin: 4px 25px;
-	  cursor: pointer;
-	}
-	
-	.content {
-	  margin-left: 150px;
-	  padding: 20px;
-	  background-color: #e6f0ff;
-	  display: flex;
-	  justify-content: center;
-	  width: calc(100% - 170px);  /* Use available space */
-	  flex-direction: column; /* Stack items vertically */
-	}
+    h2 {
+      margin: 0px 40px;
+      font-size: 25px;
+      color: white;
+    }
 
 
+    .nav {
+      height: 100%;
+      width: 170px;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      background-color: #0074e4;
+      overflow-x: hidden;
+      padding-top: 20px;
+    }
 
-@media (max-width: 800px) {
-  .table-container {
-    margin-left: 20px;
-    margin-right: 20px;
-    width: calc(100% - 40px); /* Adjust for small screens */
-    padding: 10px; /* Less padding on small screens */
-  }
+    .nav a {
+      padding: 6px 8px 6px 16px;
+      margin: 10px;
+      text-decoration: none;
+      font-size: 16px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-  .identity-row input,
-  .event-details input {
-    font-size: 14px; /* Smaller text for smaller screens */
-  }
-}
+    .nav a.active {
+      background-color: #0264c2;
+      color: white;
+    }
+
+    .nav a:hover {
+      background-color: #0264c2;
+      transition: all 0.4s ease;
+    }
+
+    .sub-menu {
+      background: #044e95;
+      display: none;
+    }
+
+    .sub-menu a {
+      padding-left: 30px;
+      font-size: 12px;
+    }
+
+
+    .button {
+      background-color: #D2D2D2;
+      border: 2px solid #D0D0D0;
+      color: black;
+      padding: 16px 30px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 25px;
+      cursor: pointer;
+    }
+
+    .content {
+      margin-left: 150px;
+      padding: 20px;
+      background-color: #e6f0ff;
+      display: flex;
+      justify-content: center;
+      width: calc(100% - 170px);
+      /* Use available space */
+      flex-direction: column;
+      /* Stack items vertically */
+    }
 
 
 
-	.logo{
-	  height: 40px;
-	  margin: 10px;
-	}
-	
-	.logo2{
-	  height: 35px;
-	  margin: 10px;
-	}
-	
-	.section-title {
+    @media (max-width: 800px) {
+      .table-container {
+        margin-left: 20px;
+        margin-right: 20px;
+        width: calc(100% - 40px);
+        /* Adjust for small screens */
+        padding: 10px;
+        /* Less padding on small screens */
+      }
+
+      .identity-row input,
+      .event-details input {
+        font-size: 14px;
+        /* Smaller text for smaller screens */
+      }
+    }
+
+
+
+    .logo {
+      height: 40px;
+      margin: 10px;
+    }
+
+    .logo2 {
+      height: 35px;
+      margin: 10px;
+    }
+
+    .section-title {
       background: #f0f0f0;
       padding: 12px;
       margin: 0;
@@ -198,26 +203,27 @@ if (isset($_SESSION['email'])) {
 
 
 
-	table {
-		width: 100%;
-		border-collapse: collapse;
-	}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
 
-	table th, table td {
-		padding: 10px;
-		border: 1px solid #ddd;
-		text-align: center;
-	}
+    table th,
+    table td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
 
-	table th {
-		background-color: #0096D6;
-		color: white;
-	}
+    table th {
+      background-color: #0096D6;
+      color: white;
+    }
 
 
 
 
-.section-header {
+    .section-header {
       background: #f0f0f0;
       padding: 12px;
       font-size: 20px;
@@ -267,14 +273,15 @@ if (isset($_SESSION['email'])) {
       border: 2px solid black;
     }
 
-    
-      .btn-group {
-  display: flex;
-  justify-content: space-between; /* Ensures buttons are at opposite ends */
-  padding: 0 20px 30px;
-}
 
-    
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      /* Ensures buttons are at opposite ends */
+      padding: 0 20px 30px;
+    }
+
+
 
     .btn {
       padding: 10px 20px;
@@ -289,174 +296,172 @@ if (isset($_SESSION['email'])) {
     .btn:hover {
       background: #f0f0f0;
     }
-   
-	.header1 {
-	   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #0074e4;
-  padding: 10px 20px;
-  margin-left: 160px;
-  color: white;
-	}
-	
-	.header-right {
-	  float: right;
-	   display: flex;
+
+    .header1 {
+      display: flex;
       align-items: center;
-	}
-	.header-center {
-  text-align: center;
-  flex-grow: 1;
-}
+      justify-content: space-between;
+      background-color: #0074e4;
+      padding: 10px 20px;
+      margin-left: 160px;
+      color: white;
+    }
 
-.header-center h2 {
-  margin: 0;
-  font-size: 22px;
-}
+    .header-right {
+      float: right;
+      display: flex;
+      align-items: center;
+    }
 
-.header-center p {
-  margin: 0;
-  font-size: 14px;
-}
+    .header-center {
+      text-align: center;
+      flex-grow: 1;
+    }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 120px;
-}
+    .header-center h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .header-center p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 120px;
+    }
 
 
-	.logo {
-  height: 40px;
-}
+    .logo {
+      height: 40px;
+    }
 
-.logo2 {
-  height: 35px;
-  border-radius: 50%;
-}
-	
-.back-button{
-   background-color: #0074e4; 
-   font-family: 'Poppins', sans-serif;
-   border: none;
-   border-radius: 10px;
-   color: white;
-   padding: 8px 14px;
-   text-align: center;
-   text-decoration: none;
-   display: inline-block;
-   font-size: 14px;
-   margin: 4px 25px;
-   cursor: pointer;
-   transition: 0.3s;
-  
- }
- 
- .back-button:hover {
-   background-color: #005bb5;
- }
- 
- .download-button{
-   background-color: #0074e4; 
-   font-family: 'Poppins', sans-serif;
-   border: none;
-   border-radius: 10px;
-   color: white;
-   padding: 8px 14px;
-   text-align: center;
-   text-decoration: none;
-   display: inline-block;
-   font-size: 14px;
-   margin: 4px 25px;
-   cursor: pointer;
-   transition: 0.3s;
-   
- }
- 
- .download-button:hover {
-   background-color: #005bb5;
- }
-	
-	.tbody {
-		 background-color: white;
-	}
-	
-	
-		
+    .logo2 {
+      height: 35px;
+      border-radius: 50%;
+    }
+
+    .back-button {
+      background-color: #0074e4;
+      font-family: 'Poppins', sans-serif;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      padding: 8px 14px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 4px 25px;
+      cursor: pointer;
+      transition: 0.3s;
+
+    }
+
+    .back-button:hover {
+      background-color: #005bb5;
+    }
+
+    .download-button {
+      background-color: #0074e4;
+      font-family: 'Poppins', sans-serif;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      padding: 8px 14px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 4px 25px;
+      cursor: pointer;
+      transition: 0.3s;
+
+    }
+
+    .download-button:hover {
+      background-color: #005bb5;
+    }
+
+    .tbody {
+      background-color: white;
+    }
   </style>
 </head>
 
 <body>
   <div class="header1">
-	<img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
+    <img src="images/UMPSALogo.png" alt="UMPSA Logo000nn" class="logo">
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
-		
-		<div class="header-center">
-    <h2>View Event</h2>
-    <p>Student : <?php echo $loggedInStudentName; ?></p>
+
+    <div class="header-center">
+      <h2>View Event</h2>
+      <p>Student : <?php echo $loggedInStudentName; ?></p>
+    </div>
+    <div class="header-right">
+      <a href="logout_button.php" class="logout">Logout</a>
+      <a href="s_edit_profile.php">
+        <img src="images/profile.png" alt="Profile" class="logo2">
+      </a>
+    </div>
   </div>
-		<div class="header-right">
-			<a href="logout_button.php" class="logout">Logout</a>
-			<a href="s_edit_profile.php">
-				<img src="images/profile.png" alt="Profile" class="logo2">
-			</a>
-		</div> 
+
+  <div class="nav">
+    <div class="menu">
+
+      <div class="item"><a class="active" href="#membership">Dashboard</a></div>
+      <div class="item">
+        <a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
+        <div class="sub-menu">
+          <a href="s_membershipApp.html" class="sub-item">Membership Application</a>
+        </div>
+      </div>
+
+      <div class="item">
+        <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
+        <div class="sub-menu">
+          <a href="#events" class="sub-item">View Event</a>
+        </div>
+      </div>
+
+      <div class="item">
+        <a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
+        <div class="sub-menu">
+          <a href="#events" class="sub-item">Verify Attendance</a>
+        </div>
+      </div>
+    </div>
   </div>
-  
- <div class="nav">
-	<div class="menu">
-		
-		<div class="item"><a class="active" href="#membership">Dashboard</a></div>
-		<div class="item">
-			<a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
-			<div class="sub-menu">
-				<a href="s_membershipApp.html" class="sub-item">Membership Application</a>
-			</div>
-		</div>
-		
-		<div class="item">
-			<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
-			<div class="sub-menu">
-				<a href="#events" class="sub-item">View Event</a>
-			</div>
-		</div>
-		
-		<div class="item">
-			<a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
-			<div class="sub-menu">
-				<a href="#events" class="sub-item">Verify Attendance</a>
-			</div>
-		</div>
-	</div>
-  </div>
-  
+
   <div class="content">
     <div class="table-container">
-        <div class="section-header">EVENT DETAILS</div>
+      <div class="section-header">EVENT DETAILS</div>
 
 
-    
 
-<table>
-  <thead>
-    <tr>
-      <th>Student ID</th>
-      <th>Committee Role</th>
-      <th>Event Name</th>
-      <th>Event Date</th>
-      <th>Event Location</th>
-	  <th>Event Status</th>
-    </tr>
-  </thead>
-  <tbody class="tbody">
-     <?php
-    // Only proceed with event data if a valid student ID is found
-    if (!empty($loggedInStudentId)) {
-        // Query to fetch event details for the logged-in student
-        // Using the newly provided table structures for 'committee' and 'committeerole'
-        $queryEvents = "
+
+      <table>
+        <thead>
+          <tr>
+            <th>Student ID</th>
+            <th>Committee Role</th>
+            <th>Event Name</th>
+            <th>Event Date</th>
+            <th>Event Location</th>
+            <th>Event Status</th>
+          </tr>
+        </thead>
+        <tbody class="tbody">
+          <?php
+          // Only proceed with event data if a valid student ID is found
+          if (!empty($loggedInStudentId)) {
+            // Query to fetch event details for the logged-in student
+            // Using the newly provided table structures for 'committee' and 'committeerole'
+            $queryEvents = "
             SELECT
                 s.studentID,
                 cr.committeeRole,    
@@ -476,12 +481,12 @@ if (isset($_SESSION['email'])) {
                 s.studentID = '{$loggedInStudentId}'
         ";
 
-        $resultEvents = mysqli_query($link, $queryEvents) or die(mysqli_error($link)); 
+            $resultEvents = mysqli_query($link, $queryEvents) or die(mysqli_error($link));
 
-        if (mysqli_num_rows($resultEvents) > 0) {
-            while ($row = mysqli_fetch_assoc($resultEvents)) {
+            if (mysqli_num_rows($resultEvents) > 0) {
+              while ($row = mysqli_fetch_assoc($resultEvents)) {
                 $studentID = htmlspecialchars($row["studentID"]);
-                $role = htmlspecialchars($row["committeeRole"]); 
+                $role = htmlspecialchars($row["committeeRole"]);
                 $eventName = htmlspecialchars($row["eventName"]);
                 $eventDate = htmlspecialchars($row["eventDate"]);
                 $eventLoc = htmlspecialchars($row["eventLocation"]);
@@ -495,27 +500,28 @@ if (isset($_SESSION['email'])) {
                 echo "<td>$eventLoc</td>";
                 echo "<td>$eventStatus</td>";
                 echo "</tr>";
+              }
+            } else {
+              echo "<tr><td colspan='6'>No events found for this student.</td></tr>";
             }
-        } else {
-            echo "<tr><td colspan='6'>No events found for this student.</td></tr>"; 
-        }
-    } else {
-        echo "<tr><td colspan='6'>Student information not available. Please log in.</td></tr>"; 
-    }
+          } else {
+            echo "<tr><td colspan='6'>Student information not available. Please log in.</td></tr>";
+          }
 
-    mysqli_close($link); // Close the database connection
-    ?>
+          mysqli_close($link); // Close the database connection
+          ?>
 
-	  
+
 
     </div>
   </div>
-	<script type="text/javascript">
-	$(document).ready(function(){
-		$('.sub-button').click(function(){
-			$(this).next('.sub-menu').slideToggle();
-		});
-	});
-	</script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('.sub-button').click(function() {
+        $(this).next('.sub-menu').slideToggle();
+      });
+    });
+  </script>
 </body>
+
 </html>
