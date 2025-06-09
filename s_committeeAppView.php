@@ -38,7 +38,7 @@ if (isset($_SESSION['email'])) {
 <head>
   <title>View Event</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <title>MyPetakom Event Advisor Homepage</title>   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
   <style>
@@ -405,22 +405,26 @@ if (isset($_SESSION['email'])) {
  <div class="nav">
   <div class="menu">
     
-    <div class="item"><a href="s_homepage.php">Dashboard</a></div>     <div class="item">
+    <div class="item"><a href="s_homepage.php">Dashboard</a></div> 
+    <div class="item">
       <a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
       <div class="sub-menu">
-        <a href="s_membership.php" class="sub-item">Membership Application</a>       </div>
+        <a href="s_membership.php" class="sub-item">Membership Application</a> 
+      </div>
     </div>
     
     <div class="item">
       <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
       <div class="sub-menu">
-        <a href="s_committeeAppView.php" class="sub-item active">View Event</a>       </div>
+        <a href="s_committeeAppView.php" class="sub-item active">View Event</a> 
+      </div>
     </div>
     
     <div class="item">
       <a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
       <div class="sub-menu">
-        <a href="s_attendance1.php" class="sub-item">Attendance Slot</a>       </div>
+        <a href="s_attendance1.php" class="sub-item">Attendance Slot</a> 
+      </div>
     </div>
   </div>
   </div>
@@ -445,19 +449,11 @@ if (isset($_SESSION['email'])) {
     // Only proceed with event data if a valid student ID is found
     if (!empty($loggedInStudentId)) {
         // Query to fetch event details for the logged-in student
-        // Assumptions for table structure (based on your previous query and table images):
-        // - 'student' table has 'studentID'
-        // - 'committee' table has 'eventID', 'studentID', and 'committeeRole'
-        // - 'event' table has 'eventID', 'eventName', 'eventDate', 'eventLocation', 'status'
-        // - The 'committeerole' table is not strictly needed for the columns you're displaying
-        //   if 'committeeRole' string is directly in the 'committee' table.
-        //   I'm removing the 'committeerole' join as it seemed logically incorrect in your original code,
-        //   and you're fetching 'committeeRole' directly.
-
+        // Using the newly provided table structures for 'committee' and 'committeerole'
         $queryEvents = "
             SELECT
                 s.studentID,
-                c.committeeRole,
+                cr.committeeRole,    
                 e.eventName,
                 e.eventDate,
                 e.eventLocation,
@@ -466,21 +462,20 @@ if (isset($_SESSION['email'])) {
                 student s
             JOIN
                 committee c ON s.studentID = c.studentID
-                JOIN
-                committeerole cr ON c.roleID = cr.roleID
             JOIN
                 event e ON c.eventID = e.eventID
-              
+            JOIN
+                committeerole cr ON c.roleID = cr.roleID 
             WHERE
                 s.studentID = '{$loggedInStudentId}'
         ";
 
-        $resultEvents = mysqli_query($link, $queryEvents) or die(mysqli_error($link));
+        $resultEvents = mysqli_query($link, $queryEvents) or die(mysqli_error($link)); 
 
         if (mysqli_num_rows($resultEvents) > 0) {
             while ($row = mysqli_fetch_assoc($resultEvents)) {
                 $studentID = htmlspecialchars($row["studentID"]);
-                $role = htmlspecialchars($row["committeeRole"]); // Assuming committeeRole is in committee table
+                $role = htmlspecialchars($row["committeeRole"]); 
                 $eventName = htmlspecialchars($row["eventName"]);
                 $eventDate = htmlspecialchars($row["eventDate"]);
                 $eventLoc = htmlspecialchars($row["eventLocation"]);
@@ -496,10 +491,10 @@ if (isset($_SESSION['email'])) {
                 echo "</tr>";
             }
         } else {
-            echo "<tr><td colspan='6'>No events found for this student.</td></tr>"; // Adjusted colspan
+            echo "<tr><td colspan='6'>No events found for this student.</td></tr>"; 
         }
     } else {
-        echo "<tr><td colspan='6'>Student information not available. Please log in.</td></tr>"; // Adjusted colspan
+        echo "<tr><td colspan='6'>Student information not available. Please log in.</td></tr>"; 
     }
 
     mysqli_close($link); // Close the database connection
