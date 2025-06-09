@@ -1,11 +1,11 @@
 <?php
 session_start(); // Start the session at the very beginning
 
-// Database connection (assuming you have a db_connect.php or similar)
+// Database connection
 $servername = "localhost";
 $username = "root"; // Your database username
 $password = "";     // Your database password
-$dbname = "laravel"; // Replace with your actual database name
+$dbname = "web_project"; // CORRECTED: Your actual database name from the image
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -22,16 +22,22 @@ $loggedInStudentId = ""; // Default student ID
 if (isset($_SESSION['email'])) {
     $loggedInStudentEmail = $_SESSION['email'];
 
-    // Fetch student's name and ID based on the logged-in email
-    $stmt = $conn->prepare("SELECT student_name, student_id FROM students WHERE student_email = ?");
+    // Fetch user's username (for display) and the associated studentID based on the logged-in email
+    // Join user and student tables using userID
+    $stmt = $conn->prepare("
+        SELECT u.username, s.studentID
+        FROM user u
+        JOIN student s ON u.userID = s.userID
+        WHERE u.email = ?
+    ");
     $stmt->bind_param("s", $loggedInStudentEmail);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        $loggedInStudentName = $row['student_name'];
-        $loggedInStudentId = $row['student_id'];
+        $loggedInStudentName = $row['username']; // Use 'username' from 'user' table as the student's display name
+        $loggedInStudentId = $row['studentID']; // Get 'studentID' from 'student' table
     }
     $stmt->close();
 } else {
@@ -410,24 +416,26 @@ if (isset($_SESSION['email'])) {
           <?php
           if (!empty($loggedInStudentId)) {
               // Fetch event details for the logged-in student
-              // This query assumes a table named 'event_participation' or similar
-              // that links student_id to event_details. Adjust table and column names as per your database.
+              // ASSUMPTIONS:
+              // - Your event_participation table has 'studentID' and 'event_id'
+              // - Your events table has 'event_id', 'event_name', 'event_date', 'event_location', 'event_status'
+              // Please adjust 'event_participation' and 'events' table/column names if they differ.
               $stmt = $conn->prepare("
                   SELECT
-                      s.student_id,
+                      s.studentID, /* Corrected: Use studentID from the student table */
                       ep.committee_role,
                       e.event_name,
                       e.event_date,
                       e.event_location,
                       e.event_status
                   FROM
-                      students s
+                      student s /* Corrected: Use the 'student' table */
                   JOIN
-                      event_participation ep ON s.student_id = ep.student_id
+                      event_participation ep ON s.studentID = ep.studentID /* Corrected: Join on studentID */
                   JOIN
                       events e ON ep.event_id = e.event_id
                   WHERE
-                      s.student_id = ?
+                      s.studentID = ?
               ");
               $stmt->bind_param("s", $loggedInStudentId);
               $stmt->execute();
@@ -436,7 +444,7 @@ if (isset($_SESSION['email'])) {
               if ($result->num_rows > 0) {
                   while ($row = $result->fetch_assoc()) {
                       echo "<tr>";
-                      echo "<td>" . htmlspecialchars($row['student_id']) . "</td>";
+                      echo "<td>" . htmlspecialchars($row['studentID']) . "</td>";
                       echo "<td>" . htmlspecialchars($row['committee_role']) . "</td>";
                       echo "<td>" . htmlspecialchars($row['event_name']) . "</td>";
                       echo "<td>" . htmlspecialchars($row['event_date']) . "</td>";
