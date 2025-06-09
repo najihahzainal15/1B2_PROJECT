@@ -172,7 +172,8 @@ if ($result) {
         }
 
         .event-table th {
-            background-color: #0074e4;
+            background-color: #0066cc;
+            ;
             color: white;
         }
 

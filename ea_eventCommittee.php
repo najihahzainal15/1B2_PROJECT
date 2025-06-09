@@ -176,7 +176,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
 
     table th {
-      background-color: #0096D6;
+      background-color: #0066cc;
       color: white;
     }
 

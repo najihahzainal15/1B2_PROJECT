@@ -216,18 +216,22 @@ $result = mysqli_query($link, $query);
 			margin-left: 40px;
 			width: 90%;
 			border-collapse: collapse;
-			background: #d0e6ff;
 			margin-top: 20px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 		}
 
 		.member-table tbody tr {
 			background-color: white;
 		}
 
+		.member-table th {
+			color: white;
+			background-color: #0066cc;
+		}
 
 		.member-table th,
 		.member-table td {
-			border: 2px solid #ddd;
+			border: 1px solid #ddd;
 			padding: 10px;
 			text-align: center;
 			font-family: 'Poppins', sans-serif;
@@ -405,8 +409,6 @@ $result = mysqli_query($link, $query);
 			</tbody>
 
 		</table>
-
-		<button class="back-button">Back</button>
 	</div>
 
 	<script type="text/javascript">

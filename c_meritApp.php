@@ -40,7 +40,7 @@ $result = mysqli_query($link, $query);
 <html>
 
 <head>
-  <title> EVENT ADVISOR MERIT</title>
+  <title>COORDINATOR MERIT APPROVAL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
@@ -135,6 +135,7 @@ $result = mysqli_query($link, $query);
       /* wrap long text */
       font-size: 13px;
       /* slightly smaller font */
+
     }
 
     table th,
@@ -150,7 +151,7 @@ $result = mysqli_query($link, $query);
     }
 
     table th {
-      background-color: #0096D6;
+      background-color: #0066cc;
       color: white;
     }
 
@@ -298,21 +299,6 @@ $result = mysqli_query($link, $query);
       max-width: 100%;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       border-radius: 10px;
-    }
-
-    .section-header {
-      background: #f0f0f0;
-      padding: 12px;
-      font-size: 20px;
-      font-weight: bold;
-      text-align: center;
-      border-top: 2px solid black;
-      border-bottom: 2px solid black;
-    }
-
-    <style>body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
     }
 
     p {
@@ -481,7 +467,7 @@ $result = mysqli_query($link, $query);
   <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo" />
   <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo" />
   <div class="header-center">
-    <h2>User Profile Management</h2>
+    <h2>Merit Application</h2>
     <p>Petakom Coordinator: <?php echo  htmlspecialchars($loggedInUser); ?></p>
   </div>
   <div class="header-right">
@@ -523,7 +509,6 @@ $result = mysqli_query($link, $query);
 
 <div class="content">
   <div class="table-container">
-    <div class="section-header">MERIT APPLICATION</div>
     <table border="1" cellspacing="0" cellpadding="5">
 
       <form method="GET" style="margin-bottom: 20px; text-align: right;">
