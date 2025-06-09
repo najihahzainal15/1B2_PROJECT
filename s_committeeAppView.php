@@ -445,19 +445,11 @@ if (isset($_SESSION['email'])) {
     // Only proceed with event data if a valid student ID is found
     if (!empty($loggedInStudentId)) {
         // Query to fetch event details for the logged-in student
-        // Assumptions for table structure (based on your previous query and table images):
-        // - 'student' table has 'studentID'
-        // - 'committee' table has 'eventID', 'studentID', and 'committeeRole'
-        // - 'event' table has 'eventID', 'eventName', 'eventDate', 'eventLocation', 'status'
-        // - The 'committeerole' table is not strictly needed for the columns you're displaying
-        //   if 'committeeRole' string is directly in the 'committee' table.
-        //   I'm removing the 'committeerole' join as it seemed logically incorrect in your original code,
-        //   and you're fetching 'committeeRole' directly.
-
+        // Using the newly provided table structures for 'committee' and 'committeerole'
         $queryEvents = "
             SELECT
                 s.studentID,
-                c.committeeRole,
+                cr.committeeRole,    /* CORRECTED: Get committeeRole from committeerole table */
                 e.eventName,
                 e.eventDate,
                 e.eventLocation,
@@ -466,21 +458,20 @@ if (isset($_SESSION['email'])) {
                 student s
             JOIN
                 committee c ON s.studentID = c.studentID
-                JOIN
-                committeerole cr ON c.roleID = cr.roleID
             JOIN
                 event e ON c.eventID = e.eventID
-              
+            JOIN
+                committeerole cr ON c.roleID = cr.roleID /* CORRECTED: Join committee with committeerole on roleID */
             WHERE
                 s.studentID = '{$loggedInStudentId}'
         ";
 
-        $resultEvents = mysqli_query($link, $queryEvents) or die(mysqli_error($link));
+        $resultEvents = mysqli_query($link, $queryEvents) or die(mysqli_error($link)); // Line 478 will now be this line or near it.
 
         if (mysqli_num_rows($resultEvents) > 0) {
             while ($row = mysqli_fetch_assoc($resultEvents)) {
                 $studentID = htmlspecialchars($row["studentID"]);
-                $role = htmlspecialchars($row["committeeRole"]); // Assuming committeeRole is in committee table
+                $role = htmlspecialchars($row["committeeRole"]); // Now correctly retrieves from the joined table
                 $eventName = htmlspecialchars($row["eventName"]);
                 $eventDate = htmlspecialchars($row["eventDate"]);
                 $eventLoc = htmlspecialchars($row["eventLocation"]);
