@@ -38,7 +38,7 @@ if (isset($_SESSION['email'])) {
 <head>
   <title>View Event</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <title>MyPetakom Event Advisor Homepage</title>   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kit.fontawesome.com/f52cf35b07.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
   <style>
@@ -405,22 +405,26 @@ if (isset($_SESSION['email'])) {
  <div class="nav">
   <div class="menu">
     
-    <div class="item"><a href="s_homepage.php">Dashboard</a></div>     <div class="item">
+    <div class="item"><a href="s_homepage.php">Dashboard</a></div> 
+    <div class="item">
       <a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
       <div class="sub-menu">
-        <a href="s_membership.php" class="sub-item">Membership Application</a>       </div>
+        <a href="s_membership.php" class="sub-item">Membership Application</a> 
+      </div>
     </div>
     
     <div class="item">
       <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
       <div class="sub-menu">
-        <a href="s_committeeAppView.php" class="sub-item active">View Event</a>       </div>
+        <a href="s_committeeAppView.php" class="sub-item active">View Event</a> 
+      </div>
     </div>
     
     <div class="item">
       <a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
       <div class="sub-menu">
-        <a href="s_attendance1.php" class="sub-item">Attendance Slot</a>       </div>
+        <a href="s_attendance1.php" class="sub-item">Attendance Slot</a> 
+      </div>
     </div>
   </div>
   </div>
@@ -449,7 +453,7 @@ if (isset($_SESSION['email'])) {
         $queryEvents = "
             SELECT
                 s.studentID,
-                cr.committeeRole,    /* CORRECTED: Get committeeRole from committeerole table */
+                cr.committeeRole,    
                 e.eventName,
                 e.eventDate,
                 e.eventLocation,
@@ -461,17 +465,17 @@ if (isset($_SESSION['email'])) {
             JOIN
                 event e ON c.eventID = e.eventID
             JOIN
-                committeerole cr ON c.roleID = cr.roleID /* CORRECTED: Join committee with committeerole on roleID */
+                committeerole cr ON c.roleID = cr.roleID 
             WHERE
                 s.studentID = '{$loggedInStudentId}'
         ";
 
-        $resultEvents = mysqli_query($link, $queryEvents) or die(mysqli_error($link)); // Line 478 will now be this line or near it.
+        $resultEvents = mysqli_query($link, $queryEvents) or die(mysqli_error($link)); 
 
         if (mysqli_num_rows($resultEvents) > 0) {
             while ($row = mysqli_fetch_assoc($resultEvents)) {
                 $studentID = htmlspecialchars($row["studentID"]);
-                $role = htmlspecialchars($row["committeeRole"]); // Now correctly retrieves from the joined table
+                $role = htmlspecialchars($row["committeeRole"]); 
                 $eventName = htmlspecialchars($row["eventName"]);
                 $eventDate = htmlspecialchars($row["eventDate"]);
                 $eventLoc = htmlspecialchars($row["eventLocation"]);
@@ -487,10 +491,10 @@ if (isset($_SESSION['email'])) {
                 echo "</tr>";
             }
         } else {
-            echo "<tr><td colspan='6'>No events found for this student.</td></tr>"; // Adjusted colspan
+            echo "<tr><td colspan='6'>No events found for this student.</td></tr>"; 
         }
     } else {
-        echo "<tr><td colspan='6'>Student information not available. Please log in.</td></tr>"; // Adjusted colspan
+        echo "<tr><td colspan='6'>Student information not available. Please log in.</td></tr>"; 
     }
 
     mysqli_close($link); // Close the database connection
