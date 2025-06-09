@@ -294,7 +294,7 @@ if (isset($_GET['id'])) {
   <script>
     const eventId = <?php echo (int)$id; ?>;
     const localIP = "10.66.40.220";  // Your PC's IP
-    const projectFolder = "yeyaya"; // Replace accordingly
+    const projectFolder = "YAYA/1B2_PROJECT"; // Replace accordingly
     const qrData = `http://${localIP}/${projectFolder}/event_details.php?id=${eventId}`;
 
     QRCode.toCanvas(document.getElementById("qrcode"), qrData, function (error) {
