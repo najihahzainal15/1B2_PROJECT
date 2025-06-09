@@ -178,13 +178,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 			margin-left: 30px;
 		}
 
-		/* Search Bar Transition */
-		#searchInput:focus {
-			border-color: #0074e4;
-			box-shadow: 0 0 5px rgba(0, 116, 228, 0.5);
-			outline: none;
-		}
-
 		/* Horizontal scroll wrapper */
 		.events-scroll-wrapper {
 			overflow-x: auto;
@@ -279,10 +272,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 		</h2>
 		<p>Welcome to MyPetakom's home.</p>
 		<br>
-		<h2>Events</h2>
-		<div style="margin-left:30px; margin-bottom:20px;">
-			<input type="text" id="searchInput" placeholder="Search events..." style="padding:10px; width:300px; border-radius:4px; border:1px solid #ccc;">
-		</div>
+		<h2>Upcoming Events</h2>
 
 		<!-- Scrollable horizontal container -->
 		<div class="events-scroll-wrapper">
@@ -315,14 +305,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 				// Toggle sub-menu
 				$('.sub-button').click(function() {
 					$(this).next('.sub-menu').slideToggle();
-				});
-
-				// Search event cards
-				$('#searchInput').on('keyup', function() {
-					var value = $(this).val().toLowerCase();
-					$('.event').filter(function() {
-						$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-					});
 				});
 			});
 		</script>
