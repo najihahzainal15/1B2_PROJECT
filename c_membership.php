@@ -26,7 +26,7 @@ $userData = mysqli_fetch_assoc($resultUser);
 $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 
 // Fetch student membership applications
-$query = "SELECT s.studentID, s.student_card_upload, s.programme, s.year_of_study, 
+$query = "SELECT s.studentID, s.student_card_upload, 
                  m.verification_status, m.membership_ID
           FROM student s
           INNER JOIN membership m ON s.studentID = m.studentID
@@ -361,14 +361,14 @@ $result = mysqli_query($link, $query);
 			<div class="item">
 				<a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
 				<div class="sub-menu">
-					<a class="active" href="c_membership.php" class="sub-item">Membership Approval</a>
+					<a href="c_membership.php" class="sub-item active">Membership Approval</a>
 				</div>
 			</div>
 
 			<div class="item">
 				<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 				<div class="sub-menu">
-					<a href="c_viewAttendance.php" class="sub-item">Attendance Event</a>
+					<a href="c_viewAttendance.php" class="sub-item">Event Attendance</a>
 					<a href="c_meritApp.php" class="sub-item">Merit Application</a>
 				</div>
 			</div>
@@ -411,6 +411,22 @@ $result = mysqli_query($link, $query);
 
 		</table>
 	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('.sub-button').click(function() {
+				$(this).next('.sub-menu').slideToggle();
+			});
+
+			// Automatically open sub-menu if it contains an active item
+			$('.sub-menu').each(function() {
+				if ($(this).find('.active').length > 0) {
+					$(this).show();
+					$(this).prev('.sub-button').addClass('active-parent');
+				}
+			});
+		});
+	</script>
 
 	<script type="text/javascript">
 		$(document).ready(function() {
