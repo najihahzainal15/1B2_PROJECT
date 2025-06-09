@@ -1,30 +1,5 @@
-<?php
-// Initialize the session
-session_start();
-
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-  header("location: login_page.php");
-  exit();
-}
-
-$link = mysqli_connect("localhost", "root", "", "web_project") or die(mysqli_connect_error());
-$userID = $_SESSION["userID"];
-$role = $_SESSION["role"];
-
-// Get user's name from the database
-$queryUser = "SELECT username FROM user WHERE userID = ?";
-$stmtUser = mysqli_prepare($link, $queryUser);
-mysqli_stmt_bind_param($stmtUser, "i", $userID);
-mysqli_stmt_execute($stmtUser);
-$resultUser = mysqli_stmt_get_result($stmtUser);
-$userData = mysqli_fetch_assoc($resultUser);
-
-$loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
-?>
-
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>View Event</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -36,37 +11,31 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       margin: 0;
       font-family: 'Poppins', sans-serif;
     }
-
     .header1 {
       overflow: hidden;
       background-color: #0074e4;
       padding: 0px 10px;
       margin-left: 160px;
     }
-
     .header-right {
       float: right;
       display: flex;
       align-items: center;
     }
-
     p {
       margin: 0px 40px;
       font-size: 16px;
     }
-
     .p1 {
       margin: 5px;
       font-size: 14px;
     }
-
 
     h2 {
       margin: 0px 40px;
       font-size: 25px;
       color: white;
     }
-
 
     .nav {
       height: 100%;
@@ -79,7 +48,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       overflow-x: hidden;
       padding-top: 20px;
     }
-
     .nav a {
       padding: 6px 8px 6px 16px;
       margin: 10px;
@@ -90,27 +58,22 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       justify-content: space-between;
       align-items: center;
     }
-
     .nav a.active {
       background-color: #0264c2;
       color: white;
     }
-
     .nav a:hover {
       background-color: #0264c2;
       transition: all 0.4s ease;
     }
-
     .sub-menu {
       background: #044e95;
       display: none;
     }
-
     .sub-menu a {
       padding-left: 30px;
       font-size: 12px;
     }
-
 
     .button {
       background-color: #D2D2D2;
@@ -124,7 +87,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       margin: 4px 25px;
       cursor: pointer;
     }
-
     .content {
       margin-left: 150px;
       padding: 20px;
@@ -138,7 +100,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
 
 
-
     @media (max-width: 800px) {
       .table-container {
         margin-left: 20px;
@@ -148,7 +109,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
         padding: 10px;
         /* Less padding on small screens */
       }
-
       .identity-row input,
       .event-details input {
         font-size: 14px;
@@ -157,17 +117,14 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
 
 
-
     .logo {
       height: 40px;
       margin: 10px;
     }
-
     .logo2 {
       height: 35px;
       margin: 10px;
     }
-
     .section-title {
       background: #f0f0f0;
       padding: 12px;
@@ -178,7 +135,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       border-top: 2px solid #000;
       border-bottom: 2px solid #000;
     }
-
     .actions {
       display: flex;
       justify-content: flex-end;
@@ -189,24 +145,20 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
 
 
-
     table {
       width: 100%;
       border-collapse: collapse;
     }
-
     table th,
     table td {
       padding: 10px;
       border: 1px solid #ddd;
       text-align: center;
     }
-
     table th {
       background-color: #0096D6;
       color: white;
     }
-
 
 
 
@@ -219,14 +171,12 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       border-top: 2px solid black;
       border-bottom: 2px solid black;
     }
-
     .identity-row {
       display: flex;
       justify-content: center;
       gap: 10px;
       padding: 20px;
     }
-
     .identity-row input {
       text-align: center;
       font-weight: bold;
@@ -236,7 +186,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       background: white;
       border-radius: 5px;
     }
-
     .event-details {
       display: grid;
       grid-template-columns: 1fr 2fr;
@@ -244,7 +193,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       background: #b3d9ff;
       padding: 20px;
     }
-
     .event-details label {
       background: #d3d3d3;
       font-weight: bold;
@@ -252,7 +200,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       text-align: center;
       border: 2px solid black;
     }
-
     .event-details input {
       padding: 10px;
       font-weight: bold;
@@ -260,14 +207,12 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       border: 2px solid black;
     }
 
-
     .btn-group {
       display: flex;
       justify-content: space-between;
       /* Ensures buttons are at opposite ends */
       padding: 0 20px 30px;
     }
-
 
 
     .btn {
@@ -279,11 +224,9 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       border-radius: 8px;
       cursor: pointer;
     }
-
     .btn:hover {
       background: #f0f0f0;
     }
-
     .header1 {
       display: flex;
       align-items: center;
@@ -293,28 +236,23 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       margin-left: 160px;
       color: white;
     }
-
     .header-right {
       float: right;
       display: flex;
       align-items: center;
     }
-
     .header-center {
       text-align: center;
       flex-grow: 1;
     }
-
     .header-center h2 {
       margin: 0;
       font-size: 22px;
     }
-
     .header-center p {
       margin: 0;
       font-size: 14px;
     }
-
     .header-left {
       display: flex;
       align-items: center;
@@ -322,16 +260,13 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       min-width: 120px;
     }
 
-
     .logo {
       height: 40px;
     }
-
     .logo2 {
       height: 35px;
       border-radius: 50%;
     }
-
     .back-button {
       background-color: #0074e4;
       font-family: 'Poppins', sans-serif;
@@ -346,13 +281,10 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       margin: 4px 25px;
       cursor: pointer;
       transition: 0.3s;
-
     }
-
     .back-button:hover {
       background-color: #005bb5;
     }
-
     .download-button {
       background-color: #0074e4;
       font-family: 'Poppins', sans-serif;
@@ -367,27 +299,65 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       margin: 4px 25px;
       cursor: pointer;
       transition: 0.3s;
-
     }
-
     .download-button:hover {
       background-color: #005bb5;
     }
-
     .tbody {
       background-color: white;
     }
   </style>
 </head>
-
 <body>
+  <?php
+  session_start(); // Start the session at the very beginning
+
+  // Database connection (assuming you have a db_connect.php or similar)
+  $servername = "localhost";
+  $username = "root"; // Your database username
+  $password = "";     // Your database password
+  $dbname = "your_database_name"; // Replace with your actual database name
+
+  // Create connection
+  $conn = new mysqli($servername, $username, $password, $dbname);
+
+  // Check connection
+  if ($conn->connect_error) {
+      die("Connection failed: " . $conn->connect_error);
+  }
+
+  $loggedInStudentName = "Guest"; // Default name
+  $loggedInStudentEmail = ""; // Default email
+  $loggedInStudentId = ""; // Default student ID
+
+  if (isset($_SESSION['email'])) {
+      $loggedInStudentEmail = $_SESSION['email'];
+
+      // Fetch student's name and ID based on the logged-in email
+      $stmt = $conn->prepare("SELECT student_name, student_id FROM students WHERE student_email = ?");
+      $stmt->bind_param("s", $loggedInStudentEmail);
+      $stmt->execute();
+      $result = $stmt->get_result();
+
+      if ($result->num_rows > 0) {
+          $row = $result->fetch_assoc();
+          $loggedInStudentName = $row['student_name'];
+          $loggedInStudentId = $row['student_id'];
+      }
+      $stmt->close();
+  } else {
+      // If no email in session, redirect to login page (or handle as appropriate)
+      header("Location: login_page.php");
+      exit();
+  }
+  ?>
   <div class="header1">
     <img src="images/UMPSALogo.png" alt="UMPSA Logo" class="logo">
     <img src="images/PetakomLogo.png" alt="PETAKOM Logo" class="logo">
 
     <div class="header-center">
       <h2>View Event</h2>
-      <p>Student: <?php echo  htmlspecialchars($loggedInUser); ?></p>
+      <p>Student: <?php echo htmlspecialchars($loggedInStudentName); ?></p>
     </div>
     <div class="header-right">
       <a href="logout_button.php" class="logout">Logout</a>
@@ -413,7 +383,6 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
           <a href="s_committeeAppView.php" class="sub-item active">View Event</a>
         </div>
       </div>
-
       <div class="item">
         <a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
@@ -422,29 +391,11 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       </div>
     </div>
   </div>
-
   <div class="content">
     <div class="table-container">
       <div class="section-header">EVENT DETAILS</div>
 
-
-      <?php
-      // Connect to the database server.
-      $link = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
-
-      // Select the database.
-      mysqli_select_db($link, "web_project") or die(mysqli_error($link));
-
-      $query = "SELECT * FROM event 
-          JOIN committee ON event.eventID = committee.eventID
-		  JOIN committeerole on committeerole.roleID= committee.eventID";
-
-
-      $result = mysqli_query($link, $query);
-
-      ?>
-
-      <table>
+            <table>
         <thead>
           <tr>
             <th>Student ID</th>
@@ -457,37 +408,53 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
         </thead>
         <tbody class="tbody">
           <?php
-          if (mysqli_num_rows($result) > 0) {
-            while ($row = mysqli_fetch_assoc($result)) {
-              $commID = htmlspecialchars($row["committeeID"]);
-              $eventID = htmlspecialchars($row["eventID"]);
-              $role = htmlspecialchars($row["committeeRole"]);
-              $studentID = htmlspecialchars($row["studentID"]);
-              $eventName = htmlspecialchars($row["eventName"]);
-              $eventDate = htmlspecialchars($row["eventDate"]);
-              $eventLoc = htmlspecialchars($row["eventLocation"]);
-              $eventStatus = htmlspecialchars($row["status"]);
+          if (!empty($loggedInStudentId)) {
+              // Fetch event details for the logged-in student
+              // This query assumes a table named 'event_participation' or similar
+              // that links student_id to event_details. Adjust table and column names as per your database.
+              $stmt = $conn->prepare("
+                  SELECT
+                      s.student_id,
+                      ep.committee_role,
+                      e.event_name,
+                      e.event_date,
+                      e.event_location,
+                      e.event_status
+                  FROM
+                      students s
+                  JOIN
+                      event_participation ep ON s.student_id = ep.student_id
+                  JOIN
+                      events e ON ep.event_id = e.event_id
+                  WHERE
+                      s.student_id = ?
+              ");
+              $stmt->bind_param("s", $loggedInStudentId);
+              $stmt->execute();
+              $result = $stmt->get_result();
 
-
-              echo "<tr>";
-              echo "<td>$studentID</td>";
-              echo "<td>$role</td>";
-              echo "<td>$eventName</td>";
-              echo "<td>$eventDate</td>";
-              echo "<td>$eventLoc</td>";
-              echo "<td>$eventStatus</td>";
-              echo "<td>
-        
-      </td>";
-            }
+              if ($result->num_rows > 0) {
+                  while ($row = $result->fetch_assoc()) {
+                      echo "<tr>";
+                      echo "<td>" . htmlspecialchars($row['student_id']) . "</td>";
+                      echo "<td>" . htmlspecialchars($row['committee_role']) . "</td>";
+                      echo "<td>" . htmlspecialchars($row['event_name']) . "</td>";
+                      echo "<td>" . htmlspecialchars($row['event_date']) . "</td>";
+                      echo "<td>" . htmlspecialchars($row['event_location']) . "</td>";
+                      echo "<td>" . htmlspecialchars($row['event_status']) . "</td>";
+                      echo "</tr>";
+                  }
+              } else {
+                  echo "<tr><td colspan='6'>No events found for this student.</td></tr>";
+              }
+              $stmt->close();
           } else {
-            echo "<tr><td colspan='7'>No committee records found.</td></tr>";
+              echo "<tr><td colspan='6'>Student ID not found. Please log in again.</td></tr>";
           }
-
-          mysqli_close($link);
+          $conn->close();
           ?>
-
-
+        </tbody>
+      </table>
     </div>
   </div>
   <script type="text/javascript">
@@ -506,5 +473,4 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     });
   </script>
 </body>
-
 </html>
