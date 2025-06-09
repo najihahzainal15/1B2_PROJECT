@@ -422,7 +422,7 @@ if (isset($_SESSION['email'])) {
 
   <div class="nav">
     <div class="menu">
-      <div class="item"><a class="active" href="s_homepage.php">Dashboard</a></div>
+      <div class="item"><a href="s_homepage.php">Dashboard</a></div>
       <div class="item">
         <a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
@@ -433,7 +433,7 @@ if (isset($_SESSION['email'])) {
       <div class="item">
         <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a href="s_committeeAppView.php" class="sub-item">View Event</a>
+          <a href="s_committeeAppView.php" class="sub-item active">View Event</a>
         </div>
       </div>
 
@@ -525,6 +525,14 @@ if (isset($_SESSION['email'])) {
     $(document).ready(function() {
       $('.sub-button').click(function() {
         $(this).next('.sub-menu').slideToggle();
+      });
+
+      // Automatically open sub-menu if it contains an active item
+      $('.sub-menu').each(function() {
+        if ($(this).find('.active').length > 0) {
+          $(this).show();
+          $(this).prev('.sub-button').addClass('active-parent');
+        }
       });
     });
   </script>
