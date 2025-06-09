@@ -178,48 +178,30 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 			margin-left: 30px;
 		}
 
-		/* Horizontal scroll wrapper */
-		.events-scroll-wrapper {
-			overflow-x: auto;
-			padding: 20px 30px;
-			white-space: nowrap;
-		}
-
-		/* Flex container for event cards */
-		.events-container {
-			display: flex;
-			flex-wrap: nowrap;
-			gap: 20px;
-		}
-
 		/* Each event card */
 		.event {
-			min-width: 300px;
-			max-width: 300px;
+			width: 300px;
 			background: white;
-			border-radius: 10px;
-			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-			transition: transform 0.3s;
-			display: inline-block;
-			white-space: normal;
+			box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+			margin: 20px;
+			border-radius: 8px;
+			transition: 0.3s;
+			overflow: hidden;
 		}
 
 		.event:hover {
-			transform: scale(1.05);
+			transform: scale(1.03);
 		}
 
-		/* Event title and text */
-		.event-title {
-			color: #0074e4;
+		.event-content h3 {
 			font-size: 18px;
+			color: #0074e4;
 			margin-bottom: 10px;
-			font-family: 'Poppins', sans-serif;
 		}
 
 		.event-content p {
 			font-size: 14px;
-			margin: 6px 0;
-			font-family: 'Poppins', sans-serif;
+			margin: 5px 0;
 		}
 	</style>
 </head>
@@ -274,31 +256,28 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 		<br>
 		<h2>Upcoming Events</h2>
 
-		<!-- Scrollable horizontal container -->
-		<div class="events-scroll-wrapper">
-			<div class="events-container">
-				<?php
-				$query = "SELECT eventName, eventDesc, eventDate, eventTime, eventLocation FROM event ORDER BY eventDate ASC";
-				$result = mysqli_query($link, $query);
 
-				if (mysqli_num_rows($result) > 0) {
-					while ($event = mysqli_fetch_assoc($result)) {
-						echo '<div class="event">';
-						echo '<div class="event-content" style="padding:15px;">';
-						echo '<h3 class="event-title">' . htmlspecialchars($event["eventName"]) . '</h3>';
-						echo '<p>' . htmlspecialchars($event["eventDesc"]) . '</p>';
-						echo '<p><strong>Date:</strong> ' . htmlspecialchars($event["eventDate"]) . '</p>';
-						echo '<p><strong>Time:</strong> ' . htmlspecialchars($event["eventTime"]) . '</p>';
-						echo '<p><strong>Location:</strong> ' . htmlspecialchars($event["eventLocation"]) . '</p>';
-						echo '</div></div>';
-					}
-				} else {
-					echo "<p style='margin-left:30px;'>No events available.</p>";
+		<div class="events-container">
+			<?php
+			$query = "SELECT eventName, eventDesc, eventDate, eventTime, eventLocation FROM event ORDER BY eventDate ASC";
+			$result = mysqli_query($link, $query);
+
+			if (mysqli_num_rows($result) > 0) {
+				while ($event = mysqli_fetch_assoc($result)) {
+					echo '<div class="event">';
+					echo '<div class="event-content" style="padding:15px;">';
+					echo '<h3 class="event-title">' . htmlspecialchars($event["eventName"]) . '</h3>';
+					echo '<p>' . htmlspecialchars($event["eventDesc"]) . '</p>';
+					echo '<p><strong>Date:</strong> ' . htmlspecialchars($event["eventDate"]) . '</p>';
+					echo '<p><strong>Time:</strong> ' . htmlspecialchars($event["eventTime"]) . '</p>';
+					echo '<p><strong>Location:</strong> ' . htmlspecialchars($event["eventLocation"]) . '</p>';
+					echo '</div></div>';
 				}
-				?>
-			</div>
+			} else {
+				echo "<p style='margin-left:30px;'>No events available.</p>";
+			}
+			?>
 		</div>
-
 
 		<script type="text/javascript">
 			$(document).ready(function() {

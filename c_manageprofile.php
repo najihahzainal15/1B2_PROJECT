@@ -192,18 +192,18 @@ $filterRole = isset($_GET['role']) ? $_GET['role'] : '';
 			margin-top: 20px;
 			width: 95%;
 			border-collapse: collapse;
-			background: #0096D6;
+			background: #d0e6ff;
 		}
 
 		.member-table th,
 		.member-table td {
-			border: 1px solid #ddd;
+			border: 2px solid #ddd;
 			border-collapse: collapse;
 			padding: 10px;
 		}
 
 		.member-table th {
-			color: white;
+			color: black;
 		}
 
 		.member-table td:last-child {

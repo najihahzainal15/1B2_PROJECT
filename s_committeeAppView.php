@@ -38,7 +38,7 @@ if (isset($_SESSION['email'])) {
 <html>
 
 <head>
-  <title>4</title>
+  <title>VIEW EVENT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyPetakom Event Advisor Homepage</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -163,8 +163,6 @@ if (isset($_SESSION['email'])) {
       /* Stack items vertically */
     }
 
-
-
     @media (max-width: 800px) {
       .table-container {
         margin-left: 20px;
@@ -181,8 +179,6 @@ if (isset($_SESSION['email'])) {
         /* Smaller text for smaller screens */
       }
     }
-
-
 
     .logo {
       height: 40px;
@@ -212,25 +208,22 @@ if (isset($_SESSION['email'])) {
       padding: 0 20px 30px;
     }
 
-
-
-
-
     table {
-      width: 100%;
+      width: 95%;
       border-collapse: collapse;
+      margin-left: 30px;
     }
 
     table th,
     table td {
       padding: 10px;
-      border: 1px solid #ddd;
+      border: 2px solid #ddd;
       text-align: center;
     }
 
     table th {
-      background-color: #0096D6;
-      color: white;
+      background-color: #d0e6ff;
+      color: black;
     }
 
     .section-header {
@@ -453,12 +446,12 @@ if (isset($_SESSION['email'])) {
       <table>
         <thead>
           <tr>
-            <th>Student ID</th>
-            <th>Committee Role</th>
-            <th>Event Name</th>
-            <th>Event Date</th>
-            <th>Event Location</th>
-            <th>Event Status</th>
+            <th>STUDENT ID</th>
+            <th>COMMITTEE ROLE</th>
+            <th>EVENT NAME</th>
+            <th>EVENT DATE</th>
+            <th>EVENT LOCATION</th>
+            <th>EVENT STATUS</th>
           </tr>
         </thead>
         <tbody class="tbody">

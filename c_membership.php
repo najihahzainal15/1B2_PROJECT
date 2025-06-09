@@ -227,7 +227,7 @@ $result = mysqli_query($link, $query);
 
 		.member-table th,
 		.member-table td {
-			border: 2px solid #666;
+			border: 2px solid #ddd;
 			padding: 10px;
 			text-align: center;
 			font-family: 'Poppins', sans-serif;

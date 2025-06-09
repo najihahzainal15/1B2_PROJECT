@@ -275,7 +275,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
             background-color: #0074e4;
             font-family: 'Poppins', sans-serif;
             border: none;
-            border-radius: 10px;
+            border-radius: 6px;
             color: white;
             padding: 12px 20px;
             text-align: center;
@@ -346,7 +346,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
         .event-table th,
         .event-table td {
-            border: 2px solid #666;
+            border: 2px solid #ddd;
             padding: 10px;
             text-align: center;
         }
@@ -427,7 +427,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
             margin: 20px auto;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .no-events h3 {
@@ -455,31 +455,32 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
                 width: 95%;
                 margin: 15px auto;
             }
-            
+
             .search-container form {
                 flex-direction: column;
                 gap: 10px;
             }
-            
+
             .search-box {
                 width: 100%;
             }
-            
-            .search-btn, .clear-search {
+
+            .search-btn,
+            .clear-search {
                 width: 100%;
                 justify-content: center;
             }
-            
+
             .search-results {
                 width: 95%;
                 margin: 10px auto;
             }
-            
+
             .event-table {
                 width: 95%;
                 font-size: 14px;
             }
-            
+
             .no-events {
                 width: 95%;
                 margin: 15px auto;
@@ -537,9 +538,9 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
         <!-- Search Section -->
         <div class="search-container">
             <form method="GET" action="">
-                <input type="text" name="search" class="search-box" 
-                       placeholder="Search by event name, date, or status..." 
-                       value="<?php echo htmlspecialchars($searchTerm); ?>">
+                <input type="text" name="search" class="search-box"
+                    placeholder="Search by event name, date, or status..."
+                    value="<?php echo htmlspecialchars($searchTerm); ?>">
                 <button type="submit" class="search-btn">
                     <i class="fas fa-search"></i> Search
                 </button>
@@ -553,7 +554,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
         <?php if (!empty($searchTerm)): ?>
             <div class="search-results">
-                <?php 
+                <?php
                 $resultCount = count($events);
                 if ($resultCount > 0) {
                     echo "<i class='fas fa-info-circle'></i> Found " . $resultCount . " result" . ($resultCount != 1 ? "s" : "") . " for '" . htmlspecialchars($searchTerm) . "'";
@@ -589,7 +590,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
                     <?php foreach ($events as $event): ?>
                         <tr>
                             <td>
-                                <?php 
+                                <?php
                                 $eventName = htmlspecialchars($event['eventName']);
                                 if (!empty($searchTerm) && stripos($eventName, $searchTerm) !== false) {
                                     $eventName = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $eventName);
@@ -598,7 +599,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
                                 ?>
                             </td>
                             <td>
-                                <?php 
+                                <?php
                                 $eventDate = htmlspecialchars($event['eventDate']);
                                 if (!empty($searchTerm) && stripos($eventDate, $searchTerm) !== false) {
                                     $eventDate = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $eventDate);
@@ -607,7 +608,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
                                 ?>
                             </td>
                             <td class="status <?php echo strtolower($event['status']); ?>">
-                                <?php 
+                                <?php
                                 $status = htmlspecialchars($event['status']);
                                 if (!empty($searchTerm) && stripos($status, $searchTerm) !== false) {
                                     $status = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $status);
@@ -630,7 +631,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
                 </tbody>
             </table>
         <?php endif; ?>
-        
+
         <button class="submit-button" onclick="window.history.back()">
             <i class="fas fa-arrow-left"></i> Back
         </button>
