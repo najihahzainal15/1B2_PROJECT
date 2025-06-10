@@ -19,6 +19,12 @@ $userData = mysqli_fetch_assoc($resultUser);
 
 $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 
+// Count total users from user table
+$userCountQuery = "SELECT COUNT(*) AS total_users FROM user";
+$userCountResult = mysqli_query($link, $userCountQuery);
+$userCountRow = mysqli_fetch_assoc($userCountResult);
+$totalUsers = $userCountRow['total_users'];
+
 // Count students by course prefix using COUNT and GROUP BY
 $courseCounts = [
 	'Software Engineering' => 0,
@@ -264,13 +270,32 @@ while ($row = mysqli_fetch_assoc($yearResult)) {
 		<p>Welcome to MyPetakom's home.</p>
 
 		<h2 style="font-size: 18px;">Overview</h2>
+		<div style="
+		background-color: #ffffff;
+		border-left: 6px solid #0074e4;
+		box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+		border-radius: 10px;
+		padding: 10px 20px;
+		margin: 10px 0 30px 0;
+		width: fit-content;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	">
+			<i class="fas fa-users" style="font-size: 24px; color: #0074e4;"></i>
+			<div>
+				<div style="font-size: 13px; color: #555;">Total Registered Users</div>
+				<div style="font-size: 20px; font-weight: bold;"><?php echo $totalUsers; ?></div>
+			</div>
+		</div>
+
 		<div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 20px;">
 			<div style="width: 45%; max-width: 500px;">
-				<h3 style="text-align: center; font-size: 16px;">Total Student by Course</h3>
+				<h3 style="text-align: center; font-size: 16px;">Total Students by Course</h3>
 				<canvas id="courseChart" height="250"></canvas>
 			</div>
 			<div style="width: 45%; max-width: 500px;">
-				<h3 style="text-align: center; font-size: 16px;">Students by Year of Study</h3>
+				<h3 style="text-align: center; font-size: 16px;">Total Students by Year of Study</h3>
 				<canvas id="yearChart" height="250"></canvas>
 			</div>
 		</div>
