@@ -19,7 +19,13 @@ $userData = mysqli_fetch_assoc($resultUser);
 
 $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 
-// Count students by course prefix
+// Count total users from user table
+$userCountQuery = "SELECT COUNT(*) AS total_users FROM user";
+$userCountResult = mysqli_query($link, $userCountQuery);
+$userCountRow = mysqli_fetch_assoc($userCountResult);
+$totalUsers = $userCountRow['total_users'];
+
+// Count students by course prefix using COUNT and GROUP BY
 $courseCounts = [
 	'Software Engineering' => 0,
 	'Multimedia Software' => 0,
@@ -27,29 +33,40 @@ $courseCounts = [
 	'Cyber Security' => 0
 ];
 
-$courseQuery = "SELECT studentID FROM student";
+$courseQuery = "
+	SELECT 
+		LEFT(LOWER(studentID), 2) AS prefix,
+		COUNT(*) AS total
+	FROM student
+	GROUP BY prefix
+";
 $courseResult = mysqli_query($link, $courseQuery);
-
 while ($row = mysqli_fetch_assoc($courseResult)) {
-	$prefix = strtolower(substr($row['studentID'], 0, 2));
-	if ($prefix == 'cb') $courseCounts['Software Engineering']++;
-	elseif ($prefix == 'cd') $courseCounts['Multimedia Software']++;
-	elseif ($prefix == 'ca') $courseCounts['Computer Systems & Networking']++;
-	elseif ($prefix == 'cf') $courseCounts['Cyber Security']++;
+	$prefix = $row['prefix'];
+	$count = (int)$row['total'];
+
+	if ($prefix == 'cb') $courseCounts['Software Engineering'] = $count;
+	elseif ($prefix == 'cd') $courseCounts['Multimedia Software'] = $count;
+	elseif ($prefix == 'ca') $courseCounts['Computer Systems & Networking'] = $count;
+	elseif ($prefix == 'cf') $courseCounts['Cyber Security'] = $count;
 }
 
-// Count students by year of study
+// Count students by year of study using COUNT and GROUP BY
 $yearCounts = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
-$yearQuery = "SELECT year_of_study FROM student";
+$yearQuery = "
+	SELECT year_of_study, COUNT(*) AS total 
+	FROM student 
+	GROUP BY year_of_study
+";
 $yearResult = mysqli_query($link, $yearQuery);
-
 while ($row = mysqli_fetch_assoc($yearResult)) {
 	$year = (int)$row['year_of_study'];
 	if (isset($yearCounts[$year])) {
-		$yearCounts[$year]++;
+		$yearCounts[$year] = (int)$row['total'];
 	}
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 
@@ -197,12 +214,12 @@ while ($row = mysqli_fetch_assoc($yearResult)) {
 			margin: 5px 0;
 		}
 
-		h2 {
+		.content h2 {
 			margin: 0px 40px;
 			font-size: 25px;
 		}
 
-		p {
+		.content p {
 			margin: 0px 40px;
 			font-size: 16px;
 			margin-bottom: 20px;
@@ -252,14 +269,33 @@ while ($row = mysqli_fetch_assoc($yearResult)) {
 		<h2>Hi <?php echo htmlspecialchars($loggedInUser); ?></h2>
 		<p>Welcome to MyPetakom's home.</p>
 
-		<h2 style="font-size: 18px;">Student Data Overview</h2>
+		<h2 style="font-size: 18px;">Overview</h2>
+		<div style="
+		background-color: #ffffff;
+		border-left: 6px solid #0074e4;
+		box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+		border-radius: 10px;
+		padding: 10px 20px;
+		margin: 10px 0 30px 0;
+		width: fit-content;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	">
+			<i class="fas fa-users" style="font-size: 24px; color: #0074e4;"></i>
+			<div>
+				<div style="font-size: 13px; color: #555;">Total Registered Users</div>
+				<div style="font-size: 20px; font-weight: bold;"><?php echo $totalUsers; ?></div>
+			</div>
+		</div>
+
 		<div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 20px;">
 			<div style="width: 45%; max-width: 500px;">
-				<h3 style="text-align: center; font-size: 16px;">Total Student by Course</h3>
+				<h3 style="text-align: center; font-size: 16px;">Total Students by Course</h3>
 				<canvas id="courseChart" height="250"></canvas>
 			</div>
 			<div style="width: 45%; max-width: 500px;">
-				<h3 style="text-align: center; font-size: 16px;">Students by Year of Study</h3>
+				<h3 style="text-align: center; font-size: 16px;">Total Students by Year of Study</h3>
 				<canvas id="yearChart" height="250"></canvas>
 			</div>
 		</div>
