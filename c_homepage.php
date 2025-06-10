@@ -29,6 +29,7 @@ function getAttendanceByActiveEvents($link)
 {
     $data = [];
 
+
     $sql = "SELECT e.eventID, e.eventName, COUNT(a.attendanceID) as attendance_count 
             FROM attendance a
             JOIN attendanceslot s ON a.slot_ID = s.slot_ID
