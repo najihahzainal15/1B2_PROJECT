@@ -24,11 +24,35 @@ $userData = mysqli_fetch_assoc($resultUser);
 // Assign username after database query
 $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["username"])) : "User";
 
-// Function to get attendance data by active events
-function getAttendanceByActiveEvents($link)
-{
+// Function to get total students for each active event
+function getTotalStudentsPerEvent($link) {
     $data = [];
+    
+    $sql = "SELECT e.eventID, e.eventName, COUNT(DISTINCT a.StudentID) as total_students 
+            FROM attendance a
+            JOIN attendanceslot s ON a.slot_ID = s.slot_ID
+            JOIN event e ON s.eventID = e.eventID
+            WHERE e.status = 'ACTIVE'
+            GROUP BY e.eventID, e.eventName
+            ORDER BY total_students DESC";
+    
+    $result = mysqli_query($link, $sql);
+    
+    if ($result && mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = [
+                'event' => $row['eventName'],
+                'count' => $row['total_students']
+            ];
+        }
+    }
+    
+    return $data;
+}
 
+// Function to get attendance data by active events
+function getAttendanceByActiveEvents($link) {
+    $data = [];
 
     $sql = "SELECT e.eventID, e.eventName, COUNT(a.attendanceID) as attendance_count 
             FROM attendance a
@@ -54,8 +78,7 @@ function getAttendanceByActiveEvents($link)
 }
 
 // Function to get attendance data by course
-function getAttendanceByCourse($link)
-{
+function getAttendanceByCourse($link) {
     $data = [];
 
     // Query to get attendance count by course prefix
@@ -90,6 +113,7 @@ function getAttendanceByCourse($link)
     return $data;
 }
 
+$studentsPerEvent = getTotalStudentsPerEvent($link);
 $attendanceData = getAttendanceByActiveEvents($link);
 $chartLabels = [];
 $chartValues = [];
@@ -98,6 +122,9 @@ foreach ($attendanceData as $item) {
     $chartLabels[] = $item['event'];
     $chartValues[] = $item['count'];
 }
+
+// Calculate total attendance across all events
+$totalAttendance = array_sum($chartValues);
 
 $attendanceByCourse = getAttendanceByCourse($link);
 $courseLabels = [];
@@ -264,7 +291,7 @@ $pieBorderColors = [
         .content {
             background-color: #e6f0ff;
             margin-left: 160px;
-            height: auto;
+            height: 100vh;
         }
 
         .logo {
@@ -391,7 +418,7 @@ $pieBorderColors = [
             width: 100% !important;
             height: 100% !important;
         }
-    </style>
+        </style>
 </head>
 
 <body>
@@ -447,10 +474,50 @@ $pieBorderColors = [
 
         <div class="dashboard-content">
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total Users</h3>
-                    <p>2,430</p>
+            <!-- Display total students for each event in a card -->
+            <div style="
+                background-color: #ffffff;
+                border-left: 6px solid #0074e4;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                border-radius: 10px;
+                padding: 10px 20px;
+                margin: 10px 0 30px 0;
+                width: fit-content;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            ">
+                <i class="fas fa-calendar-check" style="font-size: 24px; color: #0074e4;"></i>
+                <div>
+                    <div style="font-size: 13px; color: #555;">Total Students by Event</div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 5px;">
+                        <?php foreach ($studentsPerEvent as $event): ?>
+                            <div style="font-size: 14px;">
+                                <span style="font-weight: bold;"><?php echo $event['event']; ?>:</span> 
+                                <span><?php echo $event['count']; ?> students</span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Attendance Card -->
+            <div style="
+                background-color: #ffffff;
+                border-left: 6px solid #28a745;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                border-radius: 10px;
+                padding: 10px 20px;
+                margin: 10px 0 30px 0;
+                width: fit-content;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            ">
+                <i class="fas fa-user-check" style="font-size: 24px; color: #28a745;"></i>
+                <div>
+                    <div style="font-size: 13px; color: #555;">Total Event Attendance</div>
+                    <div style="font-size: 20px; font-weight: bold;"><?php echo $totalAttendance; ?> students</div>
                 </div>
             </div>
 
@@ -504,6 +571,14 @@ $pieBorderColors = [
                                     callbacks: {
                                         label: function(context) {
                                             return context.parsed.y + ' students attended';
+                                        },
+                                        afterLabel: function(context) {
+                                            // Calculate percentage for this event
+                                            const percentage = ((context.parsed.y / <?php echo $totalAttendance; ?>) * 100).toFixed(1);
+                                            return `This represents ${percentage}% of total attendance`;
+                                        },
+                                        footer: function(context) {
+                                            return `Total students attended all events: <?php echo $totalAttendance; ?>`;
                                         }
                                     }
                                 }
