@@ -17,7 +17,7 @@ $role = $_SESSION["role"];
 // Fetch username from database
 $queryUser = "SELECT username FROM user WHERE userID = ?";
 $stmtUser = mysqli_prepare($link, $queryUser);
-mysqli_stmt_bind_param($stmtUser, "i", $userID);
+mysqli_stmt_bind_param($stmtUser, "i", $userID);//bind_param;send to db, i;integer (data type)
 mysqli_stmt_execute($stmtUser);
 $resultUser = mysqli_stmt_get_result($stmtUser);
 $userData = mysqli_fetch_assoc($resultUser);
@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     try {
         $eventID = mysqli_real_escape_string($link, $_POST['event_id']);
+        //safety function that makes sure user input (like from a form) doesn’t break SQL queries
         
         // DELETE QR code from attendanceslot
         if (isset($_POST['delete_qr'])) {
@@ -44,7 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (mysqli_query($link, $deleteSql)) {
                 echo json_encode(['status' => 'success', 'message' => 'QR Code deleted']);
-            } else {
+                // PHP function that converts a PHP value (like an array or object) into a JSON (JavaScript Object Notation) string. 
+                // JSON is a lightweight data format that's easy for humans to read and for machines to parse.
+              } else {
                 throw new Exception("Delete failed: " . mysqli_error($link));
             }
             exit;
@@ -59,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (!$eventData) {
                 throw new Exception("Event not found");
+                //An exception is a way to handle unexpected errors or events that occur during program execution.
             }
             
             $currentVenue = $eventData['eventLocation'];
@@ -117,6 +121,10 @@ if (isset($_GET['event_id'])) {
         if ($qrResult && mysqli_num_rows($qrResult) > 0) {
             $qrData = mysqli_fetch_assoc($qrResult)['attendance_QRcode'];
             $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($qrData);
+            // Uses an external API from api.qrserver.com
+            // Simply pass the data as a URL parameter to generate the QR image
+            //The QR data contains event ID, venue, and a unique identifier
+
             $hasQrCode = true;
         }
     } else {
@@ -478,12 +486,15 @@ if (isset($_GET['event_id'])) {
     
     <div class="qr-container">
       <div class="event-info">
-        <div class="event-name"><?php echo htmlspecialchars($eventName); ?></div>
+        <div class="event-name"><?php echo htmlspecialchars($eventName); ?></div> 
+        <!-- htmlspecialchars() method is used to convert special characters to HTML entities -->
+        
         <div class="event-date">Date: <?php echo htmlspecialchars($eventDate); ?></div>
         <div class="event-venue">Venue: <?php echo htmlspecialchars($eventLocation); ?></div>
       </div>
       
-      <?php if(!empty($qrUrl)): ?>
+      <!-- if qr not empty -->
+      <?php if(!empty($qrUrl)): ?> 
         <img src="<?php echo $qrUrl; ?>" alt="Event QR Code" class="qr-code" id="qrImage">
         <div class="action-buttons">
           <button id="deleteQrBtn" class="delete-btn">
@@ -552,9 +563,13 @@ if (isset($_GET['event_id'])) {
 
   <!-- Bootstrap JS and dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <!-- Popper.js: Helps with positioning popups and tooltips -->
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+  <!-- Bootstrap.js: Provides ready-made components like modals, buttons, etc. -->
 
   <script>
+    // when the webpage has fully loaded, run this code
     $(document).ready(function() {
       // Sub-menu functionality
       $('.sub-button').click(function(){
@@ -574,13 +589,15 @@ if (isset($_GET['event_id'])) {
       $('#deleteQrBtn').click(function() {
         $('#modalMessage').text('Are you sure you want to delete this QR code?');
         $('#confirmAction').text('Delete').off('click').on('click', function() {
+          //when confirm is clicked
           var $btn = $(this);
           $btn.html('<i class="fas fa-spinner fa-spin"></i> Deleting...').prop('disabled', true);
           
           $.ajax({
-            url: window.location.href,
-            type: 'POST',
-            data: { delete_qr: true, event_id: '<?php echo $eventID; ?>' },
+            url: window.location.href, //Send to current page
+            type: 'POST', //Using POST method
+            data: { delete_qr: true, event_id: '<?php echo $eventID; ?>' }, //Sending data: instruction to delete QR and the event ID
+
             success: function(response) {
               try {
                 response = typeof response === 'string' ? JSON.parse(response) : response;
@@ -589,11 +606,13 @@ if (isset($_GET['event_id'])) {
                   $('#successModal').modal('show');
                   setTimeout(function() {
                     location.reload();
-                  }, 1500);
+                  }, 1500); //After 1.5 seconds, refresh the page
+
                 } else {
                   alert('Error: ' + (response.message || 'Operation failed'));
                 }
-              } catch(e) {
+                //handle error
+              } catch(e) { // If any error happens in the success block, this part catches error
                 console.error('Error:', e, response);
                 alert('Error processing response');
               }
@@ -601,6 +620,9 @@ if (isset($_GET['event_id'])) {
               $('#confirmModal').modal('hide');
             },
             error: function(xhr, status, error) {
+              // xhr - The XMLHttpRequest object itself. used to interact with servers. You can retrieve data from a URL without having to do a full page refresh
+              // status - A string describing the type of error ("timeout", "error", "abort", etc.)
+              // error - The error message text
               alert('Request failed: ' + error);
               $btn.html('Delete').prop('disabled', false);
               $('#confirmModal').modal('hide');

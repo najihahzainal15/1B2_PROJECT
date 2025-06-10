@@ -3,6 +3,7 @@
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-cache, must-revalidate');
+    //Sets headers to indicate JSON response and no caching
     
     require_once "config.php";
     
@@ -60,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Handle event location lookup
     if (isset($_POST['eventId']) && !isset($_POST['qrCode'])) {
         $response = array('success' => false, 'eventName' => '', 'eventLocation' => '');
-        $eventId = intval($_POST['eventId']);
+        $eventId = intval($_POST['eventId']); //intval() is a function that converts a value to an integer (a whole number).
         
         try {
             $sql = "SELECT eventName, eventLocation FROM event WHERE eventID = ?";
@@ -578,7 +579,7 @@ if($eventID) {
             var qrCode = "<?php echo $qrCode; ?>";
             if(qrCode) {
                 // Generate QR code using qrcode-generator library
-                var qr = qrcode(0, 'M');
+                var qr = qrcode(0, 'M'); //0:smalled possible vers, medium error recovery
                 qr.addData(qrCode);
                 qr.make();
                 
@@ -712,7 +713,7 @@ if($eventID) {
                             }
                         },
                         error: function(xhr, status, error) {
-                            Swal.close();
+                            Swal.close(); //Swal refers to SweetAlert2, a popular JavaScript library for creating beautiful, customizable alert dialogs (like modals/popups) instead of the browser's default alert() or confirm().
                             console.error('AJAX Error:', error);
                             Swal.fire({
                                 icon: 'error',
