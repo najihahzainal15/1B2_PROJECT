@@ -23,7 +23,7 @@ $sCard = $studentData["student_card_upload"] ?? '';
 // Get verification status from membership table **AFTER student ID is properly fetched**
 $verificationStatus = "PENDING"; // Default status
 if (!empty($sID)) {
-	$queryMembership = "SELECT verification_status FROM membership WHERE studentID = ?";
+	$queryMembership = "SELECT verification_status, rejection_reason FROM membership WHERE studentID = ?";
 	$stmtMembership = mysqli_prepare($link, $queryMembership);
 	mysqli_stmt_bind_param($stmtMembership, "s", $sID);
 	mysqli_stmt_execute($stmtMembership);
@@ -32,6 +32,7 @@ if (!empty($sID)) {
 	if ($membershipData = mysqli_fetch_assoc($resultMembership)) {
 		$verificationStatus = $membershipData["verification_status"];
 	}
+	$rejectionReason = $membershipData["rejection_reason"] ?? '';
 }
 
 // Get user data
@@ -366,6 +367,9 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 				<span id="verificationStatus" class="status-text <?php echo strtolower($verificationStatus); ?>">
 					<?php echo htmlspecialchars($verificationStatus); ?>
 				</span>
+				<?php if ($verificationStatus === 'Rejected' && !empty($rejectionReason)): ?>
+					<p style="color: red;"><strong>Reason for Rejection:</strong> <?php echo htmlspecialchars($rejectionReason); ?></p>
+				<?php endif; ?>
 			</h3>
 		</div>
 

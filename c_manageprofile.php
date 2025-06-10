@@ -192,7 +192,8 @@ $filterRole = isset($_GET['role']) ? $_GET['role'] : '';
 			margin-top: 20px;
 			width: 95%;
 			border-collapse: collapse;
-			background: #0096D6;
+			background: #0066cc;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 		}
 
 		.member-table th,
@@ -339,7 +340,7 @@ $filterRole = isset($_GET['role']) ? $_GET['role'] : '';
 				<a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
 				<div class="sub-menu">
 					<a href="c_viewAttendance.php" class="sub-item">Event Attendance</a>
-					<a href="c_merit.php" class="sub-item">Merit Application</a>
+					<a href="c_meritApp.php" class="sub-item">Merit Application</a>
 				</div>
 			</div>
 		</div>

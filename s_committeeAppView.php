@@ -38,7 +38,7 @@ if (isset($_SESSION['email'])) {
 <html>
 
 <head>
-  <title>4</title>
+  <title>VIEW EVENT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyPetakom Event Advisor Homepage</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -61,6 +61,19 @@ if (isset($_SESSION['email'])) {
       float: right;
       display: flex;
       align-items: center;
+    }
+
+    .header-right .logout {
+      color: white;
+      font-size: 14px;
+      margin-right: 15px;
+      /* space between Logout and profile icon */
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .header-right .logout:hover {
+      color: #ddd;
     }
 
     p {
@@ -150,8 +163,6 @@ if (isset($_SESSION['email'])) {
       /* Stack items vertically */
     }
 
-
-
     @media (max-width: 800px) {
       .table-container {
         margin-left: 20px;
@@ -168,8 +179,6 @@ if (isset($_SESSION['email'])) {
         /* Smaller text for smaller screens */
       }
     }
-
-
 
     .logo {
       height: 40px;
@@ -199,29 +208,23 @@ if (isset($_SESSION['email'])) {
       padding: 0 20px 30px;
     }
 
-
-
-
-
     table {
-      width: 100%;
+      width: 95%;
       border-collapse: collapse;
+      margin-left: 30px;
     }
 
     table th,
     table td {
       padding: 10px;
-      border: 1px solid #ddd;
+      border: 2px solid #ddd;
       text-align: center;
     }
 
     table th {
-      background-color: #0096D6;
-      color: white;
+      background-color: #d0e6ff;
+      color: black;
     }
-
-
-
 
     .section-header {
       background: #f0f0f0;
@@ -412,26 +415,25 @@ if (isset($_SESSION['email'])) {
 
   <div class="nav">
     <div class="menu">
-
-      <div class="item"><a class="active" href="#membership">Dashboard</a></div>
+      <div class="item"><a href="s_homepage.php">Dashboard</a></div>
       <div class="item">
         <a href="#membership" class="sub-button">Membership<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a href="s_membershipApp.html" class="sub-item">Membership Application</a>
+          <a href="s_membership.php" class="sub-item">Membership Application</a>
         </div>
       </div>
 
       <div class="item">
         <a href="#events" class="sub-button">Events<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a href="#events" class="sub-item">View Event</a>
+          <a href="s_committeeAppView.php" class="sub-item active">View Event</a>
         </div>
       </div>
 
       <div class="item">
         <a href="#attendance" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a href="#events" class="sub-item">Verify Attendance</a>
+          <a href="s_attendance1.php" class="sub-item">Attendance Slot</a>
         </div>
       </div>
     </div>
@@ -441,18 +443,15 @@ if (isset($_SESSION['email'])) {
     <div class="table-container">
       <div class="section-header">EVENT DETAILS</div>
 
-
-
-
       <table>
         <thead>
           <tr>
-            <th>Student ID</th>
-            <th>Committee Role</th>
-            <th>Event Name</th>
-            <th>Event Date</th>
-            <th>Event Location</th>
-            <th>Event Status</th>
+            <th>STUDENT ID</th>
+            <th>COMMITTEE ROLE</th>
+            <th>EVENT NAME</th>
+            <th>EVENT DATE</th>
+            <th>EVENT LOCATION</th>
+            <th>EVENT STATUS</th>
           </tr>
         </thead>
         <tbody class="tbody">
@@ -519,6 +518,14 @@ if (isset($_SESSION['email'])) {
     $(document).ready(function() {
       $('.sub-button').click(function() {
         $(this).next('.sub-menu').slideToggle();
+      });
+
+      // Automatically open sub-menu if it contains an active item
+      $('.sub-menu').each(function() {
+        if ($(this).find('.active').length > 0) {
+          $(this).show();
+          $(this).prev('.sub-button').addClass('active-parent');
+        }
       });
     });
   </script>

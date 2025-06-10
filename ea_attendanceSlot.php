@@ -32,17 +32,17 @@ $successMessage = '';
 // Fetch events from database with search functionality
 $events = [];
 if (!empty($searchTerm)) {
-    $sql = "SELECT eventID, eventName, eventDate, status FROM event 
+	$sql = "SELECT eventID, eventName, eventDate, status FROM event 
             WHERE eventName LIKE ? OR eventDate LIKE ? OR status LIKE ? 
             ORDER BY eventDate DESC";
-    $searchParam = '%' . $searchTerm . '%';
-    $stmt = mysqli_prepare($link, $sql);
-    mysqli_stmt_bind_param($stmt, "sss", $searchParam, $searchParam, $searchParam);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+	$searchParam = '%' . $searchTerm . '%';
+	$stmt = mysqli_prepare($link, $sql);
+	mysqli_stmt_bind_param($stmt, "sss", $searchParam, $searchParam, $searchParam);
+	mysqli_stmt_execute($stmt);
+	$result = mysqli_stmt_get_result($stmt);
 } else {
-    $sql = "SELECT eventID, eventName, eventDate, status FROM event ORDER BY eventDate DESC";
-    $result = mysqli_query($link, $sql);
+	$sql = "SELECT eventID, eventName, eventDate, status FROM event ORDER BY eventDate DESC";
+	$result = mysqli_query($link, $sql);
 }
 
 if ($result) {
@@ -339,7 +339,7 @@ mysqli_close($link);
 		}
 
 		/* Standardized Error and Success Messages */
-		.error { 
+		.error {
 			color: #d32f2f;
 			padding: 15px;
 			background-color: #ffebee;
@@ -350,7 +350,7 @@ mysqli_close($link);
 			margin: 20px auto;
 		}
 
-		.success { 
+		.success {
 			color: #2e7d32;
 			padding: 15px;
 			background-color: #e8f5e8;
@@ -364,7 +364,7 @@ mysqli_close($link);
 		.event-table {
 			width: 90%;
 			border-collapse: collapse;
-			background: #d0e6ff;
+			background: #0066cc;
 			margin-top: 20px;
 			margin-left: auto;
 			margin-right: auto;
@@ -372,9 +372,13 @@ mysqli_close($link);
 			margin-bottom: 50px;
 		}
 
+		.event-table th {
+			color: white;
+		}
+
 		.event-table th,
 		.event-table td {
-			border: 2px solid #666;
+			border: 1px solid #ddd;
 			padding: 10px;
 			text-align: center;
 		}
@@ -455,7 +459,7 @@ mysqli_close($link);
 			margin: 20px auto;
 			background: white;
 			border-radius: 10px;
-			box-shadow: 0 0 10px rgba(0,0,0,0.1);
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 		}
 
 		.no-events h3 {
@@ -483,31 +487,32 @@ mysqli_close($link);
 				width: 95%;
 				margin: 15px auto;
 			}
-			
+
 			.search-container form {
 				flex-direction: column;
 				gap: 10px;
 			}
-			
+
 			.search-box {
 				width: 100%;
 			}
-			
-			.search-btn, .clear-search {
+
+			.search-btn,
+			.clear-search {
 				width: 100%;
 				justify-content: center;
 			}
-			
+
 			.search-results {
 				width: 95%;
 				margin: 10px auto;
 			}
-			
+
 			.event-table {
 				width: 95%;
 				font-size: 14px;
 			}
-			
+
 			.no-events {
 				width: 95%;
 				margin: 15px auto;
@@ -557,11 +562,11 @@ mysqli_close($link);
 	</div>
 
 	<div class="content">
-		<?php if(!empty($errorMessage)): ?>
+		<?php if (!empty($errorMessage)): ?>
 			<div class="error">
 				<strong>Error:</strong> <?php echo $errorMessage; ?>
 			</div>
-		<?php elseif(!empty($successMessage)): ?>
+		<?php elseif (!empty($successMessage)): ?>
 			<div class="success">
 				<strong>Success!</strong> <?php echo $successMessage; ?>
 			</div>
@@ -570,9 +575,9 @@ mysqli_close($link);
 		<!-- Standardized Search Section -->
 		<div class="search-container">
 			<form method="GET" action="">
-				<input type="text" name="search" class="search-box" 
-					   placeholder="Search by event name, date, or status..." 
-					   value="<?php echo htmlspecialchars($searchTerm); ?>">
+				<input type="text" name="search" class="search-box"
+					placeholder="Search by event name, date, or status..."
+					value="<?php echo htmlspecialchars($searchTerm); ?>">
 				<button type="submit" class="search-btn">
 					<i class="fas fa-search"></i> Search
 				</button>
@@ -586,7 +591,7 @@ mysqli_close($link);
 
 		<?php if (!empty($searchTerm)): ?>
 			<div class="search-results">
-				<?php 
+				<?php
 				$resultCount = count($events);
 				if ($resultCount > 0) {
 					echo "<i class='fas fa-info-circle'></i> Found " . $resultCount . " result" . ($resultCount != 1 ? "s" : "") . " for '" . htmlspecialchars($searchTerm) . "'";
@@ -622,7 +627,7 @@ mysqli_close($link);
 					<?php foreach ($events as $event): ?>
 						<tr>
 							<td>
-								<?php 
+								<?php
 								$eventName = htmlspecialchars($event['eventName']);
 								if (!empty($searchTerm) && stripos($eventName, $searchTerm) !== false) {
 									$eventName = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $eventName);
@@ -631,7 +636,7 @@ mysqli_close($link);
 								?>
 							</td>
 							<td>
-								<?php 
+								<?php
 								$eventDate = htmlspecialchars($event['eventDate']);
 								if (!empty($searchTerm) && stripos($eventDate, $searchTerm) !== false) {
 									$eventDate = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $eventDate);
@@ -640,7 +645,7 @@ mysqli_close($link);
 								?>
 							</td>
 							<td class="status <?php echo strtolower($event['status']); ?>">
-								<?php 
+								<?php
 								$status = htmlspecialchars($event['status']);
 								if (!empty($searchTerm) && stripos($status, $searchTerm) !== false) {
 									$status = str_ireplace($searchTerm, '<span class="highlight">' . htmlspecialchars($searchTerm) . '</span>', $status);
@@ -662,7 +667,7 @@ mysqli_close($link);
 				</tbody>
 			</table>
 		<?php endif; ?>
-		
+
 		<button class="submit-button" onclick="window.history.back()">
 			<i class="fas fa-arrow-left"></i> Back
 		</button>
@@ -703,4 +708,5 @@ mysqli_close($link);
 		});
 	</script>
 </body>
+
 </html>

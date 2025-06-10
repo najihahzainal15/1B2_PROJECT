@@ -176,7 +176,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
     }
 
     table th {
-      background-color: #0096D6;
+      background-color: #0066cc;
       color: white;
     }
 
@@ -339,7 +339,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
       <div class="item">
         <a href="#" class="sub-button">Attendance<i class="fa-solid fa-caret-down"></i></a>
         <div class="sub-menu">
-          <a href="c_membership.php" class="sub-item">Membership Approval</a>
+          <a href="ea_attendanceSlot.php" class="sub-item">Attendance Slot</a>
         </div>
       </div>
 

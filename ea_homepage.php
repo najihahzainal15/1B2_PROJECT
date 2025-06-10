@@ -220,37 +220,6 @@ while ($row = mysqli_fetch_assoc($committeeResult)) {
 			margin: 10px;
 		}
 
-		.events-container {
-			height: auto;
-			display: flex;
-			flex-direction: row;
-			flex-wrap: wrap;
-			gap: 30px;
-			margin-left: 30px;
-		}
-
-		.event {
-			width: 300px;
-			height: 330px;
-			background: white;
-			margin: 20px;
-			box-sizing: border-box;
-			font-size: 14px;
-			box-shadow: 0px 0px 10px 2px grey;
-			transition: 1s;
-		}
-
-		.event:hover {
-			transform: scale(1.05);
-			z-index: 2;
-		}
-
-		.eventImage {
-			height: 260px;
-			width: 300px;
-			justify-content: center;
-			align-items: center;
-		}
 
 		.overview-cards {
 			display: flex;
@@ -394,7 +363,7 @@ while ($row = mysqli_fetch_assoc($committeeResult)) {
 					<a href="ea_viewEvent.php" class="sub-item">View Event</a>
 					<a href="ea_registerEvent1.php" class="sub-item">Register New Event</a>
 					<a href="ea_eventCommittee.php" class="sub-item">Event Committee</a>
-					<a href="ea_committeeReg.php" class="sub-item">Register Committee Event</a>
+					<a href="ea_committeeReg.php" class="sub-item">Register Committee Member</a>
 				</div>
 			</div>
 
@@ -412,33 +381,6 @@ while ($row = mysqli_fetch_assoc($committeeResult)) {
 		<h2>Hi <?php echo htmlspecialchars($loggedInUser); ?></h2>
 		<p>Welcome to MyPetakom's home.</p>
 		<br>
-		<h2>Upcoming Events</h2>
-		<div class="events-container">
-			<div class="event">
-				<img src="images/larian_amal.jpg" class="eventImage">
-				<div class="event-content">
-					<p align="center" class="p1">Larian Amal UMPSA 2025</h3><br>
-					<p align="center" class="p1">31 May 2025</p>
-				</div>
-			</div>
-
-			<div class="event">
-				<img src="images/hackaton.jpg" class="eventImage">
-				<div class="event-content">
-					<p align="center" class="p1">Hackaton X: Smart City 2025</h3><br>
-					<p align="center" class="p1">28 May 2025</p>
-				</div>
-			</div>
-
-			<div class="event">
-				<img src="images/combat.jpg" class="eventImage">
-				<div class="event-content">
-					<p align="center" class="p1">COMBAT 2025</h3><br>
-					<p align="center" class="p1">9 May-23 May 2025</p>
-				</div>
-			</div>
-		</div>
-
 		<div class="dashboard-content">
 			<table class="dashboard-table">
 				<tr>
@@ -457,8 +399,6 @@ while ($row = mysqli_fetch_assoc($committeeResult)) {
 
 			</table>
 		</div>
-
-
 
 		<div id="chart-container">
 			<h2>Event Status Distribution (Pie Chart)</h2>

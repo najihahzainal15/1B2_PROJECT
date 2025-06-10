@@ -472,34 +472,6 @@ $pieBorderColors = [
                 </div>
             </div>
 
-            <br>
-            <h2>Upcoming Events</h2>
-            <div class="events-container">
-                <div class="event">
-                    <img src="images/larian_amal.jpg" class="eventImage">
-                    <div class="event-content">
-                        <p align="center" class="p1">Larian Amal UMPSA 2025</p><br>
-                        <p align="center" class="p1">31 May 2025</p>
-                    </div>
-                </div>
-
-                <div class="event">
-                    <img src="images/hackaton.jpg" class="eventImage">
-                    <div class="event-content">
-                        <p align="center" class="p1">Hackaton X: Smart City 2025</p><br>
-                        <p align="center" class="p1">28 May 2025</p>
-                    </div>
-                </div>
-
-                <div class="event">
-                    <img src="images/combat.jpg" class="eventImage">
-                    <div class="event-content">
-                        <p align="center" class="p1">COMBAT 2025</p><br>
-                        <p align="center" class="p1">9 May-23 May 2025</p>
-                    </div>
-                </div>
-            </div>
-
             <script type="text/javascript">
                 $(document).ready(function() {
                     $('.sub-button').click(function() {
