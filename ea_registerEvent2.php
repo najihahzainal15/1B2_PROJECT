@@ -334,7 +334,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
 
   <script>
     const eventId = <?php echo (int)$id; ?>;
-    const localIP = "10.66.40.220"; // Your PC's IP
+    const localIP = "10.65.92.214"; // Your PC's IP
     const projectFolder = "YAYA/1B2_PROJECT"; // Replace accordingly
     const qrData = `http://${localIP}/${projectFolder}/event_details.php?id=${eventId}`;
 
