@@ -32,11 +32,14 @@ $event = mysqli_fetch_assoc($result);
 $participants = [];
 $search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-$sql = "SELECT a.StudentID, u.username, u.email, a.date, a.time, s.studentID, u.username AS student_name
+// Modified query with LEFT JOINs to ensure all attendance records show up
+$sql = "SELECT a.StudentID, a.date, a.time, 
+               COALESCE(u.username, 'Unknown') AS username,
+               COALESCE(u.email, 'N/A') AS email
         FROM attendance a 
-        JOIN student s ON a.StudentID = s.studentID 
-        JOIN user u ON s.userID = u.userID
-        JOIN attendanceslot ats ON a.slot_ID = ats.slot_ID
+        LEFT JOIN attendanceslot ats ON a.slot_ID = ats.slot_ID
+        LEFT JOIN student s ON a.StudentID = s.studentID 
+        LEFT JOIN user u ON s.userID = u.userID
         WHERE ats.eventID = ?";
 
 // Add search condition if search term exists
@@ -55,6 +58,10 @@ if (!empty($search_term)) {
 
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
+
+// Debugging - uncomment to see raw query results
+// echo "<pre>"; print_r(mysqli_fetch_all($result, MYSQLI_ASSOC)); echo "</pre>"; exit;
+
 $participants = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 // Fetch username from database for header
@@ -371,7 +378,7 @@ $loggedInUser = !empty($userData["username"]) ? ucwords(strtolower($userData["us
                         <tr>
                             <td><?php echo $index + 1; ?></td>
                             <td><?php echo htmlspecialchars($participant['StudentID']); ?></td>
-                            <td><?php echo htmlspecialchars($participant['student_name']); ?></td>
+                            <td><?php echo htmlspecialchars($participant['username']); ?></td>
                             <td><?php echo htmlspecialchars($participant['email']); ?></td>
                             <td><?php 
                                 echo (isset($participant['date']) && isset($participant['time'])) 
